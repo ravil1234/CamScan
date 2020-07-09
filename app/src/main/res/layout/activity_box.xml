@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.BoxActivity">
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/box_next_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_media_next"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="16sp"
+
+        />
+
+
+    <ImageView
+        android:id="@+id/box_img_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="71dp"
+        android:src="@drawable/ic_launcher_background"
+
+        />
+    <com.example.camscan.Activities.MyBoxLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        />
+</FrameLayout>
