@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MyBoxLine">
+        <attr name="setX1" format="integer" />
+        <attr name="setX2" format="integer" />
+        <attr name="setY1" format="integer" />
+        <attr name="setY2" format="integer" />
+    </declare-styleable>
+</resources>
