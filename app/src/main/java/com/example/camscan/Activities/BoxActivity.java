@@ -2,6 +2,9 @@ package com.example.camscan.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -18,6 +21,11 @@ import android.widget.Toast;
 import com.example.camscan.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class BoxActivity extends AppCompatActivity {
@@ -88,10 +96,56 @@ public class BoxActivity extends AppCompatActivity {
                         if(trns.sameAs(emptyBitmap)){
                             Toast.makeText(BoxActivity.this, "Can't Crop", Toast.LENGTH_SHORT).show();
                         }else{
+                            //save in storage
+                            String[] path=saveBitmap(trns);
+                            Intent intent=new Intent(BoxActivity.this,FilterActivity.class);
+                            intent.putExtra("path",path[1]);
+                            intent.putExtra("name",path[0]);
+                            Log.e(TAG, "onClick: "+path[1] );
+                            startActivity(intent);
 
+                            /*
                             imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                             imageView.setImageBitmap(trns);
 
+
+                            //move to new activity
+                            ByteArrayOutputStream bStream=new ByteArrayOutputStream();
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        trns.compress(Bitmap.CompressFormat.JPEG, 100, bStream);
+                                        Log.e(TAG, "run: "+ bStream.size() );
+                                    }catch (OutOfMemoryError e){
+                                        trns.compress(Bitmap.CompressFormat.JPEG, 50, bStream);
+                                        Log.e(TAG, "run: 2"+ bStream.size() );
+                                    }
+                                    byte[] barray=bStream.toByteArray();
+
+
+                                    if(barray.length>0){
+                                        Log.e(TAG, "run: "+"Here" );
+                                        Bitmap comp=BitmapFactory.decodeByteArray(barray,0,barray.length);
+
+                                        Intent intent=new Intent(BoxActivity.this,FilterActivity.class);
+
+                                        intent.putExtra("cropped",comp);
+                                        startActivity(intent);
+
+
+                                       runOnUiThread(new Runnable() {
+                                           @Override
+                                           public void run() {
+
+                                           }
+                                       });
+                                    }
+                                }
+                            }).start();
+
+                            */
                         }
 
 
@@ -102,6 +156,33 @@ public class BoxActivity extends AppCompatActivity {
 
             }
         });
+
+    }
+
+    private String[] saveBitmap(Bitmap trns) {
+
+        ContextWrapper cw=new ContextWrapper(BoxActivity.this.getApplicationContext());
+
+        File dir=cw.getDir(".temp", Context.MODE_PRIVATE);
+        String name=System.currentTimeMillis()+".jpg";
+        File path=new File(dir,name);
+
+        FileOutputStream fos=null;
+        try{
+            fos=new FileOutputStream(path);
+            trns.compress(Bitmap.CompressFormat.JPEG,100,fos);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            try{
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return new String[]{name,dir.getAbsolutePath()};
+      //  return dir.getAbsolutePath();
 
     }
 
