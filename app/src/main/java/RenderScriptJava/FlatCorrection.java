@@ -13,6 +13,8 @@ import androidx.renderscript.Script;
 import androidx.renderscript.ScriptIntrinsicBlur;
 
 import com.example.camscan.ScriptC_FlatCorrection;
+import com.example.camscan.ScriptC_contrast;
+import com.example.camscan.ScriptC_filter1;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
@@ -96,10 +98,48 @@ public class FlatCorrection {
         script.destroy();
         script2.destroy();
 
-        return corrected;
 
+        ScriptC_filter1 script3=new ScriptC_filter1(rs);
+
+        Bitmap res=Bitmap.createBitmap(image);
+
+        tmpIn=Allocation.createFromBitmap(rs,corrected);
+        tmpOut=Allocation.createTyped(rs,tmpIn.getType());
+
+        script3.invoke_setBright(130);
+        script3.forEach_exposure(tmpIn,tmpOut);
+
+        tmpOut.copyTo(res);
+
+        tmpIn.destroy();
+        tmpOut.destroy();
+        script3.destroy();
+        return res;
+
+
+
+
+
+        //return corrected;
+
+        /*
+        ScriptC_contrast script3=new ScriptC_contrast(rs);
+        int width=image.getWidth();
+        int height=image.getHeight();
+
+        script3.set_size(width*height);
+        script3.forEach_root(tmpIn,tmpOut);
+        script3.invoke_createRemapArray();
+        script3.forEach_remaptoRGB(tmpOut,tmpIn);
+
+        tmpIn.copyTo(res);
+        tmpIn.destroy();
+        tmpOut.destroy();
+        script3.destroy();
+
+        return res;
        // return output2;
-
+    */
 
     }
 
