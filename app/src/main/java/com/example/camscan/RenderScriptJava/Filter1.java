@@ -1,4 +1,4 @@
-package RenderScriptJava;
+package com.example.camscan.RenderScriptJava;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -33,6 +33,7 @@ public class Filter1 {
         tmpOut.copyTo(output);
         tmpIn.destroy();
         tmpOut.destroy();
+        //script.destroy();
         return output;
     }
 

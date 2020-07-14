@@ -1,4 +1,4 @@
-package com.example.camscan.Activities;
+package com.example.camscan.MyLayouts;
 
 import android.content.Context;
 import android.content.res.TypedArray;

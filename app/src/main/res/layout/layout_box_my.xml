@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.example.camscan.Activities.MyBoxLine
+    <com.example.camscan.MyLayouts.MyBoxLine
         android:id="@+id/my_box_line12"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
         app:setY1="0"
         app:setY2="0"
         />
-    <com.example.camscan.Activities.MyBoxLine
+    <com.example.camscan.MyLayouts.MyBoxLine
         android:id="@+id/my_box_line23"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
         app:setY1="0"
         app:setY2="0"
         />
-    <com.example.camscan.Activities.MyBoxLine
+    <com.example.camscan.MyLayouts.MyBoxLine
         android:id="@+id/my_box_line34"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
         app:setY1="0"
         app:setY2="0"
         />
-    <com.example.camscan.Activities.MyBoxLine
+    <com.example.camscan.MyLayouts.MyBoxLine
         android:id="@+id/my_box_line14"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

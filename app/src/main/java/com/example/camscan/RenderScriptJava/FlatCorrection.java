@@ -1,22 +1,16 @@
-package RenderScriptJava;
+package com.example.camscan.RenderScriptJava;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.util.Log;
 
 import androidx.renderscript.Allocation;
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
-import androidx.renderscript.Script;
 import androidx.renderscript.ScriptIntrinsicBlur;
 
+import com.example.camscan.ScriptC_BCE;
 import com.example.camscan.ScriptC_FlatCorrection;
-import com.example.camscan.ScriptC_contrast;
-import com.example.camscan.ScriptC_filter1;
-
-import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class FlatCorrection {
 
@@ -81,7 +75,6 @@ public class FlatCorrection {
       //  Log.e(TAG, "flatCorr: "+mean[0]+" "+mean[1]+" "+mean[2] );
         //output is blurred mean is calculated
 
-    //    return correction(image,output2,mean);
 
         ScriptC_FlatCorrection script2=new ScriptC_FlatCorrection(rs);
         Bitmap corrected=Bitmap.createBitmap(image);
@@ -99,15 +92,15 @@ public class FlatCorrection {
         script2.destroy();
 
 
-        ScriptC_filter1 script3=new ScriptC_filter1(rs);
+        ScriptC_BCE script3=new ScriptC_BCE(rs);
 
         Bitmap res=Bitmap.createBitmap(image);
 
         tmpIn=Allocation.createFromBitmap(rs,corrected);
         tmpOut=Allocation.createTyped(rs,tmpIn.getType());
 
-        script3.invoke_setBright(130);
-        script3.forEach_exposure(tmpIn,tmpOut);
+        script3.invoke_setVals(getFactor(60),40,40);
+        script3.forEach_Evaluate(tmpIn,tmpOut);
 
         tmpOut.copyTo(res);
 
@@ -147,6 +140,11 @@ public class FlatCorrection {
         rs.destroy();
 
 
+    }
+
+    private float getFactor(int c) {
+
+        return (259*((float)c+255))/(255*(259-(float)c));
     }
 
 }
