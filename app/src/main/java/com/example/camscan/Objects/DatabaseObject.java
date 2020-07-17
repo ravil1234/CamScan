@@ -7,38 +7,54 @@ import java.util.ArrayList;
 public class DatabaseObject {
 
     private int pid;
+    private int did;
     private String OriginalUri;
-    private String OriginalFilename;
+    private String DocName;
     private String editedUri;
     private String editedFilename;
     private int x1,x2,x3,x4,y1,y2,y3,y4;
+    private long timeCreated;
+    private long timeedited;
 
-    public DatabaseObject(String originalUri, String originalFilename, String editedUri,
-                          String editedFilename, int x1, int x2, int x3, int x4, int y1, int y2, int y3, int y4) {
+    public DatabaseObject(String originalUri, String docName, String editedUri,
+                          String editedFilename,ArrayList<Point> points,long timeCreated,long timeedited) {
         OriginalUri = originalUri;
-        OriginalFilename = originalFilename;
+        DocName = docName;
         this.editedUri = editedUri;
         this.editedFilename = editedFilename;
-        this.x1 = x1;
-        this.x2 = x2;
-        this.x3 = x3;
-        this.x4 = x4;
-        this.y1 = y1;
-        this.y2 = y2;
-        this.y3 = y3;
-        this.y4 = y4;
+
+        this.timeCreated=timeCreated;
+        this.timeedited=timeedited;
+        setCoordinates(points);
     }
 
     public DatabaseObject() {
+    }
+
+
+    public void setTimeedited(long timeedited) {
+        this.timeedited = timeedited;
+    }
+
+    public long getTimeCreated() {
+        return timeCreated;
+    }
+
+    public long getTimeedited() {
+        return timeedited;
+    }
+
+
+
+    public int getDid() {
+        return did;
     }
 
     public int getPid() {
         return pid;
     }
 
-    public void setPid(int pid) {
-        this.pid = pid;
-    }
+
 
     public String getOriginalUri() {
         return OriginalUri;
@@ -48,12 +64,12 @@ public class DatabaseObject {
         OriginalUri = originalUri;
     }
 
-    public String getOriginalFilename() {
-        return OriginalFilename;
+    public String getDocName() {
+        return DocName;
     }
 
-    public void setOriginalFilename(String originalFilename) {
-        OriginalFilename = originalFilename;
+    public void setDocName(String docName) {
+        DocName = docName;
     }
 
     public String getEditedUri() {
@@ -82,8 +98,6 @@ public class DatabaseObject {
         this.y2=pts.get(1).y;
         this.y3=pts.get(2).y;
         this.y4=pts.get(3).y;
-
-
     }
     public ArrayList<Point> getCoordinates(){
         ArrayList<Point> pts= new ArrayList<Point>();

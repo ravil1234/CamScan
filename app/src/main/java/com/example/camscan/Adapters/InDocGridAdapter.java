@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -50,14 +49,14 @@ public class InDocGridAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
 
         if(view==null){
-            view= LayoutInflater.from(context).inflate(R.layout.in_doc_grid_item,null);
+            view= LayoutInflater.from(context).inflate(R.layout.item_in_doc_rec,null);
         }
 
         DatabaseObject current=images.get(i);
 
-        ImageView img=view.findViewById(R.id.in_doc_grid_img);
-        TextView name=view.findViewById(R.id.in_doc_grid_name);
-        CheckBox cbox=view.findViewById(R.id.in_doc_grid_check);
+        ImageView img=view.findViewById(R.id.in_doc_todo_img);
+        TextView name=view.findViewById(R.id.in_doc_todo_name);
+     //   CheckBox cbox=view.findViewById(R.id.in_doc_grid_check);
 
         Uri imgUri=Uri.parse(current.getEditedUri());
         name.setText(current.getEditedFilename());

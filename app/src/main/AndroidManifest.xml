@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.InDocActivity"></activity>
+        <activity android:name=".Activities.InDocRecyclerActivity"></activity>
+        <activity android:name=".Activities.InDocActivity" />
         <activity android:name=".Activities.FilterActivity" />
         <activity android:name=".Activities.BoxActivity" />
         <activity android:name=".Activities.CamActivity" />
@@ -25,8 +26,8 @@
     </application>
 
     <uses-feature android:name="android.hardware.camera.any" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

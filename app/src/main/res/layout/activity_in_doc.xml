@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:numColumns="2"
-    tools:listitem="@layout/in_doc_grid_item"
+    tools:listitem="@layout/item_in_doc_rec"
     android:verticalSpacing="10dp"
     android:horizontalSpacing="10dp"
     tools:context=".Activities.InDocActivity"

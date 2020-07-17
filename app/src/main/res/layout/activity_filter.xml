@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:scrollbars="horizontal"
-        tools:listitem="@layout/filter_rview_items"
+        tools:listitem="@layout/item_filter_rview"
         android:layout_marginBottom="50dp"
         />
     <LinearLayout
