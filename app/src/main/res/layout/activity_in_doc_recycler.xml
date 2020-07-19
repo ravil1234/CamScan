@@ -41,6 +41,14 @@
                 android:scrollbarSize="0dp"
                 />
         </RelativeLayout>
+        <include layout="@layout/fragment_in_doc_page_settings"
+            android:visibility="gone"
+            android:id="@+id/in_doc_page_setting"
+            android:layout_weight="2"
+            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            />
+
 
     </androidx.appcompat.widget.LinearLayoutCompat>
     <include layout="@layout/fragment_in_doc_share"

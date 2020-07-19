@@ -27,7 +27,9 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:onClick="shareAsPdf"
+            >
             <ImageView
                 android:id="@+id/frag_shareas_icon1"
                 android:layout_width="34sp"
@@ -50,7 +52,9 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:onClick="shareAsImages"
+            >
             <ImageView
                 android:id="@+id/frag_shareas_icon2"
                 android:layout_width="34sp"
@@ -73,7 +77,9 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:onClick="shareAsLongimage"
+            >
             <ImageView
                 android:id="@+id/frag_shareas_icon3"
                 android:layout_width="34sp"

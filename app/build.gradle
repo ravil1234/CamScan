@@ -60,4 +60,9 @@ dependencies {
     implementation 'com.itextpdf:itextg:5.5.9'
     implementation 'com.madgag.spongycastle:prov:1.54.0.0'
 
+    //for Database
+    def room_version = "2.2.5"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
 }

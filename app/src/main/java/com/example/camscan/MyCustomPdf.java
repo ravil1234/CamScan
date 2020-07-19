@@ -1,6 +1,8 @@
 package com.example.camscan;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.DisplayMetrics;
@@ -60,11 +63,13 @@ public class MyCustomPdf {
     }
 
     private void getDefaultSettings(){
-        PASSWORD="LOLZ";
-        PageSize=1;
-        isMarginAdded=false;
-        ORIENTATION=0;
+        SharedPreferences pref=context.getSharedPreferences(UtilityClass.PDF_SETTING,Context.MODE_PRIVATE);
+        PageSize=pref.getInt("PDF_PAGE_SIZE",1);
+        ORIENTATION=pref.getInt("PDF_PAGE_ORIENTATION",0);
+        isMarginAdded=pref.getBoolean("PDF_PAGE_MARGIN",false);
+        PASSWORD=pref.getString("PDF_PAGE_PASSWORD","admin");
     }
+  /*
     public Boolean savePdf(String name){
         PdfDocument doc=new PdfDocument();
         if(isPassSet){
@@ -100,16 +105,24 @@ public class MyCustomPdf {
 
 
     }
-
-    public Boolean savePdf2(String name){
+*/
+    public Uri savePdf2(String name){
         File f;
+        File dir;
         if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q) {
-            String path = Environment.getExternalStorageDirectory().getPath() + "/" + name + ".pdf";
+            String path = Environment.getExternalStorageDirectory().getPath() + "/CamScan/" + name + ".pdf";
+            String path2=Environment.getExternalStorageDirectory().getPath()+"/CamScan";
+            dir=new File(path2);
              f = new File(path);
         }else{
-             f=new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),name+".pdf");
+             f=new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),"CamScan/"+name+".pdf");
+            dir=new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),"CamScan");
         }
         Document doc=new Document(getPageSize());
+
+        if(!dir.exists() && !dir.isDirectory()){
+            dir.mkdir();
+        }
 
 
         //Log.e("SIZE", "savePdf2: "+ com.itextpdf.text.PageSize.A4.getWidth()+" "+ com.itextpdf.text.PageSize.A4.getHeight());
@@ -147,18 +160,18 @@ public class MyCustomPdf {
         }
         catch(FileNotFoundException e) {
             e.printStackTrace();
-            return false;
+            return null;
         } catch (DocumentException e) {
             e.printStackTrace();
-            return false;
+            return null;
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            return false;
+            return null;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
-        return true;
+        return Uri.fromFile(f);
     }
     private com.itextpdf.text.Rectangle getPageSize(){
         switch (PageSize){

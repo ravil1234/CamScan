@@ -99,7 +99,7 @@ public class FlatCorrection {
         tmpIn=Allocation.createFromBitmap(rs,corrected);
         tmpOut=Allocation.createTyped(rs,tmpIn.getType());
 
-        script3.invoke_setVals(getFactor(60),40,40);
+        script3.invoke_setVals(getFactor(80),40,40);
         script3.forEach_Evaluate(tmpIn,tmpOut);
 
         tmpOut.copyTo(res);
