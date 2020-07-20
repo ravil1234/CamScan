@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -42,6 +43,11 @@ import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
 import com.example.camscan.UtilityClass;
+import com.google.android.gms.common.util.JsonUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -327,7 +333,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
 
     }
-
     private void applyFlatCorrection(Bitmap cropped,MyPicture pic) {
         System.gc();
         Thread t=new Thread(new Runnable() {
@@ -413,7 +418,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
      //   getActionBar().setTitle(currentDoc1.getDocName());
             getSupportActionBar().setTitle("SOMETHINg");
     }
-
     private void rename(){
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         View view= LayoutInflater.from(this).inflate(R.layout.fragment_rename,null);
@@ -470,7 +474,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
             openShareWindow();
         }
     }
-
     private void openShareWindow() {
         shareWindow.setVisibility(View.VISIBLE);
     }
@@ -478,7 +481,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         shareWindow.setVisibility(View.GONE);
 
     }
-
     public void shareAsPdf(View view){
         if(isEmailOpen){
             //email intent
@@ -496,9 +498,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         closeShareWindow();
 
     }
-
-
-
     public void shareAsImages(View view){
         if(isEmailOpen){
             //email intent
@@ -731,15 +730,14 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         }
     }
 
-
     public void onRetakeClicked(View view){
         int currItem=vp2.getCurrentItem();
         MyPicture currPic=list.get(currItem);
         //so that it wont go back
         currPic.setImg(null);
 
-        String jsonString=getJsonCompressed(currPic);
-        String jsonDoc=getJsonCompressed(currentDoc);
+        String jsonString=new Gson().toJson(currPic);
+        String jsonDoc=new Gson().toJson(currentDoc);
         if(jsonString!=null && jsonDoc!=null){
             //Send it both back to cam activity
 
@@ -752,8 +750,8 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         //so that it wont go back
         currPic.setImg(null);
 
-        String jsonString=getJsonCompressed(currPic);
-        String jsonDoc=getJsonCompressed(currentDoc);
+        String jsonString=new Gson().toJson(currPic);
+        String jsonDoc=new Gson().toJson(currentDoc);
         if(jsonString!=null && jsonDoc!=null){
             //Send it both back to Bounding Box activity
 
@@ -794,8 +792,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     }
 
-
-
     private void resetPositions(int deletedPos) {
 
     }
@@ -832,8 +828,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     //PAGE SETTINGS END
 
     //JSON FUNCTIONS
-    public String getJsonCompressed(Object object){
-        return null;
-    }
+
     //JSON FUNCTIONS END
 }

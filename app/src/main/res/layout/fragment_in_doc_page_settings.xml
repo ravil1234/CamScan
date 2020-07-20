@@ -26,8 +26,8 @@
             android:onClick="onSwapLeftClicked"
         >
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/ic_keyboard_arrow_left_black_24dp"
             android:layout_margin="4dp"
             android:layout_gravity="center_horizontal"
@@ -50,8 +50,8 @@
             android:onClick="onRetakeClicked"
             >
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_camera_alt_black_24dp"
                 android:layout_margin="4dp"
                 android:layout_gravity="center_horizontal"
@@ -74,8 +74,8 @@
             android:onClick="onEditClicked"
             >
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_crop_black_24dp"
                 android:layout_margin="4dp"
                 android:layout_gravity="center_horizontal"
@@ -98,8 +98,8 @@
             android:onClick="onSwapRightClicked"
             >
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
                 android:layout_margin="4dp"
                 android:layout_gravity="center_horizontal"
@@ -129,8 +129,8 @@
             android:onClick="onRotateClicked"
             >
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@android:drawable/ic_menu_rotate"
                 android:layout_margin="4dp"
                 android:layout_gravity="center_horizontal"
@@ -153,8 +153,8 @@
             android:onClick="onDeleteClicked"
             >
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_delete_black_24dp"
                 android:layout_margin="4dp"
                 android:layout_gravity="center_horizontal"
@@ -177,8 +177,8 @@
             android:onClick="onShareClicked"
             >
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@android:drawable/ic_menu_share"
                 android:layout_margin="4dp"
                 android:layout_gravity="center_horizontal"
@@ -201,8 +201,8 @@
             android:onClick="onMoveClicked"
             >
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_swap_horiz_black_24dp"
                 android:layout_margin="4dp"
                 android:layout_gravity="center_horizontal"

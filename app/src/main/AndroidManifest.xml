@@ -12,7 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".Activities.InDocRecyclerActivity"></activity>
-        <activity android:name=".Activities.InDocActivity" />
         <activity android:name=".Activities.FilterActivity" />
         <activity android:name=".Activities.BoxActivity" />
         <activity android:name=".Activities.CamActivity" />
