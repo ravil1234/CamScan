@@ -4,9 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 
 import android.view.View;
@@ -17,7 +20,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.camscan.Adapters.Filter_Items_RecyclerAdapter;
+import com.example.camscan.Objects.MyDocument;
+import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
+import com.example.camscan.UtilityClass;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
@@ -33,6 +39,8 @@ import com.example.camscan.RenderScriptJava.Filter1;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
 import com.example.camscan.RenderScriptJava.GrayScale;
 import com.example.camscan.RenderScriptJava.Inversion;
+
+import org.spongycastle.pqc.math.ntru.util.Util;
 
 public class FilterActivity extends AppCompatActivity {
 
@@ -51,6 +59,10 @@ public class FilterActivity extends AppCompatActivity {
     TextView propName,propVal;
     LinearLayout resetBtn,adjustView;
 
+    ArrayList<MyPicture> list;
+    MyDocument currDoc;
+
+
     FloatingActionButton fab;
     boolean isFabOpen=false;
 
@@ -63,10 +75,14 @@ public class FilterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
 
+
+        initializeViews();
+
+
         String path=getIntent().getStringExtra("path");
         String name=getIntent().getStringExtra("name");
+
         cropped=getImageFromStorage(path,name);
-        initializeViews();
 
         if(cropped!=null){
             image.setImageBitmap(cropped);
@@ -93,6 +109,7 @@ public class FilterActivity extends AppCompatActivity {
 
       //  addAllTnails();
 
+        getPicAndDocFromIntent();
 
         adapter=new Filter_Items_RecyclerAdapter(this,names,types,
                 Bitmap.createScaledBitmap(cropped,200,200,true),
@@ -199,6 +216,16 @@ public class FilterActivity extends AppCompatActivity {
                 applyBCE(br,co,ex);
             }
         });
+    }
+
+    private void getPicAndDocFromIntent() {
+        String myPics= getIntent().getStringExtra("MyPicture");
+        String myDoc=getIntent().getStringExtra("MyDocument");
+        ArrayList<MyPicture> pic=UtilityClass.getListOfPics(myPics);
+        if(pic!=null){
+            list=pic;
+        }
+        currDoc=UtilityClass.getDocFromJson(myDoc);
     }
 
     private void addAllTnails() {
@@ -419,5 +446,23 @@ public class FilterActivity extends AppCompatActivity {
         cropped=Bitmap.createBitmap(cropped,0,0,cropped.getWidth(),cropped.getHeight(),matrix,true);
         image.setImageBitmap(selected);
 
+    }
+
+    public void onNextButtonClicked(View view){
+        BitmapDrawable finalImgDb=(BitmapDrawable)image.getDrawable();
+        Bitmap img=finalImgDb.getBitmap();
+        String name=list.get(0).getEditedName();
+        Uri ediUri=UtilityClass.saveImage(FilterActivity.this,img,name,false);
+        list.get(0).setEditedUri(ediUri.toString());
+
+        //convertinto json and send
+        String myPicJson=UtilityClass.getStringFromObject(list);
+        String myDocJson= UtilityClass.getStringFromObject(currDoc);
+        Intent intent=new Intent(FilterActivity.this,InDocRecyclerActivity.class);
+        intent.putExtra("MyPicture",myPicJson);
+        intent.putExtra("MyDocument",myDocJson);
+        intent.putExtra("from","FilterActivity");
+        startActivity(intent);
+        finish();
     }
 }

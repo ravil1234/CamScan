@@ -1,6 +1,7 @@
 package com.example.camscan.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -11,31 +12,51 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.camscan.Adapters.BoxRecyclerAdapter;
 import com.example.camscan.MyLayouts.MyBoxLayout;
+import com.example.camscan.Objects.MyDocument;
+import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
+import com.example.camscan.RenderScriptJava.FlatCorrection;
+import com.example.camscan.UtilityClass;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.itextpdf.text.pdf.draw.LineSeparator;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.spongycastle.pqc.math.ntru.util.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class BoxActivity extends AppCompatActivity {
 
-    private static final String TAG = "actovity";
-    ImageView imageView;
+    private static final String TAG = "BOXACTIVITY";
     FloatingActionButton nextBtn;
 
-    MyBoxLayout boundingBox;
+    ViewPager2 vp2;
 
-    Bitmap image;
+    ArrayList<MyPicture> list;
+    BoxRecyclerAdapter adapter;
+
+    MyDocument currDoc;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,116 +66,37 @@ public class BoxActivity extends AppCompatActivity {
         initializeViews();
         getSupportActionBar().hide();
 
-     //   byte[] byteArray=getIntent().getByteArrayExtra("image");
-//        image=BitmapFactory.decodeByteArray(byteArray,0,byteArray.length);
-        if(image==null){
-            image=BitmapFactory.decodeResource(getResources(),R.drawable.test_img);
+        list=new ArrayList<>();
+        adapter=new BoxRecyclerAdapter(this,list);
+        adapter.setViewPager(vp2);
+        vp2.setAdapter(adapter);
+        populateList();
+
+
+    }
+
+    private void populateList() {
+        //fetch from Json
+        String myPicString=getIntent().getStringExtra("MyPicture");
+        String myDocString=getIntent().getStringExtra("MyDocument");
+
+        ArrayList<MyPicture> listTmp=UtilityClass.getListOfPics(myPicString);
+        if(listTmp!=null){
+            list.addAll(listTmp);
         }
+        currDoc= UtilityClass.getDocFromJson(myDocString);
+        adapter.notifyDataSetChanged();
 
-        boundingBox.setBitmap(image);
+        addDummyData();
+    }
 
-        adjustBoudningBoxParams();
-
-
-        nextBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ArrayList<Point> points=boundingBox.getCorners();
-                int flag=0;
-                for(Point p :points){
-                    if(p.x<0 ||p.y<0){
-                        flag=1;
-                        break;
-                    }
-                }
-                if(flag==0) {
-                    /*
-                    // First decode with inJustDecodeBounds=true to check dimensions
-                    final BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeResource(getResources(), R.drawable.test_img, options);
-
-                    // Calculate inSampleSize
-
-                    options.inSampleSize = calculateInSampleSize(options, imageView.getWidth(), imageView.getHeight());
-                    Log.e(TAG, "onClick: " + imageView.getWidth() + " " + imageView.getHeight());
-                    // Decode bitmap with inSampleSize set
-                    options.inJustDecodeBounds = false;
-
-                    image = BitmapFactory.decodeResource(BoxActivity.this.getResources(), R.drawable.test_img, options);
-                    image = Bitmap.createScaledBitmap(image, imageView.getWidth(), imageView.getHeight(), true);
-                    */
-                    imageView.setImageBitmap(image);
-                    if (image != null) {
-                        Log.e("THIS", "onClick: " + "HERE");
-                        Bitmap trns = cornerPin(image, points);
-
-                        Bitmap emptyBitmap = Bitmap.createBitmap(trns.getWidth(), trns.getHeight(),
-                                trns.getConfig());
-
-                        if(trns.sameAs(emptyBitmap)){
-                            Toast.makeText(BoxActivity.this, "Can't Crop", Toast.LENGTH_SHORT).show();
-                        }else{
-                            //save in storage
-                            String[] path=saveBitmap(trns);
-                            Intent intent=new Intent(BoxActivity.this,FilterActivity.class);
-                            intent.putExtra("path",path[1]);
-                            intent.putExtra("name",path[0]);
-                            Log.e(TAG, "onClick: "+path[1] );
-                            startActivity(intent);
-
-                            /*
-                            imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                            imageView.setImageBitmap(trns);
-
-
-                            //move to new activity
-                            ByteArrayOutputStream bStream=new ByteArrayOutputStream();
-
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        trns.compress(Bitmap.CompressFormat.JPEG, 100, bStream);
-                                        Log.e(TAG, "run: "+ bStream.size() );
-                                    }catch (OutOfMemoryError e){
-                                        trns.compress(Bitmap.CompressFormat.JPEG, 50, bStream);
-                                        Log.e(TAG, "run: 2"+ bStream.size() );
-                                    }
-                                    byte[] barray=bStream.toByteArray();
-
-
-                                    if(barray.length>0){
-                                        Log.e(TAG, "run: "+"Here" );
-                                        Bitmap comp=BitmapFactory.decodeByteArray(barray,0,barray.length);
-
-                                        Intent intent=new Intent(BoxActivity.this,FilterActivity.class);
-
-                                        intent.putExtra("cropped",comp);
-                                        startActivity(intent);
-
-
-                                       runOnUiThread(new Runnable() {
-                                           @Override
-                                           public void run() {
-
-                                           }
-                                       });
-                                    }
-                                }
-                            }).start();
-
-                            */
-                        }
-
-
-                    }
-                }else{
-                    Toast.makeText(BoxActivity.this, "Co-ordinates out of Bounds", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
+    private void addDummyData() {
+        currDoc=new MyDocument("MyDoc",21648612l,1354516l,1,null);
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406622666226.jpg",null,"01",1,null));
+      //  list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406650066500.jpg",null,"02",2,null));
+       // list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595087242244242244.jpg",null,"03",3,null));
+       // list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595133729167729167.jpg",null,"04",4,null));
+        adapter.notifyDataSetChanged();
 
     }
 
@@ -185,45 +127,17 @@ public class BoxActivity extends AppCompatActivity {
 
     }
 
-    private void adjustBoudningBoxParams() {
-        //RelativeLayout.LayoutParams params=(RelativeLayout.LayoutParams)boundingBox.getLayoutParams();
-
-
-    }
-
     private void initializeViews() {
-        imageView=findViewById(R.id.box_img_view);
+        vp2=findViewById(R.id.box_viewPager);
         nextBtn=findViewById(R.id.box_next_btn);
-        boundingBox=findViewById(R.id.box_bounding_box);
     }
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) >= reqHeight
-                    && (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
     public Bitmap cornerPin(Bitmap B,ArrayList<Point> dis){
         int w=B.getWidth();
         int h=B.getHeight();
 
-        int ImgWidth=imageView.getWidth();
-        int imgHeight=imageView.getHeight();
+        int ImgWidth=vp2.getWidth();
+        int imgHeight=vp2.getHeight();
 
         float widthRatio=(float)w/(float)ImgWidth;
         float heightRatio=(float)h/(float) imgHeight;
@@ -264,7 +178,7 @@ public class BoxActivity extends AppCompatActivity {
         };
 
 
-        Log.e(TAG, "cornerPin: "+dis );
+//        Log.e(TAG, "cornerPin: "+dis );
         Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         Canvas c = new Canvas(result);
@@ -275,25 +189,130 @@ public class BoxActivity extends AppCompatActivity {
 
         Bitmap resized=Bitmap.createBitmap(result,minLeft,minTop,wid,hei);
 //        Log.e(TAG, "cornerPin: "+ result.getHeight()+" "+result.getWidth());
-        Log.e(TAG, "cornerPin: "+resized.getHeight()+" "+resized.getWidth() );
+     //   Log.e(TAG, "cornerPin: "+resized.getHeight()+" "+resized.getWidth() );
         return resized;
 
     }
 
-    public void rotateBitmapClockWise(View view){
-        Matrix matrix=new Matrix();
-        matrix.preRotate(90);
-        image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
+    private Bitmap applyFlatCorrection(Bitmap cropped) {
+        System.gc();
 
-        boundingBox.setBitmap(image);
-        imageView.setImageBitmap(image);
+        try {
+            return new MyAsync().execute(cropped).get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    public void onNextPressed(View view){
+        String[] save=null;
+        for(MyPicture p:list){
+            Bitmap image=p.getImg();
+            Bitmap transformed=cornerPin(image,p.getCoordinates());
+            Bitmap emptyBitmap = Bitmap.createBitmap(transformed.getWidth(), transformed.getHeight(),
+                    transformed.getConfig());
+            if(transformed.sameAs(emptyBitmap)){
+                Toast.makeText(this, "Can't Crop", Toast.LENGTH_SHORT).show();
+                vp2.setCurrentItem(list.indexOf(p));
+                return;
+            }
+            if(list.size()==1){
+                //send direct to filter activity
+                save=saveBitmap(transformed);
+            }else{
+                //transforming each image into flatCorrection
+                Bitmap filtered=applyFlatCorrection(transformed);
+                String[] names=p.getEditedName().split(".jpg");
+                Uri savedEdited= UtilityClass.saveImage(BoxActivity.this,filtered,names[0],false);
+                p.setEditedUri(savedEdited.toString());
+            }
+        }
+
+        if(list.size()!=1 && currDoc.getDid()!=0){
+            currDoc.setfP_URI(list.get(0).getEditedUri());
+        }
+        for(MyPicture p:list){
+            p.setImg(null);
+        }
+        String myPics=new Gson().toJson(list);
+        String myDoc=new Gson().toJson(currDoc);
+
+        if(list.size()==1){
+            //single image
+            Intent intent=new Intent(BoxActivity.this,FilterActivity.class);
+            intent.putExtra("path",save[1]);
+            intent.putExtra("name",save[0]);
+            intent.putExtra("MyPicture",myPics);
+            intent.putExtra("MyDocument",myDoc);
+//            //  Log.e(TAG, "onClick: "+sa[1] );
+            startActivity(intent);
+        }else{
+            //goto indoc activity
+
+            Intent intent=new Intent(BoxActivity.this,InDocRecyclerActivity.class);
+            intent.putExtra("MyPicture",myPics);
+            intent.putExtra("MyDocument",myDoc);
+         //   Log.e(TAG, "onNextPressed: "+myPics );
+            intent.putExtra("from","BoxActivity");
+            startActivity(intent);
+        }
+
+    }
+    public void rotateBitmapClockWise(View view){
+
+        int currIndex=vp2.getCurrentItem();
+        MyPicture currPic=list.get(currIndex);
+        Bitmap image=currPic.getImg();
+        if(image!=null){
+            Matrix matrix=new Matrix();
+            matrix.preRotate(90);
+            image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
+            currPic.setImg(image);
+            adapter.notifyDataSetChanged();
+
+        }
+
+
     }
     public void rotateBitmapAntiClockWise(View view){
-        Matrix matrix=new Matrix();
-        matrix.preRotate(-90);
-        image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
-        boundingBox.setBitmap(image);
-        imageView.setImageBitmap(image);
-        boundingBox.resetPoints();
+        int currIndex=vp2.getCurrentItem();
+        MyPicture currPic=list.get(currIndex);
+        Bitmap image=currPic.getImg();
+        if(image!=null){
+            Matrix matrix=new Matrix();
+            matrix.preRotate(-90);
+            image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
+            currPic.setImg(image);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    public void resetCurrPoint(View view){
+        int currInd=vp2.getCurrentItem();
+        MyPicture pic=list.get(currInd);
+        int height=vp2.getHeight();
+        int width=vp2.getWidth();
+        ArrayList<Point> pts=new ArrayList<>();
+        pts.add(new Point(0,0));
+        pts.add(new Point(width,0));
+        pts.add(new Point(width,height));
+        pts.add(new Point(0,height));
+
+        pic.setCoordinates(pts);
+        adapter.notifyDataSetChanged();
+    }
+
+    public  class MyAsync extends AsyncTask<Bitmap,Void,Bitmap>{
+
+        @Override
+        protected Bitmap doInBackground(Bitmap... bitmaps) {
+            FlatCorrection fc=new FlatCorrection(BoxActivity.this);
+            Bitmap blur=fc.flatCorr(bitmaps[0].copy(bitmaps[0].getConfig(),false));
+            return blur;
+        }
     }
 }

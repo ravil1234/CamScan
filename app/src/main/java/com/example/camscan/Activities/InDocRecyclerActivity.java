@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Database;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
@@ -48,6 +49,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import org.json.JSONObject;
+import org.spongycastle.pqc.math.ntru.util.Util;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -60,7 +62,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     ViewPager2 vp2;
     View shareWindow;
 
-    ArrayList<MyPicture> list;
+
     InDocRecyclerAdapter adapter;
 
     Boolean isPageOpen=false;
@@ -75,7 +77,8 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     //FOR DATABASE
     MyDocument currentDoc;
-    ArrayList<MyPicture> currentPics;
+    ArrayList<MyPicture> list;
+    //  ArrayList<MyPicture> currentPics;
 
     MyDatabase db;
     //FOR DATABASE END
@@ -88,6 +91,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     //PAGE SETTING
 
+    
 
     View pageSettingLayout;
     //PAGE SETTING END
@@ -101,6 +105,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         initializeViews();
 
 
+        db=MyDatabase.getInstance(this);
         //delete
 
         points=new ArrayList<>();
@@ -120,6 +125,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
         //setting docName
         updateDocName();
+
 
         if(Build.VERSION.SDK_INT>=24){
             try{
@@ -266,19 +272,37 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     //-----------------------------------------------------------------------------------------
     //delete
     private void fillArrayList() {
+        String from=getIntent().getStringExtra("from");
+        if(from.equals("BoxActivity") || from.equals("FilterActivity")){
+            //came from box activity with multiple images
+            String myPics=getIntent().getStringExtra("MyPicture");
+            String myDoc=getIntent().getStringExtra("MyDocument");
 
-        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something17869.jpg","Image5",5,points));
-        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something278100.jpg","Image5",5,points));
-        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something80568.jpg","Image5",5,points));
-        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something736207.jpg","Image5",5,points));
+            ArrayList<MyPicture> newList=UtilityClass.getListOfPics(myPics);
+            currentDoc= UtilityClass.getDocFromJson(myDoc);
+
+            saveDocInDatabase();
+           savePicsIntoDatabase(newList);
+            //Pick pics from database
+            list=getPicturesFromDatabase();
+            adapter.notifyDataSetChanged();
+        }else if(from.equals("HomeActivity")){
+
+        }
+//        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something17869.jpg","Image5",5,points));
+//        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something278100.jpg","Image5",5,points));
+//        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something80568.jpg","Image5",5,points));
+//        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something736207.jpg","Image5",5,points));
 
     }
+
     //delete end
 //-----------------------------------------------------------------------------------------
 
     //DATABASE FUNCTIONS
-    public void getPictures(){
-
+    public ArrayList<MyPicture> getPicturesFromDatabase()
+    {
+        return null;
     }
     public void updatePictureInfo(){
 
@@ -292,6 +316,18 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     private void updatePositionInDatabase(MyPicture currPic) {
     }
+
+    private void saveDocInDatabase(){
+        long id=db.myDocumentDao().insertNewDoc(currentDoc);
+        currentDoc.setDid((int)id);
+    }
+    private void savePicsIntoDatabase(ArrayList<MyPicture> l) {
+        for(MyPicture p:l){
+            p.setDid(currentDoc.getDid());
+        }
+
+        db.myPicDao().InsertMultiplePics(l);
+        }
 
     private void deleteFromDatabase(int pid) {
     }
@@ -749,12 +785,18 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         MyPicture currPic=list.get(currItem);
         //so that it wont go back
         currPic.setImg(null);
+        ArrayList<MyPicture> pics=new ArrayList<>();
+        pics.add(currPic);
 
-        String jsonString=new Gson().toJson(currPic);
-        String jsonDoc=new Gson().toJson(currentDoc);
+        String jsonString=UtilityClass.getStringFromObject(pics);
+        String jsonDoc=UtilityClass.getStringFromObject(currentDoc);
         if(jsonString!=null && jsonDoc!=null){
             //Send it both back to Bounding Box activity
-
+            Intent intent=new Intent(InDocRecyclerActivity.this,BoxActivity.class);
+            intent.putExtra("MyPicture",jsonString);
+            intent.putExtra("MyDocument",jsonDoc);
+            startActivity(intent);
+            finish();
         }
     }
 

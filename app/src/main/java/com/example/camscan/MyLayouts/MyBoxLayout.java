@@ -13,6 +13,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 
 import java.util.ArrayList;
@@ -35,8 +38,12 @@ public class MyBoxLayout extends RelativeLayout {
     int dotWidth;
     int dotHeight;
 
+    ViewPager2 myvp;
+    MyPicture pic;
+
     public MyBoxLayout(Context context) {
         super(context);
+        Log.e(TAG, "MyBoxLayout: 1" );
     }
 
     public MyBoxLayout(Context context, AttributeSet attrs) {
@@ -68,12 +75,12 @@ public class MyBoxLayout extends RelativeLayout {
             public void onGlobalLayout() {
                 view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                initViewPos(view.getHeight(),view.getWidth());
+
                 screen_height=view.getHeight();
                 screen_width=view.getWidth();
                 dotWidth= dot1.getWidth();
                 dotHeight=dot1.getHeight();
-
+                initViewPos();
 
             }
         });
@@ -96,10 +103,12 @@ public class MyBoxLayout extends RelativeLayout {
 
     public MyBoxLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        Log.e(TAG, "MyBoxLayout: 2" );
     }
 
     public MyBoxLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        Log.e(TAG, "MyBoxLayout: 3" );
     }
 
     class MyListener implements OnTouchListener{
@@ -112,6 +121,7 @@ public class MyBoxLayout extends RelativeLayout {
             switch (motionEvent.getAction() & motionEvent.ACTION_MASK) {
 
                 case MotionEvent.ACTION_DOWN:{
+                    myvp.setUserInputEnabled(false);
                     RelativeLayout.LayoutParams params=(RelativeLayout.LayoutParams)view.getLayoutParams();
                     x_delta=X-params.leftMargin;
                     y_delta=Y-params.topMargin;
@@ -140,6 +150,7 @@ public class MyBoxLayout extends RelativeLayout {
                     break;
                 }
                 case MotionEvent.ACTION_UP:{
+                    myvp.setUserInputEnabled(true);
                     imageCont.setVisibility(GONE);
                     break;
 
@@ -246,21 +257,22 @@ public class MyBoxLayout extends RelativeLayout {
     }
 
     class MyCenterListener implements OnTouchListener{
-
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
             final int X=(int)motionEvent.getRawX();
             final int Y=(int)motionEvent.getRawY();
 
             switch (motionEvent.getAction() & motionEvent.ACTION_MASK) {
+
                 case MotionEvent.ACTION_DOWN:{
                     RelativeLayout.LayoutParams params=(RelativeLayout.LayoutParams)view.getLayoutParams();
                     x_delta=X-params.leftMargin;
                     y_delta=Y-params.topMargin;
-
+                    myvp.setUserInputEnabled(false);
                     break;
                 }
                 case MotionEvent.ACTION_UP:{
+                    myvp.setUserInputEnabled(true);
                     break;
 
                 }
@@ -271,7 +283,6 @@ public class MyBoxLayout extends RelativeLayout {
                     break;
                 }
                 case MotionEvent.ACTION_MOVE:{
-
                     RelativeLayout.LayoutParams params=(RelativeLayout.LayoutParams)view.getLayoutParams();
                     RelativeLayout.LayoutParams param1=(RelativeLayout.LayoutParams)dot1.getLayoutParams();
                     RelativeLayout.LayoutParams param2=(RelativeLayout.LayoutParams)dot2.getLayoutParams();
@@ -436,8 +447,8 @@ public class MyBoxLayout extends RelativeLayout {
         }
     }
 
-    private void initViewPos(int height, int width) {
-        Log.e(TAG, "initViewPos: "+height+" "+width );
+    public void initViewPos() {
+       // Log.e(TAG, "initViewPos: "+height+" "+width );
         RelativeLayout.LayoutParams param1=(RelativeLayout.LayoutParams)dot1.getLayoutParams();
         RelativeLayout.LayoutParams param2=(RelativeLayout.LayoutParams)dot2.getLayoutParams();
         RelativeLayout.LayoutParams param3=(RelativeLayout.LayoutParams)dot3.getLayoutParams();
@@ -446,14 +457,14 @@ public class MyBoxLayout extends RelativeLayout {
         param1.leftMargin=50;
         param1.topMargin=50;
 
-        param2.leftMargin=width-dot2.getWidth()-50;
+        param2.leftMargin=screen_width-dot2.getWidth()-50;
         //param2.bottomMargin=height-dot2.getHeight()-50;
         param2.topMargin=50;
 
-        param3.leftMargin=width-dot3.getWidth()-50;
-        param3.topMargin=height-dot3.getHeight()-50;
+        param3.leftMargin=screen_width-dot3.getWidth()-50;
+        param3.topMargin=screen_height-dot3.getHeight()-50;
 
-        param4.topMargin=height-dot4.getHeight()-50;
+        param4.topMargin=screen_height-dot4.getHeight()-50;
         //param4.rightMargin=width-dot4.getWidth()-50;
         param4.leftMargin=50;
 
@@ -468,7 +479,39 @@ public class MyBoxLayout extends RelativeLayout {
 
     }
 
+    public void updateViewPos(ArrayList<Point> points){
 
+
+        RelativeLayout.LayoutParams param1=(RelativeLayout.LayoutParams)dot1.getLayoutParams();
+        RelativeLayout.LayoutParams param2=(RelativeLayout.LayoutParams)dot2.getLayoutParams();
+        RelativeLayout.LayoutParams param3=(RelativeLayout.LayoutParams)dot3.getLayoutParams();
+        RelativeLayout.LayoutParams param4=(RelativeLayout.LayoutParams)dot4.getLayoutParams();
+
+        param1.leftMargin=points.get(0).x;
+        param1.topMargin=points.get(0).y;
+
+        param2.leftMargin=points.get(1).x;//screen_width-dot2.getWidth()-50;
+        //param2.bottomMargin=height-dot2.getHeight()-50;
+        param2.topMargin=points.get(1).y;//50;
+
+        param3.leftMargin=points.get(2).x;//screen_width-dot3.getWidth()-50;
+        param3.topMargin=points.get(2).y;//screen_height-dot3.getHeight()-50;
+
+        param4.topMargin=points.get(3).y;//screen_height-dot4.getHeight()-50;
+        //param4.rightMargin=width-dot4.getWidth()-50;
+        param4.leftMargin=points.get(3).x;//50;
+
+        dot1.setLayoutParams(param1);
+        dot2.setLayoutParams(param2);
+        dot3.setLayoutParams(param3);
+        dot4.setLayoutParams(param4);
+
+        updateViews(dot1);
+        updateViews(dot2);
+        updateViews(dot3);
+        updateViews(dot4);
+
+    }
     public void updateViews(View view){
 
         if(view.getId()==R.id.my_box_dot1) {
@@ -557,7 +600,8 @@ public class MyBoxLayout extends RelativeLayout {
 
             line23.setX2(paramsMain.leftMargin+(dot3.getWidth()/2));
             line23.setY2(paramsMain.topMargin+(dot3.getHeight()/2));
-        }else if(view.getId()==R.id.my_box_dot4){
+        }
+        else if(view.getId()==R.id.my_box_dot4){
             RelativeLayout.LayoutParams paramsMain = (RelativeLayout.LayoutParams) view.getLayoutParams();
             RelativeLayout.LayoutParams paramsRight = (RelativeLayout.LayoutParams) dot14.getLayoutParams();
             RelativeLayout.LayoutParams paramsLeft = (RelativeLayout.LayoutParams) dot34.getLayoutParams();
@@ -583,12 +627,14 @@ public class MyBoxLayout extends RelativeLayout {
             line14.setX1(paramsMain.leftMargin+(dot4.getWidth()/2));
             line14.setY1(paramsMain.topMargin+(dot4.getHeight()/2));
         }
-//        invalidate();
 
+        pic.setCoordinates(getCorners());
 
     }
 
-
+    public void setMyPicObject(MyPicture pic){
+        this.pic=pic;
+    }
 
     public void setBitmap(Bitmap copy){
         image=copy;
@@ -623,6 +669,9 @@ public class MyBoxLayout extends RelativeLayout {
 
     }
 
+    public void setViewPager(ViewPager2 mvp){
+        myvp=mvp;
+    }
     public void resetPoints(){
         RelativeLayout.LayoutParams param1=(RelativeLayout.LayoutParams)dot1.getLayoutParams();
         RelativeLayout.LayoutParams param2=(RelativeLayout.LayoutParams)dot2.getLayoutParams();
@@ -653,4 +702,5 @@ public class MyBoxLayout extends RelativeLayout {
         updateViews(dot4);
 
     }
+
 }

@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
        // ByteArrayOutputStream bstream=new ByteArrayOutputStream();
        // image.compress(Bitmap.CompressFormat.PNG,100,bstream);
         //byte[] byteArray=bstream.toByteArray();
-        Intent intent=new Intent(MainActivity.this, InDocRecyclerActivity.class);
+        Intent intent=new Intent(MainActivity.this, BoxActivity.class);
         //intent.putExtra("image",byteArray);
         startActivity(intent);
 

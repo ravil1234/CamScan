@@ -9,6 +9,10 @@ import android.os.Build;
 import android.os.Environment;
 import android.widget.ImageView;
 
+import com.example.camscan.Objects.MyDocument;
+import com.example.camscan.Objects.MyPicture;
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,6 +24,8 @@ public class UtilityClass {
 
     public static final String PDF_SETTING="CAM_SCAN_PDF_SETTINGS";
     public static final int IMPORT_REQ_CODE=101;
+    public static final String lineSeparator="$$__$$";
+
     public static Uri saveImage(Context context, Bitmap img, String name, boolean isOriginal){
         File dir;
 
@@ -192,4 +198,16 @@ public class UtilityClass {
     public static void deleteFromStorage(Uri deleteUri,boolean isOriginal){
         //TODO complete it
     }
+
+    public static MyDocument getDocFromJson(String docJson){
+        return null;
+    }
+    public static ArrayList<MyPicture> getListOfPics(String myPicsJson){
+        return null;
+    }
+    public static String getStringFromObject(Object object){
+        return new Gson().toJson(object);
+    }
+
+
 }

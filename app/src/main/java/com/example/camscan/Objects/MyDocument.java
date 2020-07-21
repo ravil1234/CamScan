@@ -2,6 +2,7 @@ package com.example.camscan.Objects;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity
@@ -19,6 +20,7 @@ public class MyDocument {
     @ColumnInfo(name="fp_uri")
     public String fP_URI;
 
+    @Ignore
     public MyDocument(String dName, long timeCreated, long timeEdited, int pCount, String fP_URI) {
         this.dName = dName;
         this.timeCreated = timeCreated;

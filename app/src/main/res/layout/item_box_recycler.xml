@@ -3,25 +3,18 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ImageView
-        android:id="@+id/box_img_view"
+        android:id="@+id/box_item_img_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/test_img"
         android:scaleType="fitXY"
-        android:layout_marginStart="25sp"
-        android:layout_marginEnd="25sp"
-        android:layout_marginBottom="100sp"
-        android:layout_marginTop="100sp"
+
 
         />
 
     <com.example.camscan.MyLayouts.MyBoxLayout
-        android:id="@+id/box_bounding_box"
+        android:id="@+id/box_item_bounding_box"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="25sp"
-        android:layout_marginTop="100sp"
-        android:layout_marginEnd="25sp"
-        android:layout_marginBottom="100sp" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>

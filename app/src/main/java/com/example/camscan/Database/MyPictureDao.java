@@ -9,6 +9,7 @@ import androidx.room.Update;
 
 import com.example.camscan.Objects.MyPicture;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -23,7 +24,7 @@ public interface MyPictureDao {
     long insertIntoDoc(MyPicture pic);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long[] InsertMultiplePics(MyPicture... pics);
+    long[] InsertMultiplePics(ArrayList<MyPicture> pics);
 
     @Update
     void updatePic(MyPicture pic);
