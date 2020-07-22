@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_in_doc_nav_PageEdit"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+    <item
+        android:id="@+id/action_in_doc_nav_SecurePdf"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Secure PDF"/>
+    <item
+        android:id="@+id/action_in_doc_nav_Pdf_Setting"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+    <item
+        android:id="@+id/action_in_doc_nav_Email"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+    <item
+        android:id="@+id/action_in_doc_nav_Share_Document"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+    <item
+        android:id="@+id/action_in_doc_nav_View_as"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+    <item
+        android:id="@+id/action_in_doc_nav_addMorePages"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+<!-- <-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+    <item
+        android:id="@+id/action_in_doc_nav_Share_App"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+    <item
+        android:id="@+id/action_in_doc_nav_AboutUs"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+    <item
+        android:id="@+id/action_in_doc_nav_Exit"
+        android:icon="@android:drawable/stat_notify_sdcard_prepare"
+        android:title="Edit Page"/>
+
+</menu>

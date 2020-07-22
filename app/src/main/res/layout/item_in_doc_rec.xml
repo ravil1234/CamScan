@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/curve_background"
+    android:elevation="4dp"
+    >
+
+    <ImageView
+        android:id="@+id/in_doc_todo_img"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/back"
+        android:scaleType="fitCenter"
+        android:layout_margin="8dp"
+        />
+    <TextView
+        android:id="@+id/in_doc_todo_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Name"
+        android:textColor="@color/colorPrimaryDark"
+        android:paddingStart="32dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_gravity="bottom"
+
+        />
+
+
+</FrameLayout>

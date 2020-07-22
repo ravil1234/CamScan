@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/in_doc_drawer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Activities.InDocRecyclerActivity"
+
+
+    >
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#D6D5D5"
+        >
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+            <androidx.viewpager2.widget.ViewPager2
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="4"
+                android:scrollbars="horizontal"
+                android:id="@+id/in_doc_pageViewer"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
+                android:layout_marginTop="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:layout_marginBottom="16dp"
+                />
+            <RelativeLayout
+                android:id="@+id/in_doc_mini_r_cont"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/in_doc_mini_rview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:listitem="@layout/item_filter_rview"
+                    android:scrollbars="horizontal"
+                    android:layout_centerVertical="true"
+                    android:scrollbarSize="0dp"
+                    />
+            </RelativeLayout>
+            <include layout="@layout/fragment_in_doc_page_settings"
+                android:visibility="gone"
+                android:id="@+id/in_doc_page_setting"
+                android:layout_weight="2"
+                android:layout_height="0dp"
+                android:layout_width="match_parent"
+                />
+
+
+
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+        <include layout="@layout/fragment_in_doc_share"
+            android:visibility="gone"
+            android:id="@+id/in_doc_share_window"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_margin="16dp"
+        android:onClick="onFabClicked"
+        />
+    </FrameLayout>
+
+    <com.google.android.material.navigation.NavigationView
+
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        android:id="@+id/in_doc_nav"
+        >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+            <include layout="@layout/nav_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <ListView
+                android:id="@+id/in_doc_nav_list"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@android:color/white"
+                />
+        </LinearLayout>
+    </com.google.android.material.navigation.NavigationView>
+
+
+</androidx.drawerlayout.widget.DrawerLayout>
