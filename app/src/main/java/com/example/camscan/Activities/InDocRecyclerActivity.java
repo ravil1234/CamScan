@@ -2,10 +2,12 @@ package com.example.camscan.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Database;
@@ -28,23 +30,35 @@ import android.os.StrictMode;
 import android.util.JsonWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.camscan.Adapters.InDocMiniAdapter;
 import com.example.camscan.Adapters.InDocRecyclerAdapter;
+import com.example.camscan.Adapters.NavMenuAdapter;
 import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.MyCustomPdf;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
+import com.example.camscan.Objects.NavMenuObject;
 import com.example.camscan.R;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
 import com.example.camscan.UtilityClass;
 import com.google.android.gms.common.util.JsonUtils;
+import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -56,6 +70,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class InDocRecyclerActivity extends AppCompatActivity {
 
@@ -91,8 +106,17 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     //PAGE SETTING
 
-    
+    //NAV DRAWER
+    ArrayList<NavMenuObject> menuList;
+    DrawerLayout dl;
+    ActionBarDrawerToggle abdt;
+    NavigationView nv;
+    NavMenuAdapter menuAdapter;
+    ListView menuListView;
+    boolean isPdfSettingOpen=false;
+    boolean isShareSettingOpen=false;
 
+    //NAV DRAWER END
     View pageSettingLayout;
     //PAGE SETTING END
 
@@ -124,6 +148,23 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
 
         //setting docName
+
+        //NAV DRAWER
+
+
+        abdt = new ActionBarDrawerToggle(this, dl,R.string.open, R.string.close);
+
+        dl.addDrawerListener(abdt);
+        abdt.syncState();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        menuList=new ArrayList<>();
+        populateMenuListItems();
+        menuAdapter=new NavMenuAdapter(this,menuList);
+        menuListView.setAdapter(menuAdapter);
+        menuListView.setOnItemClickListener(new MyMenuOnClickListener());
+        //NAV DRAWER END
+
         updateDocName();
 
 
@@ -137,11 +178,11 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         }
 
         list=new ArrayList<>();
-        fillArrayList();
+
         adapter=new InDocRecyclerAdapter(this,list,new MyOnClickListener(),new MyLongClickListener());
         vp2.setAdapter(adapter);
-
-        currentDoc=new MyDocument("MyDoc",0l,0l,6,list.get(0).getEditedUri());
+        fillArrayList();
+//        currentDoc=new MyDocument("MyDoc",0l,0l,6,list.get(0).getEditedUri());
 
         tNails=new ArrayList<>();
         miniAdapter=new InDocMiniAdapter(this, tNails, new View.OnClickListener() {
@@ -182,8 +223,374 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     }
 
-    //-----------------------------------------------------------------------------------------
+    //NAV DRAWER
+    private void populateMenuListItems() {
+        menuList.add(new NavMenuObject(false,"Edit Page",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(false,"Secure PDf",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(true,"Pdf Setting",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        //pdf etting
+        menuList.add(new NavMenuObject(false,"Password",0,false));
+        menuList.add(new NavMenuObject(false,"Orientation",0,false));
+        menuList.add(new NavMenuObject(false,"PageSize",0,false));
+        menuList.add(new NavMenuObject(false,"Margin",0,false));
+        //
+        menuList.add(new NavMenuObject(false,"Email",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(true,"Share",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        //share
+        menuList.add(new NavMenuObject(false,"As Images",0,false));
+        menuList.add(new NavMenuObject(false,"As Long Image",0,false));
+        menuList.add(new NavMenuObject(false,"As PDF",0,false));
+        //
+        menuList.add(new NavMenuObject(false,"Reverse Order",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(false,"Add more Pages",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        //---------------------
+        menuList.add(new NavMenuObject(false,"About Us",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(false,"Share App",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(false,"Exit",R.drawable.ic_picture_as_pdf_black_24dp,true));
 
+    }
+    public void openPdfSettings(){
+        menuList.get(3).setVisible(true);
+        menuList.get(4).setVisible(true);
+        menuList.get(5).setVisible(true);
+        menuList.get(6).setVisible(true);
+        menuAdapter.notifyDataSetChanged();
+    }
+    public void closePdfSettings(){
+        menuList.get(3).setVisible(false);
+        menuList.get(4).setVisible(false);
+        menuList.get(5).setVisible(false);
+        menuList.get(6).setVisible(false);
+        menuAdapter.notifyDataSetChanged();
+    }
+    public void openShareMenuItem(){
+        menuList.get(9).setVisible(true);
+        menuList.get(10).setVisible(true);
+        menuList.get(11).setVisible(true);
+        menuAdapter.notifyDataSetChanged();
+    }
+    public void closeShareMenuItem(){
+        menuList.get(9).setVisible(false);
+        menuList.get(10).setVisible(false);
+        menuList.get(11).setVisible(false);
+        menuAdapter.notifyDataSetChanged();
+    }
+    public void resetDrawer(){
+
+        closePdfSettings();
+        closeShareMenuItem();
+        isPdfSettingOpen=false;
+        isShareSettingOpen=false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(abdt.onOptionsItemSelected(item)){
+            resetDrawer();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private class MyMenuOnClickListener implements AdapterView.OnItemClickListener{
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            switch (i){
+                case 0:{//EDIT page
+                    vp2.performLongClick();
+                    break;
+                }
+                case 1:{//secure pdf
+                    AlertDialog.Builder builder=new AlertDialog.Builder(InDocRecyclerActivity.this);
+                    builder.setTitle("Set Password");
+                    View dialog=LayoutInflater.from(InDocRecyclerActivity.this).inflate(R.layout.fragment_rename,null);
+
+                    builder.setView(dialog);
+
+                    EditText newNameView=dialog.findViewById(R.id.rename_fragment_eview);
+                    newNameView.setSelectAllOnFocus(true);
+                    //newNameView.setText(currentDoc1.getDocName());
+                    String pass=getPagePassword();
+                    newNameView.setText(pass);
+
+                    newNameView.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                                if(motionEvent.getRawX() >= (newNameView.getRight() - newNameView.getCompoundDrawables()[2].getBounds().width())) {
+                                    // your action here
+                                    newNameView.setText("");
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+                    });
+
+                    builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            String newPass=newNameView.getText().toString();
+                            if(!newPass.equals("")){
+                                Uri pdfUri=savePdf(newPass,true);
+                                Toast.makeText(InDocRecyclerActivity.this,"Pdf saved at "+pdfUri, Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(InDocRecyclerActivity.this, "Password can't be null", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }).setNegativeButton("Cancel",null);
+
+                    builder.create().show();
+
+                    break;
+                }
+                case 2:{//pdf setting
+                        if(!isPdfSettingOpen){
+                            isPdfSettingOpen=true;
+                            openPdfSettings();
+                            ImageView ex=view.findViewById(R.id.item_nav_expand);
+                            ex.setImageDrawable(getDrawable(android.R.drawable.arrow_up_float));
+                        }else{
+                            isPdfSettingOpen=false;
+                            closePdfSettings();
+                            ImageView ex=view.findViewById(R.id.item_nav_expand);
+                            ex.setImageDrawable(getDrawable(android.R.drawable.arrow_down_float));
+                        }
+                    break;
+                }
+                case 3:{//password
+                    AlertDialog.Builder builder=new AlertDialog.Builder(InDocRecyclerActivity.this);
+                    builder.setTitle("Save Default Password");
+                    View dialog=LayoutInflater.from(InDocRecyclerActivity.this).inflate(R.layout.fragment_rename,null);
+
+                    builder.setView(dialog);
+
+                    EditText newNameView=dialog.findViewById(R.id.rename_fragment_eview);
+                    newNameView.setSelectAllOnFocus(true);
+                    //newNameView.setText(currentDoc1.getDocName());
+                    String pass=getPagePassword();
+                    newNameView.setText(pass);
+
+                    newNameView.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                                if(motionEvent.getRawX() >= (newNameView.getRight() - newNameView.getCompoundDrawables()[2].getBounds().width())) {
+                                    // your action here
+                                    newNameView.setText("");
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+                    });
+
+                    builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            String newPass=newNameView.getText().toString();
+                            if(!newPass.equals("")){
+                                setPagePassword(newPass);
+                                Toast.makeText(InDocRecyclerActivity.this,"New Password Is Set", Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(InDocRecyclerActivity.this, "Password can't be null", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }).setNegativeButton("Cancel",null);
+
+                    builder.create().show();
+                    break;
+                }
+                case 4:{//orientation
+                    AlertDialog.Builder builder=new AlertDialog.Builder(InDocRecyclerActivity.this);
+                    builder.setTitle("Set Orientation");
+                    View dialog=LayoutInflater.from(InDocRecyclerActivity.this).inflate(R.layout.fragment_orientation,null);
+
+                    builder.setView(dialog);
+
+                    RadioButton portBtn=dialog.findViewById(R.id.frag_orient_port);
+                    RadioButton landBtn=dialog.findViewById(R.id.frag_orient_land);
+
+                    int rad=getPageOrientation();
+                    if(rad==0){
+                        portBtn.setChecked(true);
+                    }else{
+                        landBtn.setChecked(true);
+                    }
+
+
+                    builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            int radio;
+                            if(portBtn.isChecked()){
+                                radio=0;
+                            }else{
+                                radio=1;
+                            }
+                            setPageOrientation(radio);
+                        }
+                    }).setNegativeButton("Cancel",null);
+
+                    builder.create().show();
+                    break;
+                }
+                case 5:{//Margin
+
+                    boolean isMargin=getPageMargin();
+                    if(isMargin){
+                        Toast.makeText(InDocRecyclerActivity.this, "Margin is Off", Toast.LENGTH_SHORT).show();
+                        setPageMargin(false);
+                    }else{
+                        Toast.makeText(InDocRecyclerActivity.this, "Margin is On", Toast.LENGTH_SHORT).show();
+                        setPageMargin(true);
+                    }
+
+
+
+                    break;
+                }
+                case 6:{//pageSize
+                    AlertDialog.Builder builder=new AlertDialog.Builder(InDocRecyclerActivity.this);
+                    builder.setTitle("Set Orientation");
+                    View dialog=LayoutInflater.from(InDocRecyclerActivity.this).inflate(R.layout.fragment_page_size,null);
+
+                    builder.setView(dialog);
+
+                    RadioButton a5=dialog.findViewById(R.id.frag_psize_a5);
+                    RadioButton a4=dialog.findViewById(R.id.frag_psize_a4);
+                    RadioButton a3=dialog.findViewById(R.id.frag_psize_a3);
+                    RadioButton legal=dialog.findViewById(R.id.frag_psize_legal);
+                    RadioButton tabloid=dialog.findViewById(R.id.frag_psize_tabloid);
+
+                    int index=getPageSize();
+                    if(index==0){
+                        a5.setChecked(true);
+                    }else if(index==1){
+                        a4.setChecked(true);
+                    }
+                    else if(index==2){
+                        a3.setChecked(true);
+                    }
+                    else if(index==3){
+                        legal.setChecked(true);
+                    }
+                    else if(index==4){
+                        tabloid.setChecked(true);
+                    }
+
+
+
+                    builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            int radio=1;
+                            if(a5.isChecked()){
+                                radio=0;
+                            }else if(a4.isChecked()){
+                                radio=1;
+                            }
+                            else if(a3.isChecked()){
+                                radio=2;
+                            }
+                            else if(legal.isChecked()){
+                                radio=3;
+                            }
+                            else if(tabloid.isChecked()){
+                                radio=4;
+                            }
+                            setPageSize(radio);
+                        }
+                    }).setNegativeButton("Cancel",null);
+
+                    builder.create().show();
+                    break;
+                }
+                case 7:{//email
+                    email();
+                    break;
+                }
+                case 8:{//share
+                        if(!isShareSettingOpen){
+                            isShareSettingOpen=true;
+                            openShareMenuItem();
+                            ImageView ex=view.findViewById(R.id.item_nav_expand);
+                            ex.setImageDrawable(getDrawable(android.R.drawable.arrow_up_float));
+                        }else{
+                            isShareSettingOpen=false;
+                            closeShareMenuItem();
+                            ImageView ex=view.findViewById(R.id.item_nav_expand);
+                            ex.setImageDrawable(getDrawable(android.R.drawable.arrow_down_float));
+                        }
+
+                    break;
+                }
+                case 9:{//as image
+                    shareAsImages(view);
+                    break;
+                }
+                case 10:{//as long image
+                    shareAsLongimage(view);
+                    break;
+                }
+                case 11:{//as pdf
+                    shareAsPdf(view);
+                    break;
+                }
+                case 12:{//Reverse Items
+                    reverseList();
+                    break;
+                }
+                case 13:{//Add more Pages
+                    addMorePages();
+                    break;
+                }
+                case 14:{//About us
+                    AlertDialog.Builder builder=new AlertDialog.Builder(InDocRecyclerActivity.this);
+                    builder.setTitle("About App");
+                    builder.setMessage(getResources().getString(R.string.lorem));
+                    builder.setPositiveButton("OK",null);
+                    builder.create().show();
+                    break;
+                }
+                case 15:{//Share app
+                    Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+                    /*This will be the actual content you wish you share.*/
+                    String shareBody = "Hey! This is the awesome app I found which will help you to manage your documents in one place. Make sure to Check is out.!";
+                    /*The type of the content is text, obviously.*/
+                    intent.setType("text/plain");
+                    /*Applying information Subject and Body.*/
+                    intent.putExtra(android.content.Intent.EXTRA_SUBJECT,"Cam Scan Available in PlayStore!!!");
+                    intent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+                    /*Fire!*/
+                    startActivity(Intent.createChooser(intent, "Share Via"));
+                    break;
+                }
+                case 16:{//Exit
+                    AlertDialog.Builder builder=new AlertDialog.Builder(InDocRecyclerActivity.this);
+                    builder.setTitle("Exit?");
+                    builder.setMessage("Are you sure you want to exit");
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            finishAffinity();
+                        }
+                    }).setNegativeButton("No",null);
+                    builder.create().show();
+                    break;
+                }
+
+
+            }
+        }
+    }
+
+    //NAV DRAWER END
+
+    //-----------------------------------------------------------------------------------------
     private void initializeViews() {
         vp2=findViewById(R.id.in_doc_pageViewer);
         shareWindow=findViewById(R.id.in_doc_share_window);
@@ -192,12 +599,14 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
         pageSettingLayout=findViewById(R.id.in_doc_page_setting);
 
+        menuListView=findViewById(R.id.in_doc_nav_list);
+        dl=findViewById(R.id.in_doc_drawer);
+        nv=findViewById(R.id.in_doc_nav);
 
     }
     //-----------------------------------------------------------------------------------------
 
     //ON PAGE FUNCTIONS
-
     private void expandPager() {
         Toast.makeText(this, "Expanded", Toast.LENGTH_SHORT).show();
 
@@ -246,10 +655,9 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
         }
     }
-
-
     //ON PAGE FUNCTIONS END
-    //-----------------------------------------------------------------------------------------
+
+
     //MINI RECYCLER VIEW
     private void populateMiniAdapter() {
         for(MyPicture i:list){
@@ -270,39 +678,50 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
 
     //-----------------------------------------------------------------------------------------
+
     //delete
     private void fillArrayList() {
+
         String from=getIntent().getStringExtra("from");
         if(from.equals("BoxActivity") || from.equals("FilterActivity")){
             //came from box activity with multiple images
             String myPics=getIntent().getStringExtra("MyPicture");
             String myDoc=getIntent().getStringExtra("MyDocument");
-
+            Log.e("THIS", "fillArrayList: "+myPics );
+            Log.e("THIS", "fillArrayList: "+myDoc );
             ArrayList<MyPicture> newList=UtilityClass.getListOfPics(myPics);
             currentDoc= UtilityClass.getDocFromJson(myDoc);
 
             saveDocInDatabase();
            savePicsIntoDatabase(newList);
             //Pick pics from database
-            list=getPicturesFromDatabase();
+            ArrayList<MyPicture> ps=getPicturesFromDatabase();
+            list.addAll(ps);
             adapter.notifyDataSetChanged();
         }else if(from.equals("HomeActivity")){
 
         }
+
+
 //        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something17869.jpg","Image5",5,points));
 //        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something278100.jpg","Image5",5,points));
 //        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something80568.jpg","Image5",5,points));
 //        list.add(new MyPicture(0,null,"file:///storage/emulated/0/CamScan/.Edited/Something736207.jpg","Image5",5,points));
 
     }
-
     //delete end
-//-----------------------------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------------------
 
     //DATABASE FUNCTIONS
     public ArrayList<MyPicture> getPicturesFromDatabase()
-    {
-        return null;
+    {int did=currentDoc.getDid();
+        ArrayList<MyPicture> lst=new ArrayList<>();
+        List<MyPicture> l=db.myPicDao().getDocPics(did);
+        if(l!=null){
+            lst.addAll(l);
+        }
+        return lst;
     }
     public void updatePictureInfo(){
 
@@ -439,10 +858,9 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         }
 
     }
-
     //IMPORT FROM GALLERY END
-
     //-----------------------------------------------------------------------------------------
+
     //RENAMING
     private void setDocName(String dName){
         currentDoc.setdName(dName);
@@ -497,9 +915,10 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         builder.show();
 
     }
-
     //RENAMING END
+
 //-----------------------------------------------------------------------------------------
+
     //SHARE
     public void share(){
         if(isShareOpen){
@@ -521,7 +940,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         if(isEmailOpen){
             //email intent
             isEmailOpen=false;
-            Uri savedPdf=savePdf();
+            Uri savedPdf=savePdf(null,false);
             if(savedPdf!=null){
                 callIntentForEmail(savedPdf,1,null);
             }
@@ -615,7 +1034,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         }
     }
 */
-    public Uri savePdf(){
+    public Uri savePdf(String pass,boolean isPassSet){
         if(isPerMissionGranted()){
             ArrayList<Bitmap> pdfList=new ArrayList<>();
             for(MyPicture p:list){
@@ -635,8 +1054,8 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
             }
 
-            MyCustomPdf pdf = new MyCustomPdf(this, pdfList, false);
-            Uri savedPdf=pdf.savePdf2(currentDoc.getdName());
+            MyCustomPdf pdf = new MyCustomPdf(this, pdfList, isPassSet);
+            Uri savedPdf=pdf.savePdf2(currentDoc.getdName(),pass);
             if (savedPdf!=null) {
                 Toast.makeText(this, "SAVED", Toast.LENGTH_SHORT).show();
                 return savedPdf;
@@ -648,7 +1067,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
         }else{
             ActivityCompat.requestPermissions(this,new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"},101);
-            return savePdf();
+            return savePdf(pass,isPassSet);
         }
     }
 
@@ -829,8 +1248,8 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
         resetPositions(currPic.getPosition());
         deleteFromDatabase(currPic.getPid());
-        UtilityClass.deleteFromStorage(Uri.parse(uriEdited),false);
-        UtilityClass.deleteFromStorage(Uri.parse(uriOriginal),true);
+        UtilityClass.deleteFromStorage(Uri.parse(uriEdited));
+        UtilityClass.deleteFromStorage(Uri.parse(uriOriginal));
 
     }
 
@@ -869,7 +1288,10 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     }
     //PAGE SETTINGS END
 
-    //JSON FUNCTIONS
+    //EXTRA
 
-    //JSON FUNCTIONS END
+    private void addMorePages() {
+        //goto camera activity
+    }
+    //EXTRA END
 }

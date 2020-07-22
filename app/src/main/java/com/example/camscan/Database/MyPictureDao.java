@@ -20,6 +20,9 @@ public interface MyPictureDao {
     @Query("SELECT * from mypicture where pid=:pid")
     MyPicture getPicWithPid(int pid);
 
+    @Query("SELECT * From mypicture")
+    List<MyPicture> getAllPics();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertIntoDoc(MyPicture pic);
 

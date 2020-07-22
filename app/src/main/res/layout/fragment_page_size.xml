@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RadioButton
+            android:id="@+id/frag_psize_a5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="A5"
+            android:textStyle="bold"
+            />
+        <RadioButton
+            android:id="@+id/frag_psize_a4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="A4"
+            android:textStyle="bold"
+            />
+        <RadioButton
+            android:id="@+id/frag_psize_a3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="A3"
+            android:textStyle="bold"
+            />
+        <RadioButton
+            android:id="@+id/frag_psize_legal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Legal"
+            android:textStyle="bold"
+            />
+        <RadioButton
+            android:id="@+id/frag_psize_tabloid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tabloid"
+            android:textStyle="bold"
+            />
+    </RadioGroup>
+
+</LinearLayout>

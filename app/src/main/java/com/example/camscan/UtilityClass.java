@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -12,6 +13,10 @@ import android.widget.ImageView;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -195,15 +200,61 @@ public class UtilityClass {
         return (int)(((float)height/(float)width)*minWidth);
     }
 
-    public static void deleteFromStorage(Uri deleteUri,boolean isOriginal){
-        //TODO complete it
+    public static void deleteFromStorage(Uri deleteUri){
+
+        File f=new File(deleteUri.getPath());
+        if(f.exists()){
+            f.delete();
+        }
     }
 
     public static MyDocument getDocFromJson(String docJson){
-        return null;
-    }
+        try {
+            JSONObject obj = new JSONObject(docJson);
+            int did = obj.getInt("did");
+            String dName = obj.getString("dName");
+            long timeCreated = obj.getLong("timeCreated");
+            long timeEdited = obj.getLong("timeEdited");
+            int pCount = obj.getInt("pCount");
+            String fP_URI=null;
+            if(obj.has("fp_URI")){
+                fP_URI = obj.getString("fP_URI");
+            }
+
+            MyDocument mydoc = new MyDocument(dName, timeCreated, timeEdited, pCount, fP_URI);
+            mydoc.setDid(did);
+            return mydoc;
+        }catch (JSONException e){
+            e.printStackTrace();
+            return null;
+        }
+
+        }
     public static ArrayList<MyPicture> getListOfPics(String myPicsJson){
-        return null;
+        try {
+            JSONArray array = new JSONArray(myPicsJson);
+            ArrayList<MyPicture> arraylistpicture = new ArrayList<>();
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject obj = array.getJSONObject(i);
+                ArrayList<Point> coordinates = new ArrayList<>();
+                coordinates.add(new Point(obj.getInt("x1"), obj.getInt("y1")));
+                coordinates.add(new Point(obj.getInt("x2"), obj.getInt("y2")));
+                coordinates.add(new Point(obj.getInt("x3"), obj.getInt("y3")));
+                coordinates.add(new Point(obj.getInt("x4"), obj.getInt("y4")));
+                String editedUri=null;
+                if(obj.has("editedUri")){
+                    editedUri=obj.getString("editedUri");
+                }
+                MyPicture pic=new MyPicture(obj.getInt("did"), obj.getString("originalUri"), editedUri,
+                        obj.getString("editedName"), obj.getInt("position"), coordinates);
+                pic.setPid(obj.getInt("pid"));
+                arraylistpicture.add(pic);
+            }
+            return arraylistpicture;
+        }catch (JSONException e){
+            e.printStackTrace();
+            return null;
+        }
     }
     public static String getStringFromObject(Object object){
         return new Gson().toJson(object);

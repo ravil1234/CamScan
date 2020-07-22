@@ -106,7 +106,7 @@ public class MyCustomPdf {
 
     }
 */
-    public Uri savePdf2(String name){
+    public Uri savePdf2(String name,String pass){
         File f;
         File dir;
         if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q) {
@@ -129,7 +129,7 @@ public class MyCustomPdf {
         try{
             PdfWriter pdw=PdfWriter.getInstance(doc,new FileOutputStream(f));
             if(isPassSet){
-                pdw.setEncryption(PASSWORD.getBytes(),"ADMIN_IS_BACK".getBytes()
+                pdw.setEncryption(pass.getBytes(),"ADMIN_IS_BACK".getBytes()
                         ,PdfWriter.ALLOW_PRINTING|PdfWriter.ALLOW_COPY|PdfWriter.ALLOW_MODIFY_CONTENTS,
                         PdfWriter.ENCRYPTION_AES_128);
             }

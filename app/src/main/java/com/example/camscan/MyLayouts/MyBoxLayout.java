@@ -486,7 +486,7 @@ public class MyBoxLayout extends RelativeLayout {
         RelativeLayout.LayoutParams param2=(RelativeLayout.LayoutParams)dot2.getLayoutParams();
         RelativeLayout.LayoutParams param3=(RelativeLayout.LayoutParams)dot3.getLayoutParams();
         RelativeLayout.LayoutParams param4=(RelativeLayout.LayoutParams)dot4.getLayoutParams();
-
+        Log.e(TAG, "updateViewPos: "+points.get(1).x+" "+points.get(1).y );
         param1.leftMargin=points.get(0).x;
         param1.topMargin=points.get(0).y;
 
@@ -499,7 +499,7 @@ public class MyBoxLayout extends RelativeLayout {
 
         param4.topMargin=points.get(3).y;//screen_height-dot4.getHeight()-50;
         //param4.rightMargin=width-dot4.getWidth()-50;
-        param4.leftMargin=points.get(3).x;//50;
+        param4.leftMargin=points.get(3).x;//50; 876 249
 
         dot1.setLayoutParams(param1);
         dot2.setLayoutParams(param2);

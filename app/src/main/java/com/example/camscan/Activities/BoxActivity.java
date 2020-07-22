@@ -87,7 +87,7 @@ public class BoxActivity extends AppCompatActivity {
         currDoc= UtilityClass.getDocFromJson(myDocString);
         adapter.notifyDataSetChanged();
 
-        addDummyData();
+//        addDummyData();
     }
 
     private void addDummyData() {
@@ -250,6 +250,7 @@ public class BoxActivity extends AppCompatActivity {
             intent.putExtra("MyDocument",myDoc);
 //            //  Log.e(TAG, "onClick: "+sa[1] );
             startActivity(intent);
+            finish();
         }else{
             //goto indoc activity
 
@@ -259,6 +260,7 @@ public class BoxActivity extends AppCompatActivity {
          //   Log.e(TAG, "onNextPressed: "+myPics );
             intent.putExtra("from","BoxActivity");
             startActivity(intent);
+            finish();
         }
 
     }
