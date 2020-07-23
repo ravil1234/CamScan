@@ -77,6 +77,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     ViewPager2 vp2;
     View shareWindow;
 
+    
 
 
     InDocRecyclerAdapter adapter;
