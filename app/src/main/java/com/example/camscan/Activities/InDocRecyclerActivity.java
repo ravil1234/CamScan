@@ -78,6 +78,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     View shareWindow;
 
 
+
     InDocRecyclerAdapter adapter;
 
     Boolean isPageOpen=false;
