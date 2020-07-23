@@ -1,25 +1,21 @@
 package com.example.camscan.Activities;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
-
 import com.example.camscan.Adapters.InDocRecyclerAdapter;
 import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import com.example.camscan.UtilityClass;
-
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-public class MainActivity extends AppCompatActivity {
-
+public class MainActivity extends AppCompatActivity
+{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
