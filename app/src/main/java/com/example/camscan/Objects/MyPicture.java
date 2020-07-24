@@ -19,7 +19,6 @@ public class MyPicture {
     private int pid;
     @ForeignKey(entity = MyDocument.class,parentColumns = "did",childColumns = "did",onDelete = CASCADE)
     private int did;
-
     @ColumnInfo(name = "originalUri")
     private String originalUri;
     @ColumnInfo(name="editedURI")

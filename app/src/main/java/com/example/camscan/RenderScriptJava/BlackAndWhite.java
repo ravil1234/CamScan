@@ -7,13 +7,9 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-
-
-import androidx.renderscript.Allocation;
-import androidx.renderscript.RenderScript;
-
+import android.renderscript.Allocation;
+import android.renderscript.RenderScript;
 import com.example.camscan.ScriptC_BlackNdWhite;
-
 public class BlackAndWhite {
 
     RenderScript rs;

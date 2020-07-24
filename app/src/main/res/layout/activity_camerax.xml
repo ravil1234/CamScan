@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/flash_mode"
+        android:layout_margin="10dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/flash_logo">
+        </ImageView>
+    </androidx.cardview.widget.CardView>
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/card_view_layout">
+    </androidx.camera.view.PreviewView>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_layout"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp">
+            <ImageView
+                android:id="@+id/gallery"
+                android:layout_width="50dp"
+                android:layout_centerVertical="true"
+                android:layout_height="50dp"
+                android:layout_marginLeft="16dp"
+                android:background="#ff0000" />
+            <ImageView
+                android:id="@+id/last_img"
+                android:layout_width="50dp"
+                android:layout_centerVertical="true"
+                android:layout_height="50dp"
+                android:layout_marginLeft="16dp"
+                tools:background="#ff0000" />
+            <ImageView
+                android:id="@+id/captureImg"
+                android:layout_width="50dp"
+                android:layout_centerVertical="true"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
+                android:layout_marginLeft="16dp"
+                android:background="#ff0000" />
+            <ImageView
+                android:id="@+id/single_mode"
+                android:layout_width="30dp"
+                android:layout_centerVertical="true"
+                android:layout_height="30dp"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@id/captureImg"
+                android:background="#000000" />
+            <ImageView
+                android:id="@+id/batch_mode"
+                android:layout_width="30dp"
+                android:layout_centerVertical="true"
+                android:layout_height="30dp"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@id/single_mode"
+                android:background="#ff00ff" />
+            <TextView
+                android:id="@+id/tick_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TICK"
+                android:textSize="16sp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@id/batch_mode">
+            </TextView>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

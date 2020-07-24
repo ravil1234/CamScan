@@ -1,13 +1,9 @@
 package com.example.camscan.RenderScriptJava;
-
 import android.content.Context;
 import android.graphics.Bitmap;
-
-import androidx.renderscript.Allocation;
-import androidx.renderscript.RenderScript;
-
+import android.renderscript.Allocation;
+import android.renderscript.RenderScript;
 import com.example.camscan.ScriptC_invert;
-
 public class Inversion {
 
     RenderScript rs;
