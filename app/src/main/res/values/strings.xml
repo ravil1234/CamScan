@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">CamScan</string>
+    <string name="open">OPEN</string>
+    <string name="close">CLOSE</string>
+    <string name="lorem">A string resource provides text strings for your application with optional text styling and formatting. There are three types … example: XML file saved at res/values/strings.xml : … You can use either getString(int) or getText(int) to retrieve a string.</string>
 </resources>

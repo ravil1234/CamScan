@@ -1,6 +1,5 @@
 package com.example.camscan.Activities;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,9 +9,8 @@ import android.icu.util.TimeUnit;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import com.example.camscan.ObjectClass.BitmapObject;
-//import com.example.camscan.Objects.MyDocument;
-//import com.example.camscan.Objects.MyPicture;
+import com.example.camscan.Objects.MyDocument;
+import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -49,6 +47,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 //import com.example.camscan.UtilityClass;
+import com.example.camscan.UtilityClass;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.picasso.Picasso;
 import java.io.ByteArrayOutputStream;
@@ -78,7 +77,7 @@ public class CameraXActivity extends AppCompatActivity {
     CardView flashmode_btn;
     ImageView gallery,single_mode_img,batch_mode_img,last_img;
     boolean single_mode;
- //   ArrayList<MyPicture > myPictureList;
+  ArrayList<MyPicture > myPictureList;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -94,7 +93,7 @@ public class CameraXActivity extends AppCompatActivity {
         tick_img=findViewById(R.id.tick_img);
         last_img=findViewById(R.id.last_img);
         flashMode = ImageCapture.FLASH_MODE_AUTO;
-      //  myPictureList=new ArrayList<>();
+        myPictureList=new ArrayList<>();
         single_mode=true;
         last_img.setVisibility(View.INVISIBLE);
         flashmode_btn.setOnClickListener(new View.OnClickListener() {
@@ -198,7 +197,7 @@ public class CameraXActivity extends AppCompatActivity {
                         public void run()
                         {
                             // Todo savelist
-                           // call_save_list(my_file.getPath());
+                            call_save_list(my_file.getPath());
                             Toast.makeText(CameraXActivity.this, "Image Saved successfully", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -208,6 +207,43 @@ public class CameraXActivity extends AppCompatActivity {
                     error.printStackTrace();
                 }
             });
+        });
+    }
+    private  void call_save_list(String uri)
+    {
+        ArrayList<Point> pointArrayList=new ArrayList<>();
+        Point p=new Point(0,0);
+        pointArrayList.add(p);
+        pointArrayList.add(p);
+        pointArrayList.add(p);
+        pointArrayList.add(p);
+        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,"","",
+                myPictureList.size()+1,pointArrayList));
+        String mypic= UtilityClass.getStringFromObject(myPictureList);
+        MyDocument document=new MyDocument("NewFolder"+System.currentTimeMillis(),
+                System.currentTimeMillis(),(long)0,myPictureList.size(),"");
+        String mydoc=UtilityClass.getStringFromObject(document);
+        if(single_mode)
+        {
+            Intent intent = new Intent(CameraXActivity.this, BoxActivity.class);
+            intent.putExtra("MyPicture",mypic);
+            intent.putExtra("MyDocument",mydoc);
+            startActivity(intent);
+        }
+        if(myPictureList.size()>0)
+            tick_img.setVisibility(View.VISIBLE);
+        gallery.setVisibility(View.GONE);
+        last_img.setVisibility(View.VISIBLE);
+        Picasso.with(CameraXActivity.this).load(uri).into(last_img);
+        tick_img.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Intent i=new Intent(CameraXActivity.this,BoxActivity.class);
+                i.putExtra("MyPicture",mypic);
+                i.putExtra("MyDocument",mydoc);
+                startActivity(i);
+            }
         });
     }
     private File  saveimagefile()
