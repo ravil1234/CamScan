@@ -26,20 +26,21 @@ public class MainActivity extends AppCompatActivity
        // image.compress(Bitmap.CompressFormat.PNG,100,bstream);
         //byte[] byteArray=bstream.toByteArray();
 
-        Intent intent=new Intent(MainActivity.this, BoxActivity.class);
+        Intent intent=new Intent(MainActivity.this, InDocRecyclerActivity.class);
         //intent.putExtra("image",byteArray);
         ArrayList<MyPicture> list=new ArrayList<>();
-        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406622666226.jpg",null,"01",1,null));
-        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406650066500.jpg",null,"02",2,null));
-        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595087242244242244.jpg",null,"03",3,null));
-        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595133729167729167.jpg",null,"04",4,null));
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406622666226.jpg","file:///storage/emulated/0/CamScan/.Edited/03781104.jpg","01",1,null));
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406650066500.jpg","file:///storage/emulated/0/CamScan/.Edited/02780215.jpg","02",2,null));
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595087242244242244.jpg","file:///storage/emulated/0/CamScan/.Edited/01779649.jpg","03",3,null));
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595133729167729167.jpg","file:///storage/emulated/0/CamScan/.Edited/Something765607.jpg","04",4,null));
         String myPics=UtilityClass.getStringFromObject(list);
         String myDoc= UtilityClass.getStringFromObject(new MyDocument("NAME",System.currentTimeMillis(),0,4,null));
-        Log.e("THIS", "onCreate: "+myDoc );
-        Log.e("THIS", "onCreate: "+myPics );
+//        Log.e("THIS", "onCreate: "+myDoc );
+//        Log.e("THIS", "onCreate: "+myPics );
 
         intent.putExtra("MyPicture",myPics);
         intent.putExtra("MyDocument",myDoc);
+        intent.putExtra("from","HomeActivity");
         startActivity(intent);
 
     }

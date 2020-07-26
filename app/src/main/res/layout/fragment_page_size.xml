@@ -6,42 +6,64 @@
     >
     <RadioGroup
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+  android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        >
         <RadioButton
             android:id="@+id/frag_psize_a5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="A5"
+            android:text="A5 (5.8×8.3in)"
             android:textStyle="bold"
+            android:layout_marginTop="8dp"
             />
         <RadioButton
             android:id="@+id/frag_psize_a4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="A4"
+            android:text="A4 (8.3×11.7in)"
             android:textStyle="bold"
+            android:layout_marginTop="8dp"
+
             />
         <RadioButton
             android:id="@+id/frag_psize_a3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="A3"
+            android:text="A3 (8.4×14in)"
             android:textStyle="bold"
+            android:layout_marginTop="8dp"
+
             />
         <RadioButton
             android:id="@+id/frag_psize_legal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Legal"
+            android:text="Legal (11×17in)"
             android:textStyle="bold"
+            android:layout_marginTop="8dp"
+
             />
         <RadioButton
             android:id="@+id/frag_psize_tabloid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tabloid"
+            android:text="Tabloid (11.7×16.5in)"
             android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             />
     </RadioGroup>
+    <TextView
+        android:id="@+id/frag_psize_save"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="SAVE"
+        android:gravity="center"
+        android:textColor="#fff"
+        android:background="@color/colorPrimary"
+        android:layout_margin="16dp"
+        />
 
 </LinearLayout>

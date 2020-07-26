@@ -2,6 +2,7 @@ package com.example.camscan.Adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +24,7 @@ public class InDocRecyclerAdapter extends RecyclerView.Adapter<InDocRecyclerAdap
 
     Context context;
     ArrayList<MyPicture> images;
-    private int viewWidth=0;
+    public int viewWidth=0;
     private int viewHeight=0;
     private View.OnClickListener ocl;
     private View.OnLongClickListener olcl;
@@ -90,7 +91,10 @@ public class InDocRecyclerAdapter extends RecyclerView.Adapter<InDocRecyclerAdap
                 current.setImg(img);
             }
         }else{
+
+            holder.img.setScaleType(ImageView.ScaleType.FIT_CENTER);
             holder.img.setImageBitmap(current.getImg());
+        //    notifyDataSetChanged();
         }
 
     }

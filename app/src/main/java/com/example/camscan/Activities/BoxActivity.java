@@ -117,6 +117,7 @@ public class BoxActivity extends AppCompatActivity {
                 pts.add(new Point(w/2,vp2.getHeight()-w/2));
                 p.setCoordinates(pts);
             //    UtilityClass.displayPoints(p.getCoordinates());
+              //  Log.e(TAG, "initializeCoordinates: "+"THIS" );
             }
         }
 
