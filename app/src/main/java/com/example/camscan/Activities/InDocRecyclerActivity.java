@@ -65,8 +65,11 @@ import com.google.gson.JsonObject;
 import org.json.JSONObject;
 import org.spongycastle.pqc.math.ntru.util.Util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,7 +80,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     ViewPager2 vp2;
     View shareWindow;
 
-    
+
 
 
     InDocRecyclerAdapter adapter;
@@ -301,6 +304,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
             switch (i){
                 case 0:{//EDIT page
                     vp2.performLongClick();
+
                     break;
                 }
                 case 1:{//secure pdf

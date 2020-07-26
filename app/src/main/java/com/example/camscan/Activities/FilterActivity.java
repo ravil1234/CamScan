@@ -20,6 +20,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.camscan.Adapters.Filter_Items_RecyclerAdapter;
+import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.example.camscan.RenderScriptJava.BCE;
 import com.example.camscan.RenderScriptJava.BlackAndWhite;
@@ -137,7 +139,6 @@ public class FilterActivity extends AppCompatActivity {
                     adjustView.setVisibility(View.GONE);
                     isFabOpen=false;
                 }
-
             }
         });
 

@@ -6,6 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".Activities.BoxActivity">
 
+    <ImageView
+        android:id="@+id/box_temp_btn"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/dot2"
+        android:visibility="invisible"
+        />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/box_next_btn"
@@ -22,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="25sp"
-        android:layout_marginTop="100sp"
+        android:layout_marginTop="25sp"
         android:layout_marginEnd="25sp"
         android:layout_marginBottom="100sp"
 

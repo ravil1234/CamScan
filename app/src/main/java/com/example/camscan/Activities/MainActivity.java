@@ -30,11 +30,11 @@ public class MainActivity extends AppCompatActivity
         //intent.putExtra("image",byteArray);
         ArrayList<MyPicture> list=new ArrayList<>();
         list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406622666226.jpg",null,"01",1,null));
-//        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406650066500.jpg",null,"02",2,null));
-//        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595087242244242244.jpg",null,"03",3,null));
-//        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595133729167729167.jpg",null,"04",4,null));
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406650066500.jpg",null,"02",2,null));
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595087242244242244.jpg",null,"03",3,null));
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595133729167729167.jpg",null,"04",4,null));
         String myPics=UtilityClass.getStringFromObject(list);
-        String myDoc= UtilityClass.getStringFromObject(new MyDocument("NAME",System.currentTimeMillis(),0,1,null));
+        String myDoc= UtilityClass.getStringFromObject(new MyDocument("NAME",System.currentTimeMillis(),0,4,null));
         Log.e("THIS", "onCreate: "+myDoc );
         Log.e("THIS", "onCreate: "+myPics );
 

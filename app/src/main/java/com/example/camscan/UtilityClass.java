@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.camscan.Objects.MyDocument;
@@ -256,6 +257,30 @@ public class UtilityClass {
             return null;
         }
     }
+    public static MyPicture getPicFromString(String picString){
+        JSONObject obj = null;
+        try {
+            obj = new JSONObject(picString);
+
+            ArrayList<Point> coordinates = new ArrayList<>();
+            coordinates.add(new Point(obj.getInt("x1"), obj.getInt("y1")));
+            coordinates.add(new Point(obj.getInt("x2"), obj.getInt("y2")));
+            coordinates.add(new Point(obj.getInt("x3"), obj.getInt("y3")));
+            coordinates.add(new Point(obj.getInt("x4"), obj.getInt("y4")));
+            String editedUri=null;
+            if(obj.has("editedUri")){
+                editedUri=obj.getString("editedUri");
+            }
+            MyPicture pic=new MyPicture(obj.getInt("did"), obj.getString("originalUri"), editedUri,
+                    obj.getString("editedName"), obj.getInt("position"), coordinates);
+            pic.setPid(obj.getInt("pid"));
+            return pic;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static String getStringFromObject(Object object){
         return new Gson().toJson(object);
     }

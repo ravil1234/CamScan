@@ -1,5 +1,6 @@
 package com.example.camscan.Activities;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -17,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -70,6 +72,8 @@ public class BoxActivity extends AppCompatActivity {
         adapter=new BoxRecyclerAdapter(this,list);
         adapter.setViewPager(vp2);
         vp2.setAdapter(adapter);
+
+
         populateList();
 
 
@@ -80,14 +84,42 @@ public class BoxActivity extends AppCompatActivity {
         String myPicString=getIntent().getStringExtra("MyPicture");
         String myDocString=getIntent().getStringExtra("MyDocument");
 
+//        Log.e(TAG, "BOX ACTIVITY populateList: "+myPicString );
         ArrayList<MyPicture> listTmp=UtilityClass.getListOfPics(myPicString);
         if(listTmp!=null){
             list.addAll(listTmp);
         }
         currDoc= UtilityClass.getDocFromJson(myDocString);
-        adapter.notifyDataSetChanged();
+       // adapter.notifyDataSetChanged();
 
+        vp2.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                initializeCoordinates();
+                vp2.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                adapter.notifyDataSetChanged();
+            }
+        });
+//        initializeCoordinates();
 //        addDummyData();
+    }
+
+    private void initializeCoordinates() {
+        ImageView tmp=findViewById(R.id.box_temp_btn);
+        int w=tmp.getWidth();
+        adapter.setDot(w);
+        for(MyPicture p:list){
+            if(p.getCoordinates().get(3).x==0 &&p.getCoordinates().get(3).y==0){
+                ArrayList<Point> pts=new ArrayList<>();
+                pts.add(new Point(w/2,w/2));
+                pts.add(new Point(vp2.getWidth()-w/2,w/2));
+                pts.add(new Point(vp2.getWidth()-w/2,vp2.getHeight()-w/2));
+                pts.add(new Point(w/2,vp2.getHeight()-w/2));
+                p.setCoordinates(pts);
+            //    UtilityClass.displayPoints(p.getCoordinates());
+            }
+        }
+
     }
 
     private void addDummyData() {
@@ -133,6 +165,7 @@ public class BoxActivity extends AppCompatActivity {
     }
 
     public Bitmap cornerPin(Bitmap B,ArrayList<Point> dis){
+      //  UtilityClass.displayPoints(dis);
         int w=B.getWidth();
         int h=B.getHeight();
 
@@ -212,6 +245,9 @@ public class BoxActivity extends AppCompatActivity {
         String[] save=null;
         for(MyPicture p:list){
             Bitmap image=p.getImg();
+            if(image==null){
+                image= BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
+            }
             Bitmap transformed=cornerPin(image,p.getCoordinates());
             Bitmap emptyBitmap = Bitmap.createBitmap(transformed.getWidth(), transformed.getHeight(),
                     transformed.getConfig());
@@ -274,6 +310,7 @@ public class BoxActivity extends AppCompatActivity {
             matrix.preRotate(90);
             image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
             currPic.setImg(image);
+            currPic.setCoordinates(null);
             adapter.notifyDataSetChanged();
 
         }
@@ -289,6 +326,7 @@ public class BoxActivity extends AppCompatActivity {
             matrix.preRotate(-90);
             image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
             currPic.setImg(image);
+            currPic.setCoordinates(null);
             adapter.notifyDataSetChanged();
         }
     }
@@ -296,16 +334,46 @@ public class BoxActivity extends AppCompatActivity {
     public void resetCurrPoint(View view){
         int currInd=vp2.getCurrentItem();
         MyPicture pic=list.get(currInd);
-        int height=vp2.getHeight();
-        int width=vp2.getWidth();
+        ImageView tmp=findViewById(R.id.box_temp_btn);
+        int w=tmp.getWidth();
         ArrayList<Point> pts=new ArrayList<>();
-        pts.add(new Point(0,0));
-        pts.add(new Point(width,0));
-        pts.add(new Point(width,height));
-        pts.add(new Point(0,height));
+        pts.add(new Point(w/2,w/2));
+        pts.add(new Point(vp2.getWidth()-w/2,w/2));
+        pts.add(new Point(vp2.getWidth()-w/2,vp2.getHeight()-w/2));
+        pts.add(new Point(w/2,vp2.getHeight()-w/2));
 
         pic.setCoordinates(pts);
         adapter.notifyDataSetChanged();
+    }
+
+    public void retakePic(){
+        int index=vp2.getCurrentItem();
+        MyPicture p=list.get(index);
+        String picString=UtilityClass.getStringFromObject(p);
+        Intent intent=new Intent(BoxActivity.this,CamActivity.class);
+        intent.putExtra("MyPicture",picString);
+        startActivityForResult(intent,101);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==101){
+            if(resultCode==RESULT_OK){
+                //returned something
+                String newPic=data.getStringExtra("MyPicture");
+                MyPicture pics=UtilityClass.getPicFromString(newPic);
+                if(pics!=null){
+                    int index=vp2.getCurrentItem();
+                    list.set(index,pics);
+                    adapter.notifyDataSetChanged();
+                }
+            }else if(resultCode==RESULT_CANCELED){
+                //cancelled!! dont do anything
+            }
+        }
+
     }
 
     public  class MyAsync extends AsyncTask<Bitmap,Void,Bitmap>{
