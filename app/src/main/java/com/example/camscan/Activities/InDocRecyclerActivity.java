@@ -31,6 +31,7 @@ import android.util.JsonWriter;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -294,7 +295,33 @@ public class InDocRecyclerActivity extends AppCompatActivity {
             resetDrawer();
             return true;
         }
+
+        switch(item.getItemId()){
+            case R.id.In_doc_menu_import:{
+                importPic();
+                break;
+            }
+            case R.id.In_doc_menu_pdf:{
+                Uri pdfUri=savePdf(null,false);
+                if(pdfUri!=null){
+                    Toast.makeText(this, "Saved at "+pdfUri.toString(), Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(this, "FAILED", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+            case R.id.In_doc_menu_share:{
+                share();
+                break;
+            }
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.in_doc_menu,menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     private class MyMenuOnClickListener implements AdapterView.OnItemClickListener{
@@ -958,17 +985,29 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     }
     public void shareAsPdf(View view){
+        Uri savedPdf=savePdf(null,false);
+
         if(isEmailOpen){
             //email intent
             isEmailOpen=false;
-            Uri savedPdf=savePdf(null,false);
+            savedPdf=savePdf(null,false);
             if(savedPdf!=null){
                 callIntentForEmail(savedPdf,1,null);
             }
 
         }else{
             //simple share intent
+            if(savedPdf!=null){
+                Intent intentShareFile=new Intent(Intent.ACTION_SEND);
+                intentShareFile.setType("application/pdf");
+                intentShareFile.putExtra(Intent.EXTRA_STREAM, savedPdf);
 
+                intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
+                        "Document from CamScan...");
+                intentShareFile.putExtra(Intent.EXTRA_TEXT, "Document made from CamScan");
+
+                startActivity(Intent.createChooser(intentShareFile, "Share as Pdf"));
+            }
         }
         isShareOpen=false;
         closeShareWindow();
@@ -1143,22 +1182,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     //REVERSE FEATURE END
 
     //PDF SETTINGS
-
-    public int getPageSize(){
-        SharedPreferences pref= getSharedPreferences(UtilityClass.PDF_SETTING,MODE_PRIVATE);
-        int pageSize=pref.getInt("PDF_PAGE_SIZE",1);
-        return pageSize;
-    }
-    public int getPageOrientation(){
-        SharedPreferences pref= getSharedPreferences(UtilityClass.PDF_SETTING,MODE_PRIVATE);
-        int pageOrient=pref.getInt("PDF_PAGE_ORIENTATION",0);
-        return pageOrient;
-    }
-    public boolean getPageMargin(){
-        SharedPreferences pref= getSharedPreferences(UtilityClass.PDF_SETTING,MODE_PRIVATE);
-        boolean isPageMargin=pref.getBoolean("PDF_PAGE_MARGIN",false);
-        return isPageMargin;
-    }
     public String getPagePassword(){
         SharedPreferences pref= getSharedPreferences(UtilityClass.PDF_SETTING,MODE_PRIVATE);
         String pass=pref.getString("PDF_PAGE_PASSWORD","admin");

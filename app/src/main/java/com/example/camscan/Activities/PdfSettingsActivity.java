@@ -6,8 +6,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,8 +30,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.camscan.R;
 import com.example.camscan.UtilityClass;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class PdfSettingsActivity extends AppCompatActivity {
 
@@ -346,6 +353,16 @@ public class PdfSettingsActivity extends AppCompatActivity {
             }
         });
 
+        imgForStamp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gall.setChecked(true);
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                photoPickerIntent.setType("image/*");
+                startActivityForResult(photoPickerIntent, 110);
+
+            }
+        });
 
         AlertDialog d=builder.create();
         saveBtn.setOnClickListener(new View.OnClickListener() {
@@ -368,15 +385,20 @@ public class PdfSettingsActivity extends AppCompatActivity {
             if(resultCode==RESULT_OK){
                 Uri uri=data.getData();
                 Bitmap stamp= null;
+                Uri savedStamp=null;
                 try {
                     stamp = BitmapFactory.decodeStream(PdfSettingsActivity.this.getContentResolver()
                             .openInputStream(uri));
+                    stamp=UtilityClass.resizeImage(stamp,200,50);
+                    stamp=makeTransparent(stamp,70);
+                    savedStamp=saveStamp(stamp);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                if(stamp!=null && imgForStamp!=null){
+                if(savedStamp!=null && imgForStamp!=null){
                     imgForStamp.setImageBitmap(stamp);
-                    setPageStamp(uri.toString());
+                    setPageStamp(savedStamp.toString());
+                    uriString=savedStamp.toString();
                     //stamp.recycle();
                 }
 
@@ -385,5 +407,52 @@ public class PdfSettingsActivity extends AppCompatActivity {
                 setPageStamp("android.resource://"+getPackageName()+"/"+R.drawable.stamp);
             }
         }
+    }
+
+    private Uri saveStamp(Bitmap stamp) {
+        File f=null;
+        File dir;
+        String name="STAMP";
+        if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q){
+
+            String path= Environment.getExternalStorageDirectory().getPath()+"/CamScan/"+name+".jpg";
+            f=new File(path);
+            dir=new File(Environment.getExternalStorageDirectory().getPath()+"/CamScan");
+        //          String path2=Environment.getExternalStorageDirectory().getPath()+System.currentTimeMillis()+".jpg";
+//            original=new File(path2);
+        }else{
+            f=new File(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan/"+name+".jpg");
+            dir=new File(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan");
+        }
+        if(!dir.exists() && !dir.isDirectory()){
+            dir.mkdirs();
+        }
+        if(f.exists()){
+            f.delete();
+        }
+        try {
+
+            FileOutputStream fos=new FileOutputStream(f,false);
+            stamp.compress(Bitmap.CompressFormat.JPEG,100,fos);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Uri.fromFile(f);
+    }
+    public Bitmap makeTransparent(Bitmap src, int value) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+        Bitmap transBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(transBitmap);
+        canvas.drawARGB(0, 0, 0, 0);
+        // config paint
+        final Paint paint = new Paint();
+        paint.setAlpha(value);
+        canvas.drawBitmap(src, 0, 0, paint);
+        return transBitmap;
     }
 }

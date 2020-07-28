@@ -11,6 +11,8 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.google.gson.Gson;
@@ -86,8 +88,21 @@ public class UtilityClass {
         return Uri.fromFile(f);
     }
 
-    public static Bitmap populateImage(Context context, Uri imgUri,boolean isThumb,int viewWidth,int viewHeight)
-    {
+    public static Bitmap resizeImage(@NonNull Bitmap img, int w, int h){
+        int originalW=img.getWidth();
+        int originalHeight=img.getHeight();
+        int newH,newW;
+        newW=w;
+        newH=(newW*originalHeight)/originalW;
+        if(newH>h){
+            newH=h;
+            newW=(newH*originalW)/originalHeight;
+        }
+        return Bitmap.createScaledBitmap(img,newW,newH,true);
+
+    }
+
+    public static Bitmap populateImage(Context context, Uri imgUri,boolean isThumb,int viewWidth,int viewHeight) {
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
