@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity
         list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595087242244242244.jpg","file:///storage/emulated/0/CamScan/.Edited/01779649.jpg","03",3,null));
         list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595133729167729167.jpg","file:///storage/emulated/0/CamScan/.Edited/Something765607.jpg","04",4,null));
         String myPics=UtilityClass.getStringFromObject(list);
-        String myDoc= UtilityClass.getStringFromObject(new MyDocument("NAME",System.currentTimeMillis(),0,4,null));
+        String myDoc= UtilityClass.getStringFromObject(new MyDocument("Document",System.currentTimeMillis(),0,4,null));
 //        Log.e("THIS", "onCreate: "+myDoc );
 //        Log.e("THIS", "onCreate: "+myPics );
 
