@@ -1,32 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="wrap_content">
 
-    >
+    <ImageView
+        android:id="@+id/frag_pdf_stamp_image"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+
+        android:layout_margin="50dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/stamp"
+        />
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
         >
         <RadioButton
-            android:id="@+id/frag_orient_port"
-            android:layout_width="match_parent"
+            android:id="@+id/frag_pdf_stamp_def"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Portrait"
-            android:checked="true"
+            android:text="Default"
             />
         <RadioButton
-            android:id="@+id/frag_orient_land"
-            android:layout_width="match_parent"
+            android:id="@+id/frag_pdf_stamp_gallery"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Landscape"
+            android:text="Choose From Gallery"
             android:layout_marginTop="8dp"
             />
     </RadioGroup>
     <TextView
-        android:id="@+id/frag_orient_save"
+        android:id="@+id/frag_pdf_stamp_save"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:text="SAVE"

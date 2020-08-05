@@ -17,6 +17,9 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
+import com.example.camscan.UtilityClass;
+
+import org.spongycastle.pqc.math.ntru.util.Util;
 
 import java.util.ArrayList;
 
@@ -70,17 +73,18 @@ public class MyBoxLayout extends RelativeLayout {
         imageCont=view.findViewById(R.id.my_box_img_frame);
 
 
+
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
+//                Log.e(TAG, "onGlobalLayout: "+"OBSERVER" );
 
                 screen_height=view.getHeight();
                 screen_width=view.getWidth();
                 dotWidth= dot1.getWidth();
                 dotHeight=dot1.getHeight();
-                initViewPos();
+              //  initViewPos();
 
             }
         });
@@ -454,19 +458,22 @@ public class MyBoxLayout extends RelativeLayout {
         RelativeLayout.LayoutParams param3=(RelativeLayout.LayoutParams)dot3.getLayoutParams();
         RelativeLayout.LayoutParams param4=(RelativeLayout.LayoutParams)dot4.getLayoutParams();
 
-        param1.leftMargin=50;
-        param1.topMargin=50;
 
-        param2.leftMargin=screen_width-dot2.getWidth()-50;
+
+        param1.leftMargin=0;
+        param1.topMargin=0;
+        param2.leftMargin=screen_width-dot2.getWidth();
         //param2.bottomMargin=height-dot2.getHeight()-50;
-        param2.topMargin=50;
+        param2.topMargin=0;
 
-        param3.leftMargin=screen_width-dot3.getWidth()-50;
-        param3.topMargin=screen_height-dot3.getHeight()-50;
+//        Log.e(TAG, "initViewPos: "+param2.leftMargin );
 
-        param4.topMargin=screen_height-dot4.getHeight()-50;
+        param3.leftMargin=screen_width-dot3.getWidth();
+        param3.topMargin=screen_height-dot3.getHeight();
+
+        param4.topMargin=screen_height-dot4.getHeight();
         //param4.rightMargin=width-dot4.getWidth()-50;
-        param4.leftMargin=50;
+        param4.leftMargin=0;
 
         dot2.setLayoutParams(param2);
         dot3.setLayoutParams(param3);
@@ -479,38 +486,85 @@ public class MyBoxLayout extends RelativeLayout {
 
     }
 
-    public void updateViewPos(ArrayList<Point> points){
+    public void updateViewPos(ArrayList<Point> points,int dotWidth){
 
+      //  UtilityClass.displayPoints(points);
 
         RelativeLayout.LayoutParams param1=(RelativeLayout.LayoutParams)dot1.getLayoutParams();
         RelativeLayout.LayoutParams param2=(RelativeLayout.LayoutParams)dot2.getLayoutParams();
         RelativeLayout.LayoutParams param3=(RelativeLayout.LayoutParams)dot3.getLayoutParams();
         RelativeLayout.LayoutParams param4=(RelativeLayout.LayoutParams)dot4.getLayoutParams();
-        Log.e(TAG, "updateViewPos: "+points.get(1).x+" "+points.get(1).y );
-        param1.leftMargin=points.get(0).x;
-        param1.topMargin=points.get(0).y;
 
-        param2.leftMargin=points.get(1).x;//screen_width-dot2.getWidth()-50;
+        param1.leftMargin=points.get(0).x-dotWidth/2;
+        param1.topMargin=points.get(0).y-dotWidth/2;
+
+        param2.leftMargin=points.get(1).x-dotWidth/2;//screen_width-dot2.getWidth()-50;
         //param2.bottomMargin=height-dot2.getHeight()-50;
-        param2.topMargin=points.get(1).y;//50;
+        param2.topMargin=points.get(1).y-dotWidth/2;//50;
 
-        param3.leftMargin=points.get(2).x;//screen_width-dot3.getWidth()-50;
-        param3.topMargin=points.get(2).y;//screen_height-dot3.getHeight()-50;
+        param3.leftMargin=points.get(2).x-dotWidth/2;//screen_width-dot3.getWidth()-50;
+        param3.topMargin=points.get(2).y-dotWidth/2;//screen_height-dot3.getHeight()-50;
 
-        param4.topMargin=points.get(3).y;//screen_height-dot4.getHeight()-50;
+        param4.topMargin=points.get(3).y-dotWidth/2;//screen_height-dot4.getHeight()-50;
         //param4.rightMargin=width-dot4.getWidth()-50;
-        param4.leftMargin=points.get(3).x;//50; 876 249
+        param4.leftMargin=points.get(3).x-dotWidth/2;//50; 876 249
 
         dot1.setLayoutParams(param1);
         dot2.setLayoutParams(param2);
         dot3.setLayoutParams(param3);
         dot4.setLayoutParams(param4);
 
-        updateViews(dot1);
-        updateViews(dot2);
-        updateViews(dot3);
-        updateViews(dot4);
 
+        RelativeLayout.LayoutParams d12=(RelativeLayout.LayoutParams)dot12.getLayoutParams();
+        RelativeLayout.LayoutParams d23=(RelativeLayout.LayoutParams)dot23.getLayoutParams();
+        RelativeLayout.LayoutParams d34=(RelativeLayout.LayoutParams)dot34.getLayoutParams();
+        RelativeLayout.LayoutParams d14=(RelativeLayout.LayoutParams)dot14.getLayoutParams();
+
+        d12.leftMargin=(int)((param2.leftMargin+param1.leftMargin)/2);
+        d12.topMargin=(int)((param1.topMargin+param2.topMargin)/2);
+
+        d23.leftMargin=(int)((param2.leftMargin+param3.leftMargin)/2);
+        d23.topMargin=(int)((param3.topMargin+param2.topMargin)/2);
+
+        d34.leftMargin=(int)((param3.leftMargin+param4.leftMargin)/2);
+        d34.topMargin=(int)((param3.topMargin+param4.topMargin)/2);
+
+        d14.leftMargin=(int)((param4.leftMargin+param1.leftMargin)/2);
+        d14.topMargin=(int)((param1.topMargin+param4.topMargin)/2);
+
+        dot12.setLayoutParams(d12);
+        dot23.setLayoutParams(d23);
+        dot34.setLayoutParams(d34);
+        dot14.setLayoutParams(d14);
+
+
+        line12.setX1(dotWidth/2+param1.leftMargin);
+        line12.setY1(dotWidth/2+param1.topMargin);
+        line14.setX2(dotWidth/2+param1.leftMargin);
+        line14.setY2(dotWidth/2+param1.topMargin);
+
+        line12.setX2(dotWidth/2+param2.leftMargin);
+        line12.setY2(dotWidth/2+param2.topMargin);
+        line23.setX1(dotWidth/2+param2.leftMargin);
+        line23.setY1(dotWidth/2+param2.topMargin);
+
+        line23.setX2(dotWidth/2+param3.leftMargin);
+        line23.setY2(dotWidth/2+param3.topMargin);
+        line34.setX1(dotWidth/2+param3.leftMargin);
+        line34.setY1(dotWidth/2+param3.topMargin);
+
+        line34.setX2(dotWidth/2+param4.leftMargin);
+        line34.setY2(dotWidth/2+param4.topMargin);
+        line14.setX1(dotWidth/2+param4.leftMargin);
+        line14.setY1(dotWidth/2+param4.topMargin);
+
+
+//
+//        updateViews(dot1);
+//        updateViews(dot2);
+//        updateViews(dot3);
+//        updateViews(dot4);
+//        UtilityClass.displayPoints(points);
     }
     public void updateViews(View view){
 
@@ -629,7 +683,7 @@ public class MyBoxLayout extends RelativeLayout {
         }
 
         pic.setCoordinates(getCorners());
-
+//        UtilityClass.displayPoints(getCorners());
     }
 
     public void setMyPicObject(MyPicture pic){
@@ -702,5 +756,7 @@ public class MyBoxLayout extends RelativeLayout {
         updateViews(dot4);
 
     }
+
+
 
 }

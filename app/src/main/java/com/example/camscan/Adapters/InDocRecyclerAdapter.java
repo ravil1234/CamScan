@@ -2,6 +2,7 @@ package com.example.camscan.Adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,13 +18,14 @@ import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import com.example.camscan.UtilityClass;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class InDocRecyclerAdapter extends RecyclerView.Adapter<InDocRecyclerAdapter.MyViewHolder> {
 
     Context context;
     ArrayList<MyPicture> images;
-    private int viewWidth=0;
+    public int viewWidth=0;
     private int viewHeight=0;
     private View.OnClickListener ocl;
     private View.OnLongClickListener olcl;
@@ -68,6 +70,7 @@ public class InDocRecyclerAdapter extends RecyclerView.Adapter<InDocRecyclerAdap
         final Uri uri=Uri.parse(current.getEditedUri());
 
         if(current.getImg()==null) {
+            /*
             if (viewHeight == 0 || viewWidth == 0) {
                 ViewTreeObserver vto = holder.img.getViewTreeObserver();
 
@@ -89,7 +92,23 @@ public class InDocRecyclerAdapter extends RecyclerView.Adapter<InDocRecyclerAdap
                 holder.img.setImageBitmap(img);
                 current.setImg(img);
             }
+            */
+            Bitmap image=null;
+            try{
+                image=BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uri));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            if(image!=null){
+                holder.img.setImageBitmap(image);
+                current.setImg(image);
+            }else{
+                images.remove(current);
+//                notifyDataSetChanged();
+            }
+
         }else{
+
             holder.img.setImageBitmap(current.getImg());
         }
 

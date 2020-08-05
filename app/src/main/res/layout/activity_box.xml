@@ -6,49 +6,36 @@
     android:layout_height="match_parent"
     tools:context=".Activities.BoxActivity">
 
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/box_next_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_media_next"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="16sp"
-        android:onClick="onNextPressed"
-
+    <ImageView
+        android:id="@+id/box_temp_btn"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/dot2"
+        android:visibility="invisible"
         />
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/box_viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="25sp"
-        android:layout_marginTop="100sp"
+        android:layout_marginTop="25sp"
         android:layout_marginEnd="25sp"
         android:layout_marginBottom="100sp"
 
         />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/box_rotateClock"
-        android:layout_width="wrap_content"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/box_navigation"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_menu_rotate"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="16sp"
-        android:layout_marginStart="16sp"
-        android:onClick="rotateBitmapClockWise"
+        android:background="@color/colorPrimaryDark"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/box_menu"
+
         />
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/box_rotateAntiClock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_menu_rotate"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="16sp"
-        android:layout_marginEnd="16sp"
-        android:scaleX="-1"
-        android:onClick="rotateBitmapAntiClockWise"
-        />
+
 
 
 </FrameLayout>

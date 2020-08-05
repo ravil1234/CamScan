@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_filter_bounding_box"
+        android:title="Bound"
+        android:icon="@drawable/ic_fullscreen_black_24dp"
+        />
+    <item
+        android:id="@+id/action_filter_rotate"
+        android:title="Rotate"
+        android:icon="@android:drawable/ic_menu_rotate"
+        />
+    <item
+        android:id="@+id/action_filter_effects"
+        android:title="Effects"
+        android:icon="@drawable/ic_fullscreen_black_24dp"
+        />
+    <item
+        android:id="@+id/action_filter_modification"
+        android:title="Modify"
+        android:icon="@drawable/dot2"
+        />
+    <item
+        android:id="@+id/action_filter_next"
+        android:title="Next"
+        android:icon="@android:drawable/arrow_down_float"
+        />
+</menu>

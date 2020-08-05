@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.camscan">
 
-    <uses-feature android:name="android.hardware.camera.any" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="false"
@@ -18,18 +15,22 @@
         <activity android:name=".Activities.FilterActivity" />
         <activity android:name=".Activities.BoxActivity" />
         <activity android:name=".Activities.CamActivity" />
-        <activity android:name=".Activities.HomeScreenActivity"></activity>
-        <activity android:name=".Activities.CapturedImageActivity" />
         <activity android:name=".Activities.MainActivity">
-        </activity>
-        <activity android:name=".Activities.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.CameraXActivity" />
+        <activity android:name=".Activities.SplashScreenActivity" />
         <activity android:name=".Activities.SingleCameraActivity" />
+        <activity android:name=".Activities.CameraXActivity" />
+        <activity android:name=".Activities.CapturedImageActivity" />
+        <activity android:name=".Activities.HomeScreenActivity" />
     </application>
+
+    <uses-feature android:name="android.hardware.camera.any" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

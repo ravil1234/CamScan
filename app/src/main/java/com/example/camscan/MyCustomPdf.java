@@ -21,12 +21,22 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.example.camscan.Objects.PageSize;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfFormXObject;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfPage;
+import com.itextpdf.text.pdf.PdfPageEvent;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.ByteArrayOutputStream;
@@ -34,8 +44,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+
+import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class MyCustomPdf {
 
@@ -47,8 +60,10 @@ public class MyCustomPdf {
     private PageSize PAGE_LEGAL=new PageSize(8.4f,14f);     //3
     private PageSize PAGE_TABLOID=new PageSize(11f,17f);    //4
     private int ORIENTATION=0;          //0->Portrait       1->LANDSCAPE
-    private Boolean isMarginAdded=false;
+    //private Boolean isMarginAdded=false;
+    private Boolean isBorderAdded=false;
     private int PageSize=1;
+    private String stampUri;
 
 
     private Context context;
@@ -66,8 +81,9 @@ public class MyCustomPdf {
         SharedPreferences pref=context.getSharedPreferences(UtilityClass.PDF_SETTING,Context.MODE_PRIVATE);
         PageSize=pref.getInt("PDF_PAGE_SIZE",1);
         ORIENTATION=pref.getInt("PDF_PAGE_ORIENTATION",0);
-        isMarginAdded=pref.getBoolean("PDF_PAGE_MARGIN",false);
+        isBorderAdded=pref.getBoolean("PDF_PAGE_BORDER",false);
         PASSWORD=pref.getString("PDF_PAGE_PASSWORD","admin");
+        stampUri=pref.getString("PDF_STAMP_URI","android.resource://"+context.getPackageName()+"/"+R.drawable.stamp);
     }
   /*
     public Boolean savePdf(String name){
@@ -133,7 +149,15 @@ public class MyCustomPdf {
                         ,PdfWriter.ALLOW_PRINTING|PdfWriter.ALLOW_COPY|PdfWriter.ALLOW_MODIFY_CONTENTS,
                         PdfWriter.ENCRYPTION_AES_128);
             }
+
+            pdw.setPageEvent(new MyEvent());
             doc.open();
+            //Bitmap stamp=BitmapFactory.decodeStream(context.getContentResolver().openInputStream(Uri.parse(stampUri)));
+            //adding stamp
+            //PdfStamper stamper=new PdfStamper(pdw,context.getContentResolver().openOutputStream(Uri.parse(stampUri)));
+
+
+
 
             for(Bitmap i :images){
                // imgV.setImageBitmap(i);
@@ -145,15 +169,21 @@ public class MyCustomPdf {
                 Image image=Image.getInstance(bos.toByteArray());
                 image.setAlignment(Image.ALIGN_CENTER);
                 image.setAbsolutePosition(ret.x,ret.y);
-                doc.add(image);
+
                 if(ORIENTATION==1){
                     pdw.addPageDictEntry(PdfName.ROTATE, PdfPage.LANDSCAPE);
                 }
-                if(isMarginAdded){
-                    image.setIndentationLeft(16);
+                if(isBorderAdded){
+                    image.setBorder(Rectangle.BOX);
+                    image.setBorderColor(BaseColor.BLACK);
+                    image.setBorderWidth(2f);
                 }
 
+
+
+                doc.add(image);
                 doc.newPage();
+
             }
             doc.close();
 
@@ -172,6 +202,48 @@ public class MyCustomPdf {
             return null;
         }
         return Uri.fromFile(f);
+    }
+
+    private class MyEvent extends PdfPageEventHelper{
+        Image stamp;
+
+
+        @Override
+        public void onOpenDocument(PdfWriter writer, Document document) {
+
+            ByteArrayOutputStream bos=new ByteArrayOutputStream();
+            try {
+                Bitmap st=BitmapFactory.decodeStream(context.getContentResolver().openInputStream(Uri.parse(stampUri)));
+                //
+                if(st.getWidth()>200){
+                    st=UtilityClass.resizeImage(st,200,50);
+                }
+                st.compress(Bitmap.CompressFormat.JPEG,100,bos);
+                stamp=Image.getInstance(bos.toByteArray());
+                Rectangle rec=getPageSize();
+                stamp.setAbsolutePosition(rec.getWidth()-st.getWidth()-50,10);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (BadElementException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onEndPage(PdfWriter writer, Document document) {
+            if(stamp!=null) {
+                try {
+                    writer.getDirectContent().addImage(stamp);
+                    Log.e("HERE", "onEndPage: "+"HERE" );
+                } catch (DocumentException e) {
+                    e.printStackTrace();
+                    Log.e("HERE", "onEndPage: "+"HERE2" );
+                }
+            }
+        }
     }
     private com.itextpdf.text.Rectangle getPageSize(){
         switch (PageSize){

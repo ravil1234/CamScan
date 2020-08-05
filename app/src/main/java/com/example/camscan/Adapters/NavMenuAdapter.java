@@ -49,25 +49,12 @@ public class NavMenuAdapter extends BaseAdapter {
         }
         NavMenuObject current=title.get(i);
 
-        if(!current.isVisible()){
-            view.setVisibility(View.GONE);
-            return view;
-        }else{
-            view.setVisibility(View.VISIBLE);
-        }
         ImageView icon=view.findViewById(R.id.item_nav_icon);
-        ImageView expandable=view.findViewById(R.id.item_nav_expand);
+       // ImageView expandable=view.findViewById(R.id.item_nav_expand);
         TextView titleText=view.findViewById(R.id.item_nav_title);
         titleText.setText(current.getTitle());
         if(current.getIconId()!=0) {
             icon.setImageDrawable(context.getResources().getDrawable(current.getIconId(), null));
-        }
-
-
-        if(current.isExpandable()){
-            expandable.setVisibility(View.VISIBLE);
-        }else{
-            expandable.setVisibility(View.INVISIBLE);
         }
 
 

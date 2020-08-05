@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_box_retake"
+        android:icon="@drawable/ic_camera_alt_black_24dp"
+        android:title="Re-Take"
+        />
+    <item
+        android:id="@+id/action_box_clockwise"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="clockwise"
+        />
+
+    <item
+        android:id="@+id/action_box_Full_Screen"
+        android:icon="@drawable/ic_fullscreen_black_24dp"
+        android:title="Re-Take"
+        />
+
+    <item
+        android:id="@+id/action_box_anti_clockwise"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="Anti clockwise"
+        />
+
+    <item
+        android:id="@+id/action_box_next"
+        android:icon="@android:drawable/arrow_down_float"
+        android:title="Next"
+        />
+
+</menu>

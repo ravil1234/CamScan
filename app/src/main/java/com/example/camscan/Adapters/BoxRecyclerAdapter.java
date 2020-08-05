@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,11 +25,16 @@ import com.example.camscan.UtilityClass;
 import java.util.ArrayList;
 import java.util.List;
 
+import static androidx.constraintlayout.widget.Constraints.TAG;
+
 public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.MyViewHolder> {
 
     Context context;
     ArrayList<MyPicture> images;
     ViewPager2 myvp;
+    int screenWidth=0;
+    int screenHeight=0;
+    int dotWidth=0;
 
     public BoxRecyclerAdapter(Context context,ArrayList<MyPicture> list){
         this.context=context;
@@ -38,10 +44,12 @@ public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.
     public class MyViewHolder extends RecyclerView.ViewHolder{
         ImageView imgView;
         MyBoxLayout boxLayout;
+        View root;
         public MyViewHolder(View view){
             super(view);
             imgView=view.findViewById(R.id.box_item_img_view);
             boxLayout=view.findViewById(R.id.box_item_bounding_box);
+            root=view;
         }
     }
 
@@ -57,6 +65,8 @@ public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.
         return new MyViewHolder(view);
     }
 
+
+
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MyPicture current=images.get(position);
@@ -65,30 +75,62 @@ public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.
         Uri imgUri=Uri.parse(current.getOriginalUri());
         mbl.setMyPicObject(current);
         mbl.setViewPager(myvp);
+        //mbl.setDimensions(screenHeight,screenWidth);
+
+//        mbl.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//
+//                if(current.getCoordinates().get(3).x==0 && current.getCoordinates().get(3).y==0){
+//                    //set the bounding box to default position
+//                   // mbl.initViewPos();
+//                    Log.e("HERE", "onBindViewHolder: "+"ZERO" );
+//                }else{
+//                    //set the boucngin box to the defined postion
+//                    ArrayList<Point> coos=current.getCoordinates();
+//                    Log.e("HERE", "onBindViewHolder: "+"UPDATED"+current.getCoordinates().get(3).x+" "+current.getCoordinates().get(3).y );
+//
+//                    mbl.updateViewPos(coos);
+//                }
+//                mbl.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//
+//            }
+//        });
+
 
         if(current.getImg()==null){
             Bitmap imageBitmap= BitmapFactory.decodeFile(imgUri.getPath());
             current.setImg(imageBitmap);
             mbl.setBitmap(imageBitmap);
             img.setImageBitmap(imageBitmap);
-
+//            mbl.updateViewPos(current.getCoordinates());
         }else{
             img.setImageBitmap(current.getImg());
             mbl.setBitmap(current.getImg());
+
         }
-        if(current.getCoordinates().get(3).x==0 &&current.getCoordinates().get(3).y==0){
+
+       // Log.e(TAG, "onBindViewHolder: "+dotWidth );
+        if(current.getCoordinates().get(3).x==0 && current.getCoordinates().get(3).y==0){
             //set the bounding box to default position
-            mbl.initViewPos();
-            Log.e("HERE", "onBindViewHolder: "+"JEHRE" );
+           // mbl.initViewPos();
+            Log.e("HERE", "onBindViewHolder: "+"ZERO" );
         }else{
             //set the boucngin box to the defined postion
             ArrayList<Point> coos=current.getCoordinates();
-            mbl.updateViewPos(coos);
+//            Log.e("HERE", "onBindViewHolder: "+"UPDATED"+current.getCoordinates().get(3).x+" "+current.getCoordinates().get(3).y );
+
+            mbl.updateViewPos(coos,dotWidth);
         }
 
     }
+    public void setDot(int d){
+        dotWidth=d;
+    }
     public void setViewPager(ViewPager2 mvp){
         myvp=mvp;
+
+
     }
 
 }

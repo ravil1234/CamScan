@@ -8,7 +8,10 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
 
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
@@ -83,6 +86,20 @@ public class UtilityClass {
         }
 
         return Uri.fromFile(f);
+    }
+
+    public static Bitmap resizeImage(@NonNull Bitmap img, int w, int h){
+        int originalW=img.getWidth();
+        int originalHeight=img.getHeight();
+        int newH,newW;
+        newW=w;
+        newH=(newW*originalHeight)/originalW;
+        if(newH>h){
+            newH=h;
+            newW=(newH*originalW)/originalHeight;
+        }
+        return Bitmap.createScaledBitmap(img,newW,newH,true);
+
     }
 
     public static Bitmap populateImage(Context context, Uri imgUri,boolean isThumb,int viewWidth,int viewHeight) {
@@ -256,6 +273,30 @@ public class UtilityClass {
             return null;
         }
     }
+    public static MyPicture getPicFromString(String picString){
+        JSONObject obj = null;
+        try {
+            obj = new JSONObject(picString);
+
+            ArrayList<Point> coordinates = new ArrayList<>();
+            coordinates.add(new Point(obj.getInt("x1"), obj.getInt("y1")));
+            coordinates.add(new Point(obj.getInt("x2"), obj.getInt("y2")));
+            coordinates.add(new Point(obj.getInt("x3"), obj.getInt("y3")));
+            coordinates.add(new Point(obj.getInt("x4"), obj.getInt("y4")));
+            String editedUri=null;
+            if(obj.has("editedUri")){
+                editedUri=obj.getString("editedUri");
+            }
+            MyPicture pic=new MyPicture(obj.getInt("did"), obj.getString("originalUri"), editedUri,
+                    obj.getString("editedName"), obj.getInt("position"), coordinates);
+            pic.setPid(obj.getInt("pid"));
+            return pic;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static String getStringFromObject(Object object){
 
         return new Gson().toJson(object);
