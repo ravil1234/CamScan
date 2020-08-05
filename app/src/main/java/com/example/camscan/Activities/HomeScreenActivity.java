@@ -3,14 +3,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.example.camscan.AdapterClass.GridViewImages;
 import com.example.camscan.AdapterClass.ListViewImages;
+import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.ObjectClass.GridViewImagesList;
+import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.R;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 public class HomeScreenActivity extends AppCompatActivity {
 
@@ -27,15 +34,28 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
     private void set_image_list()
     {
+       List<MyDocument> myDocuments= MyDatabase.getInstance(this).myDocumentDao().getAllDocs();
+       for(MyDocument myDocument:myDocuments)
+       {
 
-        for (int i=1;i<=15;i++)
-        {
-            gridViewImagesListList.add(new GridViewImagesList("",i+"- 07-2020"));
-        }
+            int did=myDocument.getDid();
+            String name=myDocument.getdName();
+            long date=myDocument.getTimeCreated();
+            int pcount=myDocument.getpCount();
+            String fp_uri=myDocument.getfP_URI();
+           long date_edited=myDocument.getTimeEdited();
+           gridViewImagesListList.add(new GridViewImagesList(did,fp_uri,dateformatter(date),pcount,dateformatter(date_edited)));
+       }
         GridLayoutManager mGridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 3);
         recyclerViewlayout.setLayoutManager(mGridLayoutManager);
         GridViewImages myAdapter = new  GridViewImages(HomeScreenActivity.this, gridViewImagesListList);
         recyclerViewlayout.setAdapter(myAdapter);
+    }
+    public  String dateformatter(long timestamp)
+    {
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        return  formatter.format(new Date(timestamp));
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -44,6 +44,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +64,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-public class MainActivity extends AppCompatActivity {
+public class SingleCameraActivity extends AppCompatActivity {
 
     private Executor executor = Executors.newSingleThreadExecutor();
     private int REQUEST_CODE_PERMISSIONS = 1001;
@@ -76,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
     MotionEvent motionEvent;
     CardView flashmode_btn;
     ImageView gallery,single_mode_img,batch_mode_img,last_img;
-   boolean single_mode;
-   ArrayList<MyPicture > myPictureList;
+    ArrayList<MyPicture > myPictureList;
+    String uri="";
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -93,39 +94,17 @@ public class MainActivity extends AppCompatActivity {
         tick_img=findViewById(R.id.tick_img);
         last_img=findViewById(R.id.last_img);
         flashMode = ImageCapture.FLASH_MODE_AUTO;
-        myPictureList=new ArrayList<>();
-        single_mode=true;
+        tick_img.setVisibility(View.GONE);
+        batch_mode_img.setVisibility(View.GONE);
+        single_mode_img.setVisibility(View.GONE);
+        gallery.setVisibility(View.GONE);
         last_img.setVisibility(View.INVISIBLE);
+        uri=getIntent().getStringExtra("PICTURE_URI");
         flashmode_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-               //Dialog box;
-            }
-        });
-        gallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
-            }
-        });
-        tick_img.setVisibility(View.INVISIBLE);
-        batch_mode_img.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                single_mode=false;
-                Toast.makeText(MainActivity.this,"Batch_Mode On",Toast.LENGTH_LONG).show();
-            }
-        });
-        single_mode_img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-                single_mode=true;
-                Toast.makeText(MainActivity.this,"Single_Mode On",Toast.LENGTH_LONG).show();
+                //Dialog box;
             }
         });
         if (allPermissionsGranted()) {
@@ -187,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageAnalysis, imageCapture);
         captureImage.setOnClickListener(v -> {
-            File my_file=saveimagefile();
+            File my_file=new File(uri);
             ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(my_file).build();
             imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
                 @Override
@@ -197,8 +176,8 @@ public class MainActivity extends AppCompatActivity {
                         public void run()
                         {
                             // Todo savelist
-                           call_save_list(my_file.getPath());
-                            Toast.makeText(MainActivity.this, "Image Saved successfully", Toast.LENGTH_SHORT).show();
+                            call_save_list(my_file.getPath());
+                            Toast.makeText(SingleCameraActivity.this, "Image Saved successfully", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -220,67 +199,10 @@ public class MainActivity extends AppCompatActivity {
         myPictureList.add(new MyPicture(myPictureList.size()+1,uri,"","",
                 myPictureList.size()+1,pointArrayList));
         String mypic= UtilityClass.getStringFromObject(myPictureList);
-        MyDocument document=new MyDocument("NewFolder"+System.currentTimeMillis(),
-                System.currentTimeMillis(),(long)0,myPictureList.size(),"");
-        String mydoc=UtilityClass.getStringFromObject(document);
-        if(single_mode)
-        {
-            Intent intent = new Intent(MainActivity.this, CapturedImageActivity.class);
-             intent.putExtra("MyPicture",mypic);
-             intent.putExtra("MyDocument",mydoc);
-              startActivity(intent);
-        }
-        if(myPictureList.size()>0)
-            tick_img.setVisibility(View.VISIBLE);
-         gallery.setVisibility(View.GONE);
-         last_img.setVisibility(View.VISIBLE);
-         Picasso.with(MainActivity.this).load(uri).into(last_img);
-         tick_img.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Intent i=new Intent(MainActivity.this,CapturedImageActivity.class);
-                i.putExtra("MyPicture",mypic);
-                i.putExtra("MyDocument",mydoc);
-                startActivity(i);
-            }
-        });
-    }
-  private File  saveimagefile()
-  {
-      File dir;
-      File f=null;
-      if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q){
-              String path= Environment.getExternalStorageDirectory().getPath()+"/CamScan/.Original/"+System.currentTimeMillis()+".jpg";
-              dir=new File(Environment.getExternalStorageDirectory().getPath()+"/CamScan/.Original");
-              f=new File(path);
-      }
-      else{
-              f=new File(MainActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan/.Original/"+System.currentTimeMillis()+".jpg");
-              dir=new File(MainActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan/.Original");
-          }
-      if(!dir.exists() && !dir.isDirectory()){
-          dir.mkdirs();
-      }
-return  f;
-  }
-    private Bitmap getBitmap(ImageProxy image) {
-        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-        buffer.rewind();
-        byte[] bytes = new byte[buffer.capacity()];
-        buffer.get(bytes);
-        byte[] clonedBytes = bytes.clone();
-        return BitmapFactory.decodeByteArray(clonedBytes, 0, clonedBytes.length);
-    }
-    public String getBatchDirectoryName() {
-
-        String app_folder_path = "";
-        app_folder_path = Environment.getExternalStorageDirectory().toString() + "/images";
-        File dir = new File(app_folder_path);
-        if (!dir.exists() && !dir.mkdirs()) {
-        }
-
-        return app_folder_path;
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("PICTURE_URI",uri);
+        setResult(Activity.RESULT_OK,returnIntent);
+        finish();
     }
     private boolean allPermissionsGranted() {
 
@@ -299,31 +221,6 @@ return  f;
                 startCamera();
             } else {
                 Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1)
-        {
-            if (resultCode == Activity.RESULT_OK)
-            {
-                if (data.getClipData() != null)
-                {
-                    int count = data.getClipData().getItemCount(); //evaluate the count before the for loop --- otherwise, the count is evaluated every loop.
-                    for (int i = 0; i < count; i++) {
-                        Uri imageUri = data.getClipData().getItemAt(i).getUri();
-                        Log.d("image_uri_all",imageUri+" ->");
-                        //do something with the image (save it to some directory or whatever you need to do with it here)
-                    }
-                }
-                else if (data.getData() != null) {
-                    String imagePath = data.getData().getPath();
-                    //do something with the image (save it to some directory or whatever you need to do with it here)
-                }
-                Intent i=new Intent(MainActivity.this,CapturedImageActivity.class);
-                 startActivity(i);
             }
         }
     }

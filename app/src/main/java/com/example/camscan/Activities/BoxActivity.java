@@ -240,7 +240,6 @@ public class BoxActivity extends AppCompatActivity {
         }
         String myPics=new Gson().toJson(list);
         String myDoc=new Gson().toJson(currDoc);
-
         if(list.size()==1){
             //single image
             Intent intent=new Intent(BoxActivity.this,FilterActivity.class);
@@ -277,8 +276,6 @@ public class BoxActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
 
         }
-
-
     }
     public void rotateBitmapAntiClockWise(View view){
         int currIndex=vp2.getCurrentItem();

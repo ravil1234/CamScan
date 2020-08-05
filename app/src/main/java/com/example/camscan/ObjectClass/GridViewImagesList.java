@@ -1,14 +1,15 @@
 package com.example.camscan.ObjectClass;
-
-import com.example.camscan.AdapterClass.GridViewImages;
-
 public class GridViewImagesList
 {
-    private  String image_url,image_date;
-    public GridViewImagesList(String image_url,String image_date)
+    private  String image_url,image_date,image_edited_date;
+    private  int did,pcount;
+    public GridViewImagesList(int did,String image_url,String image_date,int pcount,String image_edited_date)
     {
+        this.did=did;
         this.image_url=image_url;
         this.image_date=image_date;
+        this.pcount=pcount;
+        this.image_edited_date=image_edited_date;
     }
     public  String getImage_url()
     {
@@ -17,5 +18,17 @@ public class GridViewImagesList
     public  String getImage_date()
     {
         return  image_date;
+    }
+    public  String getImage_edited_date()
+    {
+        return  image_edited_date;
+    }
+    public  int getDid()
+    {
+        return  did;
+    }
+    public  int getPcount()
+    {
+        return  pcount;
     }
 }
