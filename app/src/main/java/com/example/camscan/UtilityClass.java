@@ -298,6 +298,7 @@ public class UtilityClass {
     }
 
     public static String getStringFromObject(Object object){
+
         return new Gson().toJson(object);
     }
 

@@ -1,6 +1,8 @@
 package com.example.camscan.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -17,6 +19,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -27,8 +31,13 @@ import com.example.camscan.MyLayouts.MyBoxLayout;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
+import com.example.camscan.RenderScriptJava.BlackAndWhite;
+import com.example.camscan.RenderScriptJava.Filter1;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
+import com.example.camscan.RenderScriptJava.GrayScale;
+import com.example.camscan.RenderScriptJava.Inversion;
 import com.example.camscan.UtilityClass;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -59,6 +68,8 @@ public class BoxActivity extends AppCompatActivity {
 
     MyDocument currDoc;
 
+    BottomNavigationView bnv;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,9 +87,16 @@ public class BoxActivity extends AppCompatActivity {
 
         populateList();
 
+        bnv.getMenu().setGroupCheckable(0,false,true);
+        bnv.setOnNavigationItemSelectedListener(new MyNavListener());
 
     }
 
+    private void initializeViews() {
+        vp2=findViewById(R.id.box_viewPager);
+        nextBtn=findViewById(R.id.box_next_btn);
+        bnv=findViewById(R.id.box_navigation);
+    }
     private void populateList() {
         //fetch from Json
         String myPicString=getIntent().getStringExtra("MyPicture");
@@ -160,10 +178,7 @@ public class BoxActivity extends AppCompatActivity {
 
     }
 
-    private void initializeViews() {
-        vp2=findViewById(R.id.box_viewPager);
-        nextBtn=findViewById(R.id.box_next_btn);
-    }
+
 
     public Bitmap cornerPin(Bitmap B,ArrayList<Point> dis){
       //  UtilityClass.displayPoints(dis);
@@ -384,6 +399,39 @@ public class BoxActivity extends AppCompatActivity {
             FlatCorrection fc=new FlatCorrection(BoxActivity.this);
             Bitmap blur=fc.flatCorr(bitmaps[0].copy(bitmaps[0].getConfig(),false));
             return blur;
+        }
+    }
+
+
+    private class MyNavListener implements BottomNavigationView.OnNavigationItemSelectedListener{
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()){
+                case R.id.action_box_retake:{
+                    //call for retake in new activity with return intent
+                    retakePic();
+                    break;
+                }
+                case R.id.action_box_clockwise:{
+                    rotateBitmapClockWise(null);
+                    break;
+                }
+                case R.id.action_box_Full_Screen:{
+                    resetCurrPoint(null);
+                    break;
+                }
+                case R.id.action_box_anti_clockwise:{
+                    rotateBitmapAntiClockWise(null);
+                    break;
+                }
+                case R.id.action_box_next:{
+                    onNextPressed(null);
+                    break;
+                }
+            }
+
+            return true;
         }
     }
 }

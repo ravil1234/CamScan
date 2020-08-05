@@ -5,8 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+
 import com.example.camscan.Adapters.InDocRecyclerAdapter;
 import com.example.camscan.Database.MyDatabase;
+import com.example.camscan.MyLayouts.MyCustomProgressBar;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
@@ -25,14 +28,14 @@ public class MainActivity extends AppCompatActivity
        // ByteArrayOutputStream bstream=new ByteArrayOutputStream();
        // image.compress(Bitmap.CompressFormat.PNG,100,bstream);
         //byte[] byteArray=bstream.toByteArray();
-
-        Intent intent=new Intent(MainActivity.this, InDocRecyclerActivity.class);
+//
+        Intent intent=new Intent(MainActivity.this, BoxActivity.class);
         //intent.putExtra("image",byteArray);
         ArrayList<MyPicture> list=new ArrayList<>();
         list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406622666226.jpg","file:///storage/emulated/0/CamScan/.Edited/03781104.jpg","01",1,null));
         list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406650066500.jpg","file:///storage/emulated/0/CamScan/.Edited/02780215.jpg","02",2,null));
         list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595087242244242244.jpg","file:///storage/emulated/0/CamScan/.Edited/01779649.jpg","03",3,null));
-        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595133729167729167.jpg","file:///storage/emulated/0/CamScan/.Edited/Something765607.jpg","04",4,null));
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1596450791454791454.jpg","file:///storage/emulated/0/CamScan/.Edited/2673249.jpg","04",4,null));
         String myPics=UtilityClass.getStringFromObject(list);
         String myDoc= UtilityClass.getStringFromObject(new MyDocument("Document",System.currentTimeMillis(),0,4,null));
 //        Log.e("THIS", "onCreate: "+myDoc );
@@ -43,5 +46,11 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra("from","HomeActivity");
         startActivity(intent);
 
+
+    }
+
+    public void progressStart(View view){
+        MyCustomProgressBar pbar=new MyCustomProgressBar(this);
+        pbar.start();
     }
 }

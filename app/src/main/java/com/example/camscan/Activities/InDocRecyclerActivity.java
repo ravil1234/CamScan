@@ -44,6 +44,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -816,6 +817,8 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     }
 
     private void updatePositionInDatabase(MyPicture currPic) {
+        MyDatabase db=MyDatabase.getInstance(InDocRecyclerActivity.this);
+        db.myPicDao().updatePic(currPic);
     }
 
     private void saveDocInDatabase(){
@@ -830,10 +833,10 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         db.myPicDao().InsertMultiplePics(l);
         }
 
-    private void deleteFromDatabase(int pid) {
+    private void deleteFromDatabase(MyPicture pic) {
         MyDatabase db=MyDatabase.getInstance(this);
-        MyPicture toDel=db.myPicDao().getPicWithPid(pid);
-        db.myPicDao().deletePic(toDel);
+
+        db.myPicDao().deletePic(pic);
     }
 
     private void updateDocName(){
@@ -946,7 +949,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     }
     //IMPORT FROM GALLERY END
-    //-----------------------------------------------------------------------------------------
+
 
     //RENAMING
     private void setDocName(String dName){
@@ -1002,8 +1005,6 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     }
     //RENAMING END
-
-//-----------------------------------------------------------------------------------------
 
     //SHARE
     public void share(){
@@ -1072,7 +1073,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
                 intent.setType("image/jpeg"); /* This example is sharing jpeg images. */
 
                 intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-                startActivity(intent);
+                startActivity(Intent.createChooser(intent,"Send Via"));
             }
 
         }
@@ -1320,27 +1321,58 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         }
     }
     public void onDeleteClicked(View view){
-        int currItem=vp2.getCurrentItem();
-        MyPicture currPic=list.get(currItem);
-        String uriEdited=currPic.getEditedUri();
-        String uriOriginal=currPic.getOriginalUri();
-        list.remove(currItem);
-        tNails.clear();
-        populateMiniAdapter();
-        adapter.notifyDataSetChanged();
-        resetPositions(currPic.getPosition());
-        deleteFromDatabase(currPic.getPid());
-        UtilityClass.deleteFromStorage(Uri.parse(uriEdited));
-        UtilityClass.deleteFromStorage(Uri.parse(uriOriginal));
+        if(list.size()>1) {
+            int currItem = vp2.getCurrentItem();
+            MyPicture currPic = list.get(currItem);
+            String uriEdited = currPic.getEditedUri();
+            String uriOriginal = currPic.getOriginalUri();
+            list.remove(currItem);
+            tNails.clear();
+            populateMiniAdapter();
+            adapter.notifyDataSetChanged();
+            resetPositions(currPic.getPosition());
+            deleteFromDatabase(currPic);
+            UtilityClass.deleteFromStorage(Uri.parse(uriEdited));
+            UtilityClass.deleteFromStorage(Uri.parse(uriOriginal));
+        }else{
+            AlertDialog.Builder builder=new AlertDialog.Builder(InDocRecyclerActivity.this);
+            builder.setTitle("Delete");
+            builder.setMessage("Deleting this image will delete this document");
+            builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    deleteFromDatabase(list.get(0));
+                    UtilityClass.deleteFromStorage(Uri.parse(list.get(0).getEditedUri()));
+                    UtilityClass.deleteFromStorage(Uri.parse(list.get(0).getOriginalUri()));
+                    list.clear();
+                    MyDatabase db=MyDatabase.getInstance(InDocRecyclerActivity.this);
+                    db.myDocumentDao().deleteDoc(currentDoc);
+                    finish();
+                }
+            }).setNegativeButton("Cancel",null);
 
+            builder.create().show();
+        }
     }
 
     private void resetPositions(int deletedPos) {
-
+        for(MyPicture p:list){
+            p.setPosition(list.indexOf(p)+1);
+            updatePositionInDatabase(p);
+        }
     }
 
     public void onShareClicked(View view){
+        int index=vp2.getCurrentItem();
+        MyPicture p =list.get(index);
+        Intent intent=new Intent(Intent.ACTION_SEND);
+        intent.setType("image/*");
+        //Log.e("ATG", "onShareClicked: "+p.getEditedUri() );
+        intent.putExtra(Intent.EXTRA_STREAM,Uri.parse(p.getEditedUri()));
+        startActivity(Intent.createChooser(intent,"Share"));
 
+        closePageOption();
+        isPageOpen=false;
     }
     public void onRotateClicked(View view){
         int currPicIndex=vp2.getCurrentItem();
@@ -1365,9 +1397,10 @@ public class InDocRecyclerActivity extends AppCompatActivity {
             UtilityClass.saveImage(this,copy,Uri.parse(currPic.getEditedUri()).getLastPathSegment(),false);
             int width=vp2.getWidth();
             int height=vp2.getHeight();
-            Bitmap resize=UtilityClass.populateImage(this,Uri.parse(currPic.getEditedUri()),false,width,height);
-            currPic.setImg(resize);
+           // Bitmap resize=UtilityClass.populateImage(this,Uri.parse(currPic.getEditedUri()),false,width,height);
+            //currPic.setImg(resize);
 //            adapter.viewWidth=0;
+            currPic.setImg(copy);
             adapter.notifyDataSetChanged();
 
 
@@ -1379,15 +1412,118 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
     }
     public void onMoveClicked(View view){
+        AlertDialog.Builder builder=new AlertDialog.Builder(InDocRecyclerActivity.this);
+        View view1=LayoutInflater.from(InDocRecyclerActivity.this).inflate(R.layout.fragment_move_to,null);
+        builder.setView(view1);
+        builder.setTitle("Move To");
 
+        TextView prev,curr,next;
+        SeekBar sBar;
+        prev=view1.findViewById(R.id.move_to_prev);
+        curr=view1.findViewById(R.id.move_to_curr);
+        next=view1.findViewById(R.id.move_to_next);
+        sBar=view1.findViewById(R.id.move_to_seekbar);
+
+        //initialize
+        int index=vp2.getCurrentItem();
+        Point currPoint=new Point();
+        curr.setText(String.valueOf(index+1));
+        ArrayList<Point> intervals=new ArrayList<>();
+        for(int i=0;i<=list.size();i++){
+            Point p=new Point(i,i+1);
+            if(p.y==index+1){
+                p.y+=1;
+                currPoint=p;
+
+            }
+            if(p.x!=index+1){
+                intervals.add(p);
+//                Log.e("THA", "onMoveClicked: "+p.x+" "+p.y+" "+list.size() );
+            }
+        }
+
+        if(currPoint.x==0){
+            prev.setText("s");
+        }else{
+            prev.setText(String.valueOf(currPoint.x));
+        }
+        if(currPoint.y==intervals.size()+1){
+            next.setText("e");
+        }else {
+            next.setText(String.valueOf(currPoint.y));
+        }
+
+        sBar.setMax(intervals.size()-1);
+        sBar.setProgress(index);
+        sBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                Point p=intervals.get(i);
+                if(p.x==0){
+                    prev.setText("s");
+                }else{
+                    prev.setText(String.valueOf(p.x));
+                }
+                if(p.y==intervals.size()+1){
+                    next.setText("e");
+                }else {
+                    next.setText(String.valueOf(p.y));
+                }
+
+                }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        //initialize END
+
+
+        builder.setPositiveButton("Move", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Point p=intervals.get(sBar.getProgress());
+                MyPicture pic=list.get(index);
+                list.add(p.x,pic);
+                if(index>p.x){
+                    list.remove(index+1);
+                }else{
+                    list.remove(index);
+                }
+                adapter.notifyDataSetChanged();
+                closePageOption();
+                isPageOpen=false;
+                vp2.setCurrentItem(p.x,true);
+                tNails.clear();
+                populateMiniAdapter();
+
+                for(MyPicture l:list){
+                    updatePositionInDatabase(l);
+
+                }
+
+            }
+        }).setNegativeButton("Cancel",null);
+//        AlertDialog d=builder.create();
+
+
+        builder.create().show();
     }
     //PAGE SETTINGS END
 
     //EXTRA
-
     private void addMorePages() {
         //goto camera activity
-
+        Intent intent=new Intent(InDocRecyclerActivity.this,CamActivity.class);
+        intent.putExtra(UtilityClass.getStringFromObject(currentDoc),"MyDocument");
+        startActivity(intent);
     }
     //EXTRA END
 }

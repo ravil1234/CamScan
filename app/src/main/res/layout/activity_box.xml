@@ -35,6 +35,16 @@
 
         />
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/box_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/colorPrimaryDark"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/box_menu"
+
+        />
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/box_rotateClock"
         android:layout_width="wrap_content"

@@ -1,5 +1,7 @@
 package com.example.camscan.Activities;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -7,17 +9,30 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.text.Layout;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.camscan.Adapters.Filter_Items_RecyclerAdapter;
 import com.example.camscan.Database.MyDatabase;
@@ -25,6 +40,7 @@ import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import com.example.camscan.UtilityClass;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
@@ -71,6 +87,8 @@ public class FilterActivity extends AppCompatActivity {
     int br=0;
     int co=0;
     int ex=0;
+
+    BottomNavigationView bnv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,6 +235,28 @@ public class FilterActivity extends AppCompatActivity {
                 applyBCE(br,co,ex);
             }
         });
+
+
+        bnv.getMenu().setGroupCheckable(0,false,true);
+        bnv.setOnNavigationItemSelectedListener(new MyNavListener());
+    }
+
+    private void initializeViews() {
+        image=findViewById(R.id.filter_img_view);
+        rView=findViewById(R.id.filter_recycler_view);
+        pbar=findViewById(R.id.filter_prog_bar);
+
+        sBar_bright=findViewById(R.id.filter_adjust_seek_bright);
+        sBar_contrast=findViewById(R.id.filter_adjust_seek_contrast);
+        sBar_exposure=findViewById(R.id.filter_adjust_seek_exposure);
+        propName=findViewById(R.id.filter_adjust_prop_name);
+        propVal=findViewById(R.id.filter_adjust_prop_val);
+        resetBtn=findViewById(R.id.filter_adjust_reset_cont);
+        adjustView=findViewById(R.id.filter_adjust);
+        fab=findViewById(R.id.filter_fab);
+
+        bnv=findViewById(R.id.filter_navigation);
+
     }
 
     private void getPicAndDocFromIntent() {
@@ -382,21 +422,7 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
-    private void initializeViews() {
-        image=findViewById(R.id.filter_img_view);
-        rView=findViewById(R.id.filter_recycler_view);
-        pbar=findViewById(R.id.filter_prog_bar);
 
-        sBar_bright=findViewById(R.id.filter_adjust_seek_bright);
-        sBar_contrast=findViewById(R.id.filter_adjust_seek_contrast);
-        sBar_exposure=findViewById(R.id.filter_adjust_seek_exposure);
-        propName=findViewById(R.id.filter_adjust_prop_name);
-        propVal=findViewById(R.id.filter_adjust_prop_val);
-        resetBtn=findViewById(R.id.filter_adjust_reset_cont);
-        adjustView=findViewById(R.id.filter_adjust);
-        fab=findViewById(R.id.filter_fab);
-
-    }
     private class MyOnclickListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
@@ -439,6 +465,189 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
+    private class MyNavListener implements BottomNavigationView.OnNavigationItemSelectedListener{
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()){
+                case R.id.action_filter_bounding_box:{
+                    //go back to prev activity
+                    String myPicJson=UtilityClass.getStringFromObject(list);
+                    String myDocJson= UtilityClass.getStringFromObject(currDoc);
+                    Intent backIntent=new Intent(FilterActivity.this,BoxActivity.class);
+                    backIntent.putExtra("MyPicture",myPicJson);
+                    backIntent.putExtra("MyDocument",myDocJson);
+                    startActivity(backIntent);
+                    finish();
+                    break;
+                }
+                case R.id.action_filter_rotate:{
+                    rotate(null);
+                    break;
+                }
+                case R.id.action_filter_effects:{
+                    AlertDialog.Builder builder=new AlertDialog.Builder(FilterActivity.this);
+                    View view= LayoutInflater.from(FilterActivity.this).inflate(R.layout.fragment_filter_effects,null);
+                    builder.setView(view);
+                    ImageView ef1,ef2,ef3,ef4,ef5,ef6,icon;
+                    ef1=view.findViewById(R.id.fragment_filter_effects_1);
+                    ef2=view.findViewById(R.id.fragment_filter_effects_2);
+                    ef3=view.findViewById(R.id.fragment_filter_effects_3);
+                    ef4=view.findViewById(R.id.fragment_filter_effects_4);
+                    ef5=view.findViewById(R.id.fragment_filter_effects_5);
+                    ef6=view.findViewById(R.id.fragment_filter_effects_6);
+                    icon=view.findViewById(R.id.fragment_filter_effects_icon);
+
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Bitmap original=Bitmap.createScaledBitmap(cropped,100,100,true);
+
+                            Filter1 f1=new Filter1(FilterActivity.this);
+                            Bitmap filtered=f1.filter(100,original.copy(original.getConfig(),false));
+                            f1.cleanUp();
+
+                            FlatCorrection flat=new FlatCorrection(FilterActivity.this);
+                            Bitmap flatBit=flat.flatCorr(original.copy(original.getConfig(),false));
+
+                            Bitmap gray=new GrayScale().toGrayscale(original.copy(original.getConfig(),false));
+
+                            Bitmap bnw=new BlackAndWhite(FilterActivity.this).toBnwRender(original.copy(original.getConfig(),false));
+
+                            Inversion inv=new Inversion(FilterActivity.this);
+                            Bitmap inverted=inv.setInversion(original.copy(original.getConfig(),false));
+                            inv.clear();
+
+                            final Bitmap original1=getRoundedCroppedBitmap(original);
+                            final Bitmap filtered1=getRoundedCroppedBitmap(filtered);
+                            final Bitmap flatBit1=getRoundedCroppedBitmap(flatBit);
+                            final Bitmap gray1=getRoundedCroppedBitmap(gray);
+                            final Bitmap bnw1=getRoundedCroppedBitmap(bnw);
+                            final Bitmap inverted1=getRoundedCroppedBitmap(inverted);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ef1.setImageBitmap(original1);
+                                    ef2.setImageBitmap(filtered1);
+                                    ef3.setImageBitmap(flatBit1);
+                                    ef4.setImageBitmap(gray1);
+                                    ef5.setImageBitmap(bnw1);
+                                    ef6.setImageBitmap(inverted1);
+                                }
+                            });
+
+                        }
+                    }).start();
+
+                    AlertDialog d=builder.create();
+
+                    icon.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //close this activity
+
+                            d.dismiss();
+                        }
+                    });
+
+                    ef1.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            image.setImageBitmap(cropped);
+                            selected=cropped;
+                            d.dismiss();
+                        }
+                    });
+                    ef2.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            applyExposure();
+                            d.dismiss();
+                        }
+                    });
+                    ef3.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            applyFlatCorrection();
+                            d.dismiss();
+                        }
+                    });
+                    ef4.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            applyGrayScale();
+                            d.dismiss();
+                        }
+                    });
+                    ef5.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            applyBnW();
+                            d.dismiss();
+                        }
+                    });
+                    ef6.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            applyInvert();
+                            d.dismiss();
+                        }
+                    });
+
+
+                    d.show();
+
+                    break;
+                }
+                case R.id.action_filter_modification:{
+                    if(!isFabOpen){
+                        br=co=ex=0;
+                        applyBCE(br,co,ex);
+                        sBar_exposure.setProgress(0);
+                        sBar_contrast.setProgress(0);
+                        sBar_bright.setProgress(50);
+                        rView.setVisibility(View.GONE);
+                        adjustView.setVisibility(View.VISIBLE);
+                        isFabOpen=true;
+                    }else{
+                        rView.setVisibility(View.VISIBLE);
+                        adjustView.setVisibility(View.GONE);
+                        isFabOpen=false;
+                    }
+                    break;
+                }
+                case R.id.action_filter_next:{
+                    onNextButtonClicked(null);
+                    break;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    private Bitmap getRoundedCroppedBitmap(Bitmap bitmap) {
+        int widthLight = bitmap.getWidth();
+        int heightLight = bitmap.getHeight();
+
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(output);
+        Paint paintColor = new Paint();
+        paintColor.setFlags(Paint.ANTI_ALIAS_FLAG);
+
+        RectF rectF = new RectF(new Rect(0, 0, widthLight, heightLight));
+
+        canvas.drawRoundRect(rectF, widthLight / 2 ,heightLight / 2,paintColor);
+
+        Paint paintImage = new Paint();
+        paintImage.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+        canvas.drawBitmap(bitmap, 0, 0, paintImage);
+
+        return output;
+    }
 
     public void rotate(View view){
         Matrix matrix=new Matrix();
