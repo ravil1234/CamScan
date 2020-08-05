@@ -66,11 +66,11 @@ public class FilterActivity extends AppCompatActivity {
     Bitmap cropped;
     Bitmap selected;
     ImageView image;
-    RecyclerView rView;
-    Filter_Items_RecyclerAdapter adapter;
-    ArrayList<String> names;
-    ArrayList<Integer> types;
-    ArrayList<Bitmap> tnails;
+ //   RecyclerView rView;
+   // Filter_Items_RecyclerAdapter adapter;
+//    ArrayList<String> names;
+//    ArrayList<Integer> types;
+//    ArrayList<Bitmap> tnails;
     ProgressBar pbar;
 
     SeekBar sBar_bright,sBar_contrast,sBar_exposure;
@@ -81,7 +81,7 @@ public class FilterActivity extends AppCompatActivity {
     MyDocument currDoc;
 
 
-    FloatingActionButton fab;
+   // FloatingActionButton fab;
     boolean isFabOpen=false;
 
     int br=0;
@@ -111,54 +111,35 @@ public class FilterActivity extends AppCompatActivity {
             applyFlatCorrection();
         }
 
-        names=new ArrayList<>();
-        types=new ArrayList<>();
-        tnails=new ArrayList<>();
-        names.add("Original");
-        names.add("Luminous");
-        names.add("Flat");
-        names.add("Grayscale");
-        names.add("B/W");
-        names.add("invert");
-        types.add(1);
-        types.add(2);
-        types.add(3);
-        types.add(4);
-        types.add(5);
-        types.add(6);
+//        names=new ArrayList<>();
+//        types=new ArrayList<>();
+//        tnails=new ArrayList<>();
+//        names.add("Original");
+//        names.add("Luminous");
+//        names.add("Flat");
+//        names.add("Grayscale");
+//        names.add("B/W");
+//        names.add("invert");
+//        types.add(1);
+//        types.add(2);
+//        types.add(3);
+//        types.add(4);
+//        types.add(5);
+//        types.add(6);
 
       //  addAllTnails();
 
         getPicAndDocFromIntent();
 
-        adapter=new Filter_Items_RecyclerAdapter(this,names,types,
-                Bitmap.createScaledBitmap(cropped,200,200,true),
-                new MyOnclickListener(),tnails);//cropped.copy(cropped.getConfig(),true));
-        rView.setHasFixedSize(true);
-        rView.setAdapter(adapter);
-        rView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false));
+//        adapter=new Filter_Items_RecyclerAdapter(this,names,types,
+//                Bitmap.createScaledBitmap(cropped,200,200,true),
+//                new MyOnclickListener(),tnails);//cropped.copy(cropped.getConfig(),true));
+//        rView.setHasFixedSize(true);
+//        rView.setAdapter(adapter);
+//        rView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false));
 
 
         //fab.
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!isFabOpen){
-                    br=co=ex=0;
-                    applyBCE(br,co,ex);
-                    sBar_exposure.setProgress(0);
-                    sBar_contrast.setProgress(0);
-                    sBar_bright.setProgress(50);
-                    rView.setVisibility(View.GONE);
-                    adjustView.setVisibility(View.VISIBLE);
-                    isFabOpen=true;
-                }else{
-                    rView.setVisibility(View.VISIBLE);
-                    adjustView.setVisibility(View.GONE);
-                    isFabOpen=false;
-                }
-            }
-        });
 
         //setting seekbars
 
@@ -243,7 +224,7 @@ public class FilterActivity extends AppCompatActivity {
 
     private void initializeViews() {
         image=findViewById(R.id.filter_img_view);
-        rView=findViewById(R.id.filter_recycler_view);
+       // rView=findViewById(R.id.filter_recycler_view);
         pbar=findViewById(R.id.filter_prog_bar);
 
         sBar_bright=findViewById(R.id.filter_adjust_seek_bright);
@@ -253,7 +234,7 @@ public class FilterActivity extends AppCompatActivity {
         propVal=findViewById(R.id.filter_adjust_prop_val);
         resetBtn=findViewById(R.id.filter_adjust_reset_cont);
         adjustView=findViewById(R.id.filter_adjust);
-        fab=findViewById(R.id.filter_fab);
+       // fab=findViewById(R.id.filter_fab);
 
         bnv=findViewById(R.id.filter_navigation);
 
@@ -268,35 +249,35 @@ public class FilterActivity extends AppCompatActivity {
         }
         currDoc=UtilityClass.getDocFromJson(myDoc);
     }
-
-    private void addAllTnails() {
-        tnails.add(Bitmap.createScaledBitmap(cropped,200,200,true));
-
-        Filter1 f1=new Filter1(this);
-        Bitmap t1=f1.filter(100,Bitmap.createScaledBitmap(cropped,200,200,true));
-        tnails.add(t1);
-        f1.cleanUp();
-
-
-        FlatCorrection fc=new FlatCorrection(this);
-        t1=fc.flatCorr(Bitmap.createScaledBitmap(cropped,200,200,true));
-        tnails.add(t1);
-        fc.clear();
-
-        GrayScale gs=new GrayScale();
-        t1=gs.toGrayscale(Bitmap.createScaledBitmap(cropped,200,200,true));
-        tnails.add(t1);
-
-        BlackAndWhite bnw=new BlackAndWhite(this);
-        t1=bnw.getBlackAndWhite(Bitmap.createScaledBitmap(cropped,200,200,true));
-        tnails.add(t1);
-        bnw.clear();
-
-        Inversion inv=new Inversion(this);
-        t1=inv.setInversion(Bitmap.createScaledBitmap(cropped,200,200,true));
-        tnails.add(t1);
-        inv.clear();
-    }
+//
+//    private void addAllTnails() {
+//        tnails.add(Bitmap.createScaledBitmap(cropped,200,200,true));
+//
+//        Filter1 f1=new Filter1(this);
+//        Bitmap t1=f1.filter(100,Bitmap.createScaledBitmap(cropped,200,200,true));
+//        tnails.add(t1);
+//        f1.cleanUp();
+//
+//
+//        FlatCorrection fc=new FlatCorrection(this);
+//        t1=fc.flatCorr(Bitmap.createScaledBitmap(cropped,200,200,true));
+//        tnails.add(t1);
+//        fc.clear();
+//
+//        GrayScale gs=new GrayScale();
+//        t1=gs.toGrayscale(Bitmap.createScaledBitmap(cropped,200,200,true));
+//        tnails.add(t1);
+//
+//        BlackAndWhite bnw=new BlackAndWhite(this);
+//        t1=bnw.getBlackAndWhite(Bitmap.createScaledBitmap(cropped,200,200,true));
+//        tnails.add(t1);
+//        bnw.clear();
+//
+//        Inversion inv=new Inversion(this);
+//        t1=inv.setInversion(Bitmap.createScaledBitmap(cropped,200,200,true));
+//        tnails.add(t1);
+//        inv.clear();
+//    }
 
 
     private void applyBCE(int b,int c,int e){
@@ -423,47 +404,47 @@ public class FilterActivity extends AppCompatActivity {
     }
 
 
-    private class MyOnclickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-
-
-            int pos=rView.getChildLayoutPosition(view);
-            switch(types.get(pos)){
-                case 1:{//original
-                    image.setImageBitmap(cropped);
-                    selected=cropped;
-                    break;
-                }
-                case 2:{//exposure
-                    applyExposure();
-                    break;
-                }
-                case 3:{//flat
-                    applyFlatCorrection();
-
-                    break;
-                }
-                case 4:{
-                    //grayscale
-                    applyGrayScale();
-                    break;
-                }
-                case 5:{
-                    //bnw
-                    applyBnW();
-                    break;
-                }
-                case 6:{
-                    //invert
-                    applyInvert();
-                    break;
-                }
-            }
-            adapter.selected=pos;
-            adapter.notifyDataSetChanged();
-        }
-    }
+//    private class MyOnclickListener implements View.OnClickListener {
+//        @Override
+//        public void onClick(View view) {
+//
+//
+//            int pos=rView.getChildLayoutPosition(view);
+//            switch(types.get(pos)){
+//                case 1:{//original
+//                    image.setImageBitmap(cropped);
+//                    selected=cropped;
+//                    break;
+//                }
+//                case 2:{//exposure
+//                    applyExposure();
+//                    break;
+//                }
+//                case 3:{//flat
+//                    applyFlatCorrection();
+//
+//                    break;
+//                }
+//                case 4:{
+//                    //grayscale
+//                    applyGrayScale();
+//                    break;
+//                }
+//                case 5:{
+//                    //bnw
+//                    applyBnW();
+//                    break;
+//                }
+//                case 6:{
+//                    //invert
+//                    applyInvert();
+//                    break;
+//                }
+//            }
+//            adapter.selected=pos;
+//            adapter.notifyDataSetChanged();
+//        }
+//    }
 
     private class MyNavListener implements BottomNavigationView.OnNavigationItemSelectedListener{
 
@@ -608,11 +589,11 @@ public class FilterActivity extends AppCompatActivity {
                         sBar_exposure.setProgress(0);
                         sBar_contrast.setProgress(0);
                         sBar_bright.setProgress(50);
-                        rView.setVisibility(View.GONE);
+                      //  rView.setVisibility(View.GONE);
                         adjustView.setVisibility(View.VISIBLE);
                         isFabOpen=true;
                     }else{
-                        rView.setVisibility(View.VISIBLE);
+                       // rView.setVisibility(View.VISIBLE);
                         adjustView.setVisibility(View.GONE);
                         isFabOpen=false;
                     }

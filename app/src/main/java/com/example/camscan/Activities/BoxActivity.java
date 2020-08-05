@@ -59,7 +59,7 @@ import java.util.concurrent.ExecutionException;
 public class BoxActivity extends AppCompatActivity {
 
     private static final String TAG = "BOXACTIVITY";
-    FloatingActionButton nextBtn;
+   // FloatingActionButton nextBtn;
 
     ViewPager2 vp2;
 
@@ -94,7 +94,7 @@ public class BoxActivity extends AppCompatActivity {
 
     private void initializeViews() {
         vp2=findViewById(R.id.box_viewPager);
-        nextBtn=findViewById(R.id.box_next_btn);
+       // nextBtn=findViewById(R.id.box_next_btn);
         bnv=findViewById(R.id.box_navigation);
     }
     private void populateList() {

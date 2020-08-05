@@ -1390,16 +1390,13 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         }else{
             Matrix m=new Matrix();
             m.preRotate(90);
+            m.preScale(1.5f,1.5f);
             Bitmap copy=Bitmap.createBitmap(currBitmap,0,0,currBitmap.getWidth(),currBitmap.getHeight(),m,true);
-
+            copy=Bitmap.createScaledBitmap(copy,currBitmap.getHeight(),currBitmap.getWidth(),true);
             currBitmap.recycle();
 
             UtilityClass.saveImage(this,copy,Uri.parse(currPic.getEditedUri()).getLastPathSegment(),false);
-            int width=vp2.getWidth();
-            int height=vp2.getHeight();
-           // Bitmap resize=UtilityClass.populateImage(this,Uri.parse(currPic.getEditedUri()),false,width,height);
-            //currPic.setImg(resize);
-//            adapter.viewWidth=0;
+      
             currPic.setImg(copy);
             adapter.notifyDataSetChanged();
 

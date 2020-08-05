@@ -8,24 +8,22 @@
     android:background="#000"
     >
 
-    <ImageView
-        android:id="@+id/filter_img_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerInside"
-        android:layout_marginStart="25sp"
-        android:layout_marginEnd="25sp"
-        android:layout_marginBottom="200dp"
-        android:layout_marginTop="50sp"
-        />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="25sp"
         android:layout_marginEnd="25sp"
-        android:layout_marginBottom="200dp"
+        android:layout_marginBottom="100dp"
         android:layout_marginTop="50sp"
         >
+        <ImageView
+            android:id="@+id/filter_img_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/back"
+            />
         <ProgressBar
             android:id="@+id/filter_prog_bar"
             android:layout_width="wrap_content"
@@ -33,32 +31,11 @@
             android:layout_gravity="center"
             />
 
+
     </FrameLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/filter_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:scrollbars="horizontal"
-        tools:listitem="@layout/item_filter_rview"
-        android:layout_marginBottom="50dp"
-        android:visibility="gone"
-        />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/filter_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_margin="16dp"
-        />
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:onClick="onNextButtonClicked"
-        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
