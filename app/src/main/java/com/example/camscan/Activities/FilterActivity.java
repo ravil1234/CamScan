@@ -249,6 +249,7 @@ public class FilterActivity extends AppCompatActivity {
         }
         currDoc=UtilityClass.getDocFromJson(myDoc);
     }
+
 //
 //    private void addAllTnails() {
 //        tnails.add(Bitmap.createScaledBitmap(cropped,200,200,true));
@@ -467,7 +468,7 @@ public class FilterActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.action_filter_effects:{
-                    AlertDialog.Builder builder=new AlertDialog.Builder(FilterActivity.this);
+                    AlertDialog.Builder builder=new AlertDialog.Builder(FilterActivity.this,R.style.CustomDialog);
                     View view= LayoutInflater.from(FilterActivity.this).inflate(R.layout.fragment_filter_effects,null);
                     builder.setView(view);
                     ImageView ef1,ef2,ef3,ef4,ef5,ef6,icon;

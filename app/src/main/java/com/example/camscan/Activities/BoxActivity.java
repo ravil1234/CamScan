@@ -32,6 +32,8 @@ import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import com.example.camscan.RenderScriptJava.BlackAndWhite;
+import com.example.camscan.RenderScriptJava.Brightness;
+import com.example.camscan.RenderScriptJava.Contrast;
 import com.example.camscan.RenderScriptJava.Filter1;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
 import com.example.camscan.RenderScriptJava.GrayScale;
@@ -90,11 +92,18 @@ public class BoxActivity extends AppCompatActivity {
         bnv.getMenu().setGroupCheckable(0,false,true);
         bnv.setOnNavigationItemSelectedListener(new MyNavListener());
 
+        if(autoCropSelected()){
+            onNextPressed(null);
+        }
+    }
+
+    private boolean autoCropSelected() {
+        //TODO check it in the settings
+        return false;
     }
 
     private void initializeViews() {
         vp2=findViewById(R.id.box_viewPager);
-       // nextBtn=findViewById(R.id.box_next_btn);
         bnv=findViewById(R.id.box_navigation);
     }
     private void populateList() {
@@ -102,7 +111,7 @@ public class BoxActivity extends AppCompatActivity {
         String myPicString=getIntent().getStringExtra("MyPicture");
         String myDocString=getIntent().getStringExtra("MyDocument");
 
-//        Log.e(TAG, "BOX ACTIVITY populateList: "+myPicString );
+
         ArrayList<MyPicture> listTmp=UtilityClass.getListOfPics(myPicString);
         if(listTmp!=null){
             list.addAll(listTmp);
@@ -243,6 +252,7 @@ public class BoxActivity extends AppCompatActivity {
 
     }
 
+    //FIlters That are to be applied
     private Bitmap applyFlatCorrection(Bitmap cropped) {
         System.gc();
 
@@ -256,6 +266,41 @@ public class BoxActivity extends AppCompatActivity {
         return null;
 
     }
+    private Bitmap applyBnW(Bitmap cropped) {
+        System.gc();
+        BlackAndWhite bw=new BlackAndWhite(this);
+        Bitmap bnw=bw.toBnwRender(cropped.copy(cropped.getConfig(),false));
+
+        bw.clear();
+        return bnw;
+    }
+
+    private Bitmap applyGrayScale(Bitmap cropped) {
+        System.gc();
+
+        Bitmap gray=new GrayScale().toGrayscale(cropped.copy(cropped.getConfig(),false));
+        return gray;
+    }
+
+    private Bitmap applyExposure(int exp,Bitmap cropped) {
+        System.gc();
+        Filter1 f1=new Filter1(this);
+        Bitmap filtered=f1.filter(exp,cropped.copy(cropped.getConfig(),false));
+
+        f1.cleanUp();
+        return filtered;
+    }
+
+    private Bitmap applyInvert(Bitmap cropped) {
+        System.gc();
+
+        Inversion inv=new Inversion(this);
+        Bitmap inverted=inv.setInversion(cropped.copy(cropped.getConfig(),false));
+        inv.clear();
+        return inverted;
+    }
+
+    //Filters end
 
     public void onNextPressed(View view){
         String[] save=null;
@@ -277,10 +322,40 @@ public class BoxActivity extends AppCompatActivity {
                 save=saveBitmap(transformed);
             }else{
                 //transforming each image into flatCorrection
-                Bitmap filtered=applyFlatCorrection(transformed);
+                int filter=getDefaultFilter();
+                Bitmap filtered=null;
+                switch (filter){
+                    case 0:{//original
+                        filtered=transformed;
+
+                        break;
+                    }
+                    case 1:{//luminious
+                        filtered=applyExposure(100,transformed);
+
+                        break;
+                    }
+                    case 2:{//flat correction
+                        filtered=applyFlatCorrection(transformed);
+                         break;
+                    }
+                    case 3:{//grayscale
+                        filtered=applyGrayScale(transformed);
+                        break;
+                    }
+                    case 4:{//bnw
+                        filtered=applyBnW(transformed);
+                        break;
+                    }
+                    case 5:{//inverted
+                        filtered=applyInvert(transformed);
+                        break;
+                    }
+                }
                 String[] names=p.getEditedName().split(".jpg");
                 Uri savedEdited= UtilityClass.saveImage(BoxActivity.this,filtered,names[0],false);
                 p.setEditedUri(savedEdited.toString());
+
             }
         }
 
@@ -315,6 +390,13 @@ public class BoxActivity extends AppCompatActivity {
         }
 
     }
+
+    private int getDefaultFilter() {
+        //see into setting and get the id of the filter starting with zero as original
+        //TODO see tfrom the settings
+        return 0;
+    }
+
     public void rotateBitmapClockWise(View view){
 
         int currIndex=vp2.getCurrentItem();

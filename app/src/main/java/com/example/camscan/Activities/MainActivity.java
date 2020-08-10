@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camerax);
         getSupportActionBar().hide();
+
+
         mPreviewView = findViewById(R.id.previewView);
         captureImage = findViewById(R.id.captureImg);
         flashmode_btn = findViewById(R.id.flash_mode);
@@ -148,23 +150,20 @@ public class MainActivity extends AppCompatActivity {
                 } catch (ExecutionException | InterruptedException e) {
                     // No errors need to be handled for this Future.
                     // This should never be reached.
+     //               Log.e("TAG", "run: "+"Exception" );
                 }
-            }
+    }
         }, ContextCompat.getMainExecutor(this));
     }
 
     void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
-
         Preview preview = new Preview.Builder()
                 .build();
-
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
-
         ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
                 .build();
-
         ImageCapture.Builder builder = new ImageCapture.Builder();
 
         //Vendor-Extensions (The CameraX extensions dependency in build.gradle)
@@ -175,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
             // Enable the extension if available.
             hdrImageCaptureExtender.enableExtension(cameraSelector);
         }
-
         final ImageCapture imageCapture = builder
                 .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
@@ -183,11 +181,12 @@ public class MainActivity extends AppCompatActivity {
 //                .setTargetAspectRatio(screenAspectRatio)
 //                .setTargetResolution(screenSize)
                 .build();
-
         preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageAnalysis, imageCapture);
+
         captureImage.setOnClickListener(v -> {
             File my_file=saveimagefile();
+//            Log.e("TAG", "bindPreview: "+"ON BUTTON CLICKEd" );
             ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(my_file).build();
             imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
                 @Override
@@ -225,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         String mydoc=UtilityClass.getStringFromObject(document);
         if(single_mode)
         {
-            Intent intent = new Intent(MainActivity.this, CapturedImageActivity.class);
+            Intent intent = new Intent(MainActivity.this, BoxActivity.class);
              intent.putExtra("MyPicture",mypic);
              intent.putExtra("MyDocument",mydoc);
               startActivity(intent);
@@ -239,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view)
             {
-                Intent i=new Intent(MainActivity.this,CapturedImageActivity.class);
+                Intent i=new Intent(MainActivity.this,BoxActivity.class);
                 i.putExtra("MyPicture",mypic);
                 i.putExtra("MyDocument",mydoc);
                 startActivity(i);
@@ -322,7 +321,7 @@ return  f;
                     String imagePath = data.getData().getPath();
                     //do something with the image (save it to some directory or whatever you need to do with it here)
                 }
-                Intent i=new Intent(MainActivity.this,CapturedImageActivity.class);
+                Intent i=new Intent(MainActivity.this,BoxActivity.class);
                  startActivity(i);
             }
         }
