@@ -5,18 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     >
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="14dp"
-        android:text="Modify Page"
-        android:background="@color/colorPrimaryDark"
-        android:textColor="#fff"
-        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp"
+        >
         <LinearLayout
         android:id="@+id/frag_in_doc_page_opt_1"
         android:orientation="vertical"

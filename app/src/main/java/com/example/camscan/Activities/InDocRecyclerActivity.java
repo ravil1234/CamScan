@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.CameraX;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -36,6 +37,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -58,12 +60,18 @@ import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.Objects.NavMenuObject;
 import com.example.camscan.R;
+import com.example.camscan.RenderScriptJava.BlackAndWhite;
+import com.example.camscan.RenderScriptJava.Filter1;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
+import com.example.camscan.RenderScriptJava.GrayScale;
+import com.example.camscan.RenderScriptJava.Inversion;
+import com.example.camscan.RenderScriptJava.rotator;
 import com.example.camscan.UtilityClass;
 import com.google.android.gms.common.util.JsonUtils;
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.itextpdf.kernel.geom.Line;
 
 import org.json.JSONObject;
 import org.spongycastle.pqc.math.ntru.util.Util;
@@ -96,7 +104,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     ArrayList<Bitmap> tNails;
     InDocMiniAdapter miniAdapter;
     RecyclerView miniRView;
-    RelativeLayout miniCont;
+    LinearLayout miniCont;
 
     //FOR DATABASE
     MyDocument currentDoc;
@@ -108,7 +116,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
 
     //to delete
-    ArrayList<Point> points;
+//    ArrayList<Point> points;
 
     //to delete end
 
@@ -146,12 +154,12 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         db=MyDatabase.getInstance(this);
         //delete
 
-        points=new ArrayList<>();
-        Point p=new Point(0,0);
-        points.add(p);
-        points.add(p);
-        points.add(p);
-        points.add(p);
+//        points=new ArrayList<>();
+//        Point p=new Point(0,0);
+//        points.add(p);
+//        points.add(p);
+//        points.add(p);
+//        points.add(p);
        // rename();
        //isEmailOpen=true;
        // share();
@@ -172,7 +180,10 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         abdt.syncState();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         menuList=new ArrayList<>();
+
+
         populateMenuListItems();
         menuAdapter=new NavMenuAdapter(this,menuList);
         menuListView.setAdapter(menuAdapter);
@@ -180,6 +191,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         //NAV DRAWER END
 
 //        updateDocName();
+
 
 
         if(Build.VERSION.SDK_INT>=24){
@@ -195,7 +207,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
         adapter=new InDocRecyclerAdapter(this,list,new MyOnClickListener(),new MyLongClickListener());
         vp2.setAdapter(adapter);
-        fillArrayList();
+     //   fillArrayList();
 //        currentDoc=new MyDocument("MyDoc",0l,0l,6,list.get(0).getEditedUri());
 
         tNails=new ArrayList<>();
@@ -206,11 +218,11 @@ public class InDocRecyclerActivity extends AppCompatActivity {
                 int curr=Integer.parseInt(num.getText().toString())-1;
                 vp2.setCurrentItem(curr,true);
                 miniAdapter.setSelected(curr);
-                miniAdapter.notifyDataSetChanged();
+                miniAdapter.notifyItemChanged(curr);
 
             }
         });
-        populateMiniAdapter();
+//        populateMiniAdapter();
         miniRView.setAdapter(miniAdapter);
         miniRView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
 
@@ -234,6 +246,17 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
         vp2.setPageTransformer(cpf);
 
+        vp2.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                vp2.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                int w=vp2.getWidth();
+                int h=vp2.getHeight();
+                adapter.getDimensions(w,h);
+                fillArrayList();
+                populateMiniAdapter();
+            }
+        });
 
 
     }
@@ -667,19 +690,69 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     private void fillArrayList() {
 
         String from=getIntent().getStringExtra("from");
-        if(from.equals("BoxActivity") || from.equals("FilterActivity")){
+        if(from.equals("BoxActivity")){
             //came from box activity with multiple images
             String myPics=getIntent().getStringExtra("MyPicture");
             String myDoc=getIntent().getStringExtra("MyDocument");
-            Log.e("THIS", "fillArrayList: "+myPics );
-            Log.e("THIS", "fillArrayList: "+myDoc );
+//            Log.e("THIS", "fillArrayList: "+myPics );
+//            Log.e("THIS", "fillArrayList: "+myDoc );
             ArrayList<MyPicture> newList=UtilityClass.getListOfPics(myPics);
             currentDoc= UtilityClass.getDocFromJson(myDoc);
+            //Log.e("KLOK", "fillArrayList: "+myPics );
+            //applying filters now
 
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    for(MyPicture p:newList){
+                        Bitmap image=BitmapFactory.decodeFile(Uri.parse(p.getEditedUri()).getPath());
+                        if(image!=null){
+                            image=getFilteredOutput(image);
+                        }
+                        String name=Uri.parse(p.getEditedUri()).getLastPathSegment();
+                        Uri saved=UtilityClass.saveImage(InDocRecyclerActivity.this,image,name,false);
+                        p.setEditedUri(saved.toString());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //int index=newList.indexOf(p);
+                                //list.add(p);
+
+                                adapter.notifyDataSetChanged();
+
+                            }
+                        });
+
+
+                    }
+
+
+                    // flatted.recycle();
+                }
+            }).start();
+
+           // applyFlatCorrections(newList);
+
+            //Pick pics from database
             saveDocInDatabase();
             savePicsIntoDatabase(newList);
-            //Pick pics from database
             ArrayList<MyPicture> ps=getPicturesFromDatabase();
+
+            list.addAll(ps);
+            adapter.notifyDataSetChanged();
+        }
+        else if(from.equals("FilterActivity")){
+            String myPics=getIntent().getStringExtra("MyPicture");
+            String myDoc=getIntent().getStringExtra("MyDocument");
+//            Log.e("THIS", "fillArrayList: "+myPics );
+//            Log.e("THIS", "fillArrayList: "+myDoc );
+            ArrayList<MyPicture> newList=UtilityClass.getListOfPics(myPics);
+            currentDoc= UtilityClass.getDocFromJson(myDoc);
+            saveDocInDatabase();
+            savePicsIntoDatabase(newList);
+            ArrayList<MyPicture> ps=getPicturesFromDatabase();
+
             list.addAll(ps);
             adapter.notifyDataSetChanged();
         }
@@ -704,6 +777,54 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 //        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.Edited/Something736207.jpg","file:///storage/emulated/0/CamScan/.Edited/Something736207.jpg","Image5",5,points));
 
     }
+
+    private int getFilterFromSettings() {
+        //TODO SET SHAREDPREFERENCE
+        return 2;
+    }
+    private Bitmap getFilteredOutput(Bitmap bitmap){
+        Bitmap result=null;
+        switch (getFilterFromSettings()){
+            case 0:{//original
+                result=bitmap;
+
+                break;
+            }
+            case 1:{//luminious
+                Filter1 fil=new Filter1(this);
+                result=fil.filter(100,bitmap);
+                // result=applyExposure(100,transformed);
+                fil.cleanUp();
+                break;
+            }
+            case 2:{//flat correction
+                FlatCorrection corr=new FlatCorrection(this);
+                result=corr.flatCorr(bitmap);
+                corr.clear();
+                break;
+            }
+            case 3:{//grayscale
+                GrayScale gs=new GrayScale();
+                result=gs.toGrayscale(bitmap);
+
+                break;
+            }
+            case 4:{//bnw
+                BlackAndWhite bnw=new BlackAndWhite(this);
+                result=bnw.toBnwRender(bitmap);
+                bnw.clear();
+                break;
+            }
+            case 5:{//inverted
+                Inversion inv=new Inversion(this);
+                result=inv.setInversion(bitmap);
+                inv.clear();
+                break;
+            }
+        }
+        return result;
+    }
+
 
 
     //-----------------------------------------------------------------------------------------
@@ -865,7 +986,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     }
 
     public void applyFilter(MyPicture pic){
-        Bitmap img=null;
+
         InputStream is=null;
 
         try{
@@ -873,16 +994,35 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        if(is!=null){
-            img=BitmapFactory.decodeStream(is);
+        if(is!=null) {
+
             //copyThe original img to my personal folder
-            Uri original= UtilityClass.saveImage(this,img,System.currentTimeMillis()+"",true);
-            pic.setOriginalUri(original.toString());
-            applyFlatCorrection(img,pic);
+            InputStream finalIs = is;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Bitmap img=null;
+                    img=BitmapFactory.decodeStream(finalIs);
+                    Uri original = UtilityClass.saveImage(InDocRecyclerActivity.this, img, System.currentTimeMillis() + "", true);
+                    pic.setOriginalUri(original.toString());
+                    //          updatePositionInDatabase(pic);
+
+                    img = getFilteredOutput(img);
+                    Uri saved = UtilityClass.saveImage(InDocRecyclerActivity.this, img, original.getLastPathSegment(), false);
+                    pic.setEditedUri(saved.toString());
+                    saveImportedIntoDatabase(pic);
+                    list.add(pic);
+                    adapter.notifyDataSetChanged();
+                    addIntoMiniAdapter(img);
+//            applyFlatCorrection(img,pic);
+                }
+
+            }
+            ).start();
         }
 
-
     }
+    /*
     private void applyFlatCorrection(Bitmap cropped,MyPicture pic) {
         System.gc();
         Thread t=new Thread(new Runnable() {
@@ -917,7 +1057,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         t.start();
 
     }
-
+*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -944,6 +1084,18 @@ public class InDocRecyclerActivity extends AppCompatActivity {
                 }
 
                 break;
+            }
+            case UtilityClass.RETAKE_REQ_CODE:{
+                if(resultCode==RESULT_OK){
+                    //now image is updated
+                    int currItem=vp2.getCurrentItem();
+                    MyPicture currPic=list.get(currItem);
+                    //so that it wont go back
+                    currPic.setCoordinates(null);
+                    onEditClicked(null);
+                }else{
+                    Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
+                }
             }
         }
 
@@ -1276,10 +1428,10 @@ public class InDocRecyclerActivity extends AppCompatActivity {
 
         String jsonString=new Gson().toJson(currPic);
         String jsonDoc=new Gson().toJson(currentDoc);
-        if(jsonString!=null && jsonDoc!=null){
-            //Send it both back to cam activity
 
-        }
+        Intent intent=new Intent(InDocRecyclerActivity.this,SingleCameraActivity.class);
+        intent.putExtra("PICTURE_URI",currPic.getOriginalUri());
+        startActivityForResult(intent,UtilityClass.RETAKE_REQ_CODE);
     }
 
     public void onEditClicked(View view){
@@ -1314,7 +1466,8 @@ public class InDocRecyclerActivity extends AppCompatActivity {
             updatePositionInDatabase(currPic);
             list.set(itemPos,rightPic);
             list.set(itemPos+1,currPic);
-            adapter.notifyDataSetChanged();
+            adapter.notifyItemChanged(itemPos);
+            adapter.notifyItemChanged(itemPos+1);
             tNails.clear();
             populateMiniAdapter();
             vp2.setCurrentItem(itemPos+1);
@@ -1329,7 +1482,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
             list.remove(currItem);
             tNails.clear();
             populateMiniAdapter();
-            adapter.notifyDataSetChanged();
+            adapter.notifyItemChanged(currItem);
             resetPositions(currPic.getPosition());
             deleteFromDatabase(currPic);
             UtilityClass.deleteFromStorage(Uri.parse(uriEdited));
@@ -1375,37 +1528,50 @@ public class InDocRecyclerActivity extends AppCompatActivity {
         isPageOpen=false;
     }
     public void onRotateClicked(View view){
+
         int currPicIndex=vp2.getCurrentItem();
         MyPicture currPic=list.get(currPicIndex);
-        Bitmap currBitmap=null;
-        try{
-            InputStream bais=this.getContentResolver().openInputStream(Uri.parse(currPic.getEditedUri()));
-            currBitmap=BitmapFactory.decodeStream(bais);
-        }catch (FileNotFoundException e){
-            e.printStackTrace();
-        }
-        if(currBitmap==null){
-            //load bit map
-            Toast.makeText(this, "File NOT EXIST ", Toast.LENGTH_SHORT).show();
-        }else{
-            Matrix m=new Matrix();
-            m.preRotate(90);
-            m.preScale(1.5f,1.5f);
-            Bitmap copy=Bitmap.createBitmap(currBitmap,0,0,currBitmap.getWidth(),currBitmap.getHeight(),m,true);
-            copy=Bitmap.createScaledBitmap(copy,currBitmap.getHeight(),currBitmap.getWidth(),true);
-            currBitmap.recycle();
 
-            UtilityClass.saveImage(this,copy,Uri.parse(currPic.getEditedUri()).getLastPathSegment(),false);
-      
-            currPic.setImg(copy);
-            adapter.notifyDataSetChanged();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap currBitmap=BitmapFactory.decodeFile(Uri.parse(currPic.getEditedUri()).getPath());
+                if(currBitmap==null){
+                    //load bit map
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(InDocRecyclerActivity.this, "File NOT EXIST ", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                }else{
+//            Matrix m=new Matrix();
+//            m.preRotate(90);
+//            m.preScale(1.5f,1.5f);
+//            Bitmap copy=Bitmap.createBitmap(currBitmap,0,0,currBitmap.getWidth(),currBitmap.getHeight(),m,true);
+//            copy=Bitmap.createScaledBitmap(copy,currBitmap.getHeight(),currBitmap.getWidth(),true);
+//            currBitmap.recycle();
+
+                    rotator r=new rotator(InDocRecyclerActivity.this);
+                    currBitmap=r.rotate(currBitmap,true);
+
+                    UtilityClass.saveImage(InDocRecyclerActivity.this,currBitmap,Uri.parse(currPic.getEditedUri()).getLastPathSegment(),false);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            adapter.notifyItemChanged(currPicIndex);
+                            tNails.clear();
+                            populateMiniAdapter();
+                        }
+                    });
 
 
-            //   Log.e("TAG", "onRotateClicked: "+Uri.parse(currPic.getEditedUri()).getLastPathSegment() );
-            tNails.clear();
-            populateMiniAdapter();
+                }
 
-        }
+            }
+        }).start();
 
     }
     public void onMoveClicked(View view){
@@ -1518,8 +1684,9 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     //EXTRA
     private void addMorePages() {
         //goto camera activity
-        Intent intent=new Intent(InDocRecyclerActivity.this,CamActivity.class);
+        Intent intent=new Intent(InDocRecyclerActivity.this,MainActivity.class);
         intent.putExtra(UtilityClass.getStringFromObject(currentDoc),"MyDocument");
+        intent.putExtra("from","InDocRecyclerActivity");
         startActivity(intent);
     }
     //EXTRA END

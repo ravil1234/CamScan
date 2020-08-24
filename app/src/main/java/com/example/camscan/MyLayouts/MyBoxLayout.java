@@ -230,10 +230,10 @@ public class MyBoxLayout extends RelativeLayout {
 //        int upperX=(int)((x-24)*ratioX);
  //       int upperY=(int)((y-24)*ratioY);
 
-        int upperX=x-24;
-        int upperY=y-24;
-        int width=49;
-        int height=49;
+        int upperX=x-35;
+        int upperY=y-35;
+        int width=70;
+        int height=70;
 
         if(upperX<0){
             width+=upperX;
@@ -243,10 +243,10 @@ public class MyBoxLayout extends RelativeLayout {
             height+=upperY;
             upperY=0;
         }
-        if(upperX+49>imgWidth){
+        if(upperX+70>imgWidth){
             width=imgWidth-upperX;
         }
-        if(upperY+49>imgHeight){
+        if(upperY+70>imgHeight){
             height=imgHeight-upperY;
 
         }

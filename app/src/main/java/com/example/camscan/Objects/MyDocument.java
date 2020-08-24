@@ -19,6 +19,8 @@ public class MyDocument {
     public int pCount;
     @ColumnInfo(name="fp_uri")
     public String fP_URI;
+    @ColumnInfo(name="pdf_uri")
+    public String pdf_uri;
 
     @Ignore
     public MyDocument(String dName, long timeCreated, long timeEdited, int pCount, String fP_URI) {
@@ -27,9 +29,18 @@ public class MyDocument {
         this.timeEdited = timeEdited;
         this.pCount = pCount;
         this.fP_URI = fP_URI;
+        pdf_uri=null;
     }
 
     public MyDocument() {
+    }
+
+    public String getPdf_uri() {
+        return pdf_uri;
+    }
+
+    public void setPdf_uri(String pdf_uri) {
+        this.pdf_uri = pdf_uri;
     }
 
     public int getDid() {

@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -32,6 +33,7 @@ public class UtilityClass {
 
     public static final String PDF_SETTING="CAM_SCAN_PDF_SETTINGS";
     public static final int IMPORT_REQ_CODE=101;
+    public static final int RETAKE_REQ_CODE=102;
     public static final String lineSeparator="$$__$$";
 
     public static Uri saveImage(Context context, Bitmap img, String name, boolean isOriginal){
@@ -106,15 +108,15 @@ public class UtilityClass {
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        InputStream is=null;
-        try {
-            is=context.getContentResolver().openInputStream(imgUri);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        if(is!=null){
-            BitmapFactory.decodeStream(is,null,options);
-        }
+//        InputStream is=null;
+//        try {
+//            is=context.getContentResolver().openInputStream(imgUri);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        if(is!=null){
+          BitmapFactory.decodeFile(imgUri.getPath(),options);
+//        }
         // Calculate inSampleSize
         if(isThumb){
             options.inSampleSize = calculateInSampleSize(options,100, 100);
@@ -133,8 +135,7 @@ public class UtilityClass {
 
     }
 
-    private static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -192,13 +193,21 @@ public class UtilityClass {
             currentPos+=heights[i++];
         }
         File f;
+        File dir;
         if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q){
 
-            String path= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/"+name+".jpg";
+            String path= Environment.getExternalStorageDirectory().getPath()+"/CamScan/LongImages/"+name+".jpg";
             f=new File(path);
+
+            dir=new File(Environment.getExternalStorageDirectory().getPath()+"/CamScan/LongImages");
         }else{
 
-            f=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),name+".jpg");
+            f=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan/LongImages"+name+".jpg");
+            dir=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan/LongImages");
+        }
+
+        if(!dir.exists()&& !dir.isDirectory()){
+            dir.mkdir();
         }
 
         try{
@@ -237,9 +246,14 @@ public class UtilityClass {
             if(obj.has("fp_URI")){
                 fP_URI = obj.getString("fP_URI");
             }
+            String pdfURI=null;
+            if(obj.has("pdf_uri")){
+                pdfURI=obj.getString("pdf_uri");
+            }
 
             MyDocument mydoc = new MyDocument(dName, timeCreated, timeEdited, pCount, fP_URI);
             mydoc.setDid(did);
+            mydoc.setPdf_uri(pdfURI);
             return mydoc;
         }catch (JSONException e){
             e.printStackTrace();
@@ -301,6 +315,14 @@ public class UtilityClass {
 
         return new Gson().toJson(object);
     }
+
+    public static String getUniqueDocName(){
+        String name="CamScan";
+        name+=System.currentTimeMillis()%1000000;
+        return name;
+    }
+
+
 
 
 }

@@ -77,7 +77,7 @@ public class SingleCameraActivity extends AppCompatActivity {
     MotionEvent motionEvent;
     CardView flashmode_btn;
     ImageView gallery,single_mode_img,batch_mode_img,last_img;
-    ArrayList<MyPicture > myPictureList;
+ //   ArrayList<MyPicture > myPictureList;
     String uri="";
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -100,6 +100,8 @@ public class SingleCameraActivity extends AppCompatActivity {
         gallery.setVisibility(View.GONE);
         last_img.setVisibility(View.INVISIBLE);
         uri=getIntent().getStringExtra("PICTURE_URI");
+
+
         flashmode_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
@@ -113,6 +115,7 @@ public class SingleCameraActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
     }
+
     private void startCamera() {
 
         final ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -190,17 +193,17 @@ public class SingleCameraActivity extends AppCompatActivity {
     }
     private  void call_save_list(String uri)
     {
-        ArrayList<Point> pointArrayList=new ArrayList<>();
-        Point p=new Point(0,0);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,"","",
-                myPictureList.size()+1,pointArrayList));
-        String mypic= UtilityClass.getStringFromObject(myPictureList);
+//        ArrayList<Point> pointArrayList=new ArrayList<>();
+//        Point p=new Point(0,0);
+//        pointArrayList.add(p);
+//        pointArrayList.add(p);
+//        pointArrayList.add(p);
+//        pointArrayList.add(p);
+//        myPictureList.add(new MyPicture(0,uri,null,String.valueOf(myPictureList.size()+1),
+  //              myPictureList.size()+1,pointArrayList));
+  //      String mypic= UtilityClass.getStringFromObject(myPictureList);
         Intent returnIntent = new Intent();
-        returnIntent.putExtra("PICTURE_URI",uri);
+    //    returnIntent.putExtra("PICTURE_URI",uri);
         setResult(Activity.RESULT_OK,returnIntent);
         finish();
     }

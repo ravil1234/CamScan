@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,6 +36,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class PdfSettingsActivity extends AppCompatActivity {
 
@@ -82,7 +84,7 @@ public class PdfSettingsActivity extends AppCompatActivity {
         orientInt=pref.getInt("PDF_PAGE_ORIENTATION",0);
         isBorder=pref.getBoolean("PDF_PAGE_BORDER",false);
         passString=pref.getString("PDF_PAGE_PASSWORD","admin");
-        uriString=pref.getString("PDF_STAMP_URI","android.resource://"+getPackageName()+"/"+R.drawable.stamp);
+        uriString=pref.getString("PDF_STAMP_URI","android.resource://"+getPackageName()+"/drawable/"+R.drawable.stamp);
 
         if(isBorder){
             light.setImageDrawable(getResources().getDrawable(R.drawable.border_on));
@@ -314,7 +316,10 @@ public class PdfSettingsActivity extends AppCompatActivity {
 
         Bitmap stamp= null;
         try {
-            stamp = BitmapFactory.decodeStream(this.getContentResolver().openInputStream(Uri.parse(uriString)));
+           // Log.e("THIS SETTINGS", "onStampClicked: "+uriString );
+            Uri uri=Uri.parse(uriString);
+            InputStream is=PdfSettingsActivity.this.getContentResolver().openInputStream(uri);
+            stamp = BitmapFactory.decodeStream(is);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -322,7 +327,7 @@ public class PdfSettingsActivity extends AppCompatActivity {
             imgForStamp.setImageBitmap(stamp);
             //.recycle();
         }
-        if(uriString.equals("android.resource://"+getPackageName()+"/"+R.drawable.stamp)){
+        if(uriString.equals("android.resource://"+getPackageName()+"/drawable/"+R.drawable.stamp)){
             def.setChecked(true);
         }else{
             gall.setChecked(true);

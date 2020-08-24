@@ -26,6 +26,7 @@ import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,6 +40,7 @@ import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
+import com.example.camscan.RenderScriptJava.rotator;
 import com.example.camscan.UtilityClass;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -72,6 +74,7 @@ public class FilterActivity extends AppCompatActivity {
 //    ArrayList<Integer> types;
 //    ArrayList<Bitmap> tnails;
     ProgressBar pbar;
+    Boolean isEffectThreadRunning=false;
 
     SeekBar sBar_bright,sBar_contrast,sBar_exposure;
     TextView propName,propVal;
@@ -80,6 +83,9 @@ public class FilterActivity extends AppCompatActivity {
     ArrayList<MyPicture> list;
     MyDocument currDoc;
 
+    //THumbnales for effects
+    Bitmap originalTnail,illuminateTnail,flatTnail,grayTnail,bnwTnail,invertTnail;
+    //Thumbnales fro effects END
 
    // FloatingActionButton fab;
     boolean isFabOpen=false;
@@ -111,35 +117,11 @@ public class FilterActivity extends AppCompatActivity {
             applyFlatCorrection();
         }
 
-//        names=new ArrayList<>();
-//        types=new ArrayList<>();
-//        tnails=new ArrayList<>();
-//        names.add("Original");
-//        names.add("Luminous");
-//        names.add("Flat");
-//        names.add("Grayscale");
-//        names.add("B/W");
-//        names.add("invert");
-//        types.add(1);
-//        types.add(2);
-//        types.add(3);
-//        types.add(4);
-//        types.add(5);
-//        types.add(6);
 
-      //  addAllTnails();
 
         getPicAndDocFromIntent();
 
-//        adapter=new Filter_Items_RecyclerAdapter(this,names,types,
-//                Bitmap.createScaledBitmap(cropped,200,200,true),
-//                new MyOnclickListener(),tnails);//cropped.copy(cropped.getConfig(),true));
-//        rView.setHasFixedSize(true);
-//        rView.setAdapter(adapter);
-//        rView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false));
 
-
-        //fab.
 
         //setting seekbars
 
@@ -281,6 +263,7 @@ public class FilterActivity extends AppCompatActivity {
 //    }
 
 
+
     private void applyBCE(int b,int c,int e){
         System.gc();
         pbar.setVisibility(View.VISIBLE);
@@ -396,7 +379,7 @@ public class FilterActivity extends AppCompatActivity {
            //         Toast.makeText(this,"Deleted",Toast.LENGTH_SHORT).show();
                 }
             }
-
+            setupThumbnales(res);
             return res;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -446,6 +429,137 @@ public class FilterActivity extends AppCompatActivity {
 //            adapter.notifyDataSetChanged();
 //        }
 //    }
+    private void setupThumbnales(Bitmap source) {
+        if(!isEffectThreadRunning){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    isEffectThreadRunning=true;
+                    originalTnail=Bitmap.createScaledBitmap(source,100,100,true);
+
+                    Filter1 f1=new Filter1(FilterActivity.this);
+                    illuminateTnail=f1.filter(100,originalTnail.copy(originalTnail.getConfig(),false));
+                    f1.cleanUp();
+
+                    FlatCorrection flat=new FlatCorrection(FilterActivity.this);
+                    flatTnail=flat.flatCorr(originalTnail.copy(originalTnail.getConfig(),false));
+
+                    grayTnail=new GrayScale().toGrayscale(originalTnail.copy(originalTnail.getConfig(),false));
+
+                    bnwTnail=new BlackAndWhite(FilterActivity.this).toBnwRender(originalTnail.copy(originalTnail.getConfig(),false));
+
+                    Inversion inv=new Inversion(FilterActivity.this);
+                    invertTnail=inv.setInversion(originalTnail.copy(originalTnail.getConfig(),false));
+                    inv.clear();
+
+
+                    originalTnail=getRoundedCroppedBitmap(originalTnail);
+                    illuminateTnail=getRoundedCroppedBitmap(illuminateTnail);
+                    flatTnail=getRoundedCroppedBitmap(flatTnail);
+                    grayTnail=getRoundedCroppedBitmap(grayTnail);
+                    bnwTnail=getRoundedCroppedBitmap(bnwTnail);
+                    invertTnail=getRoundedCroppedBitmap(invertTnail);
+                    isEffectThreadRunning=false;
+                }
+            }).start();
+
+        }
+
+    }
+
+    private Bitmap getRoundedCroppedBitmap(Bitmap bitmap) {
+        int widthLight = bitmap.getWidth();
+        int heightLight = bitmap.getHeight();
+
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(output);
+        Paint paintColor = new Paint();
+        paintColor.setFlags(Paint.ANTI_ALIAS_FLAG);
+
+        RectF rectF = new RectF(new Rect(0, 0, widthLight, heightLight));
+
+        canvas.drawRoundRect(rectF, widthLight / 2 ,heightLight / 2,paintColor);
+
+        Paint paintImage = new Paint();
+        paintImage.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+        canvas.drawBitmap(bitmap, 0, 0, paintImage);
+
+        return output;
+    }
+
+    public void rotate(View view){
+        pbar.setVisibility(View.VISIBLE);
+        stopInteraction();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                rotator r=new rotator(FilterActivity.this);
+                selected=r.rotate(selected,true);
+                r=new rotator(FilterActivity.this);
+                cropped=r.rotate(cropped,true);
+                //selected=Bitmap.createBitmap(selected,0,0,selected.getWidth(),selected.getHeight(),matrix,true);
+                //cropped=Bitmap.createBitmap(cropped,0,0,cropped.getWidth(),cropped.getHeight(),matrix,true);
+                //setupThumbnales(selected);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        resumeInteraction();
+                        image.setImageBitmap(selected);
+                        pbar.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    public void onNextButtonClicked(View view){
+
+//        AlertDialog.Builder builder=new AlertDialog.Builder(FilterActivity.this,R.style.CustomDialog);
+//        builder.setView(pbar);
+        pbar.setVisibility(View.VISIBLE);
+//        AlertDialog d=builder.create();
+//        d.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                BitmapDrawable finalImgDb=(BitmapDrawable)image.getDrawable();
+                Bitmap img=finalImgDb.getBitmap();
+                String name=list.get(0).getEditedName();
+                Uri ediUri=UtilityClass.saveImage(FilterActivity.this,img,name,false);
+                list.get(0).setEditedUri(ediUri.toString());
+
+                //convertinto json and send
+                String myPicJson=UtilityClass.getStringFromObject(list);
+                String myDocJson= UtilityClass.getStringFromObject(currDoc);
+                Intent intent=new Intent(FilterActivity.this,MyDocumentActivity.class);
+                intent.putExtra("MyPicture",myPicJson);
+                intent.putExtra("MyDocument",myDocJson);
+                intent.putExtra("from","FilterActivity");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                       // d.dismiss();
+                        pbar.setVisibility(View.GONE);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+
+            }
+        }).start();
+
+    }
+
+    public void stopInteraction(){
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+    public void resumeInteraction(){
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
 
     private class MyNavListener implements BottomNavigationView.OnNavigationItemSelectedListener{
 
@@ -481,48 +595,58 @@ public class FilterActivity extends AppCompatActivity {
                     icon=view.findViewById(R.id.fragment_filter_effects_icon);
 
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Bitmap original=Bitmap.createScaledBitmap(cropped,100,100,true);
+                    if(originalTnail==null){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Bitmap original=Bitmap.createScaledBitmap(cropped,100,100,true);
 
-                            Filter1 f1=new Filter1(FilterActivity.this);
-                            Bitmap filtered=f1.filter(100,original.copy(original.getConfig(),false));
-                            f1.cleanUp();
+                                Filter1 f1=new Filter1(FilterActivity.this);
+                                Bitmap filtered=f1.filter(100,original.copy(original.getConfig(),false));
+                                f1.cleanUp();
 
-                            FlatCorrection flat=new FlatCorrection(FilterActivity.this);
-                            Bitmap flatBit=flat.flatCorr(original.copy(original.getConfig(),false));
+                                FlatCorrection flat=new FlatCorrection(FilterActivity.this);
+                                Bitmap flatBit=flat.flatCorr(original.copy(original.getConfig(),false));
 
-                            Bitmap gray=new GrayScale().toGrayscale(original.copy(original.getConfig(),false));
+                                Bitmap gray=new GrayScale().toGrayscale(original.copy(original.getConfig(),false));
 
-                            Bitmap bnw=new BlackAndWhite(FilterActivity.this).toBnwRender(original.copy(original.getConfig(),false));
+                                Bitmap bnw=new BlackAndWhite(FilterActivity.this).toBnwRender(original.copy(original.getConfig(),false));
 
-                            Inversion inv=new Inversion(FilterActivity.this);
-                            Bitmap inverted=inv.setInversion(original.copy(original.getConfig(),false));
-                            inv.clear();
+                                Inversion inv=new Inversion(FilterActivity.this);
+                                Bitmap inverted=inv.setInversion(original.copy(original.getConfig(),false));
+                                inv.clear();
 
-                            final Bitmap original1=getRoundedCroppedBitmap(original);
-                            final Bitmap filtered1=getRoundedCroppedBitmap(filtered);
-                            final Bitmap flatBit1=getRoundedCroppedBitmap(flatBit);
-                            final Bitmap gray1=getRoundedCroppedBitmap(gray);
-                            final Bitmap bnw1=getRoundedCroppedBitmap(bnw);
-                            final Bitmap inverted1=getRoundedCroppedBitmap(inverted);
+                                originalTnail=getRoundedCroppedBitmap(original);
+                                illuminateTnail=getRoundedCroppedBitmap(filtered);
+                                flatTnail =getRoundedCroppedBitmap(flatBit);
+                                grayTnail =getRoundedCroppedBitmap(gray);
+                                bnwTnail =getRoundedCroppedBitmap(bnw);
+                                invertTnail =getRoundedCroppedBitmap(inverted);
 
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ef1.setImageBitmap(original1);
-                                    ef2.setImageBitmap(filtered1);
-                                    ef3.setImageBitmap(flatBit1);
-                                    ef4.setImageBitmap(gray1);
-                                    ef5.setImageBitmap(bnw1);
-                                    ef6.setImageBitmap(inverted1);
-                                }
-                            });
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ef1.setImageBitmap(originalTnail);
+                                        ef2.setImageBitmap(illuminateTnail);
+                                        ef3.setImageBitmap(flatTnail);
+                                        ef4.setImageBitmap(grayTnail);
+                                        ef5.setImageBitmap(bnwTnail);
+                                        ef6.setImageBitmap(invertTnail);
+                                    }
+                                });
 
-                        }
-                    }).start();
+                            }
+                        }).start();
+                    }else{
 
+                        ef1.setImageBitmap(originalTnail);
+                        ef2.setImageBitmap(illuminateTnail);
+                        ef3.setImageBitmap(flatTnail);
+                        ef4.setImageBitmap(grayTnail);
+                        ef5.setImageBitmap(bnwTnail);
+                        ef6.setImageBitmap(invertTnail);
+
+                    }
                     AlertDialog d=builder.create();
 
                     icon.setOnClickListener(new View.OnClickListener() {
@@ -590,11 +714,11 @@ public class FilterActivity extends AppCompatActivity {
                         sBar_exposure.setProgress(0);
                         sBar_contrast.setProgress(0);
                         sBar_bright.setProgress(50);
-                      //  rView.setVisibility(View.GONE);
+                        //  rView.setVisibility(View.GONE);
                         adjustView.setVisibility(View.VISIBLE);
                         isFabOpen=true;
                     }else{
-                       // rView.setVisibility(View.VISIBLE);
+                        // rView.setVisibility(View.VISIBLE);
                         adjustView.setVisibility(View.GONE);
                         isFabOpen=false;
                     }
@@ -610,51 +734,5 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
-    private Bitmap getRoundedCroppedBitmap(Bitmap bitmap) {
-        int widthLight = bitmap.getWidth();
-        int heightLight = bitmap.getHeight();
 
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(output);
-        Paint paintColor = new Paint();
-        paintColor.setFlags(Paint.ANTI_ALIAS_FLAG);
-
-        RectF rectF = new RectF(new Rect(0, 0, widthLight, heightLight));
-
-        canvas.drawRoundRect(rectF, widthLight / 2 ,heightLight / 2,paintColor);
-
-        Paint paintImage = new Paint();
-        paintImage.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
-        canvas.drawBitmap(bitmap, 0, 0, paintImage);
-
-        return output;
-    }
-
-    public void rotate(View view){
-        Matrix matrix=new Matrix();
-        matrix.preRotate(90);
-        selected=Bitmap.createBitmap(selected,0,0,selected.getWidth(),selected.getHeight(),matrix,true);
-        cropped=Bitmap.createBitmap(cropped,0,0,cropped.getWidth(),cropped.getHeight(),matrix,true);
-        image.setImageBitmap(selected);
-
-    }
-
-    public void onNextButtonClicked(View view){
-        BitmapDrawable finalImgDb=(BitmapDrawable)image.getDrawable();
-        Bitmap img=finalImgDb.getBitmap();
-        String name=list.get(0).getEditedName();
-        Uri ediUri=UtilityClass.saveImage(FilterActivity.this,img,name,false);
-        list.get(0).setEditedUri(ediUri.toString());
-
-        //convertinto json and send
-        String myPicJson=UtilityClass.getStringFromObject(list);
-        String myDocJson= UtilityClass.getStringFromObject(currDoc);
-        Intent intent=new Intent(FilterActivity.this,InDocRecyclerActivity.class);
-        intent.putExtra("MyPicture",myPicJson);
-        intent.putExtra("MyDocument",myDocJson);
-        intent.putExtra("from","FilterActivity");
-        startActivity(intent);
-        finish();
-    }
 }

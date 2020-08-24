@@ -29,18 +29,16 @@ public class InDocMiniAdapter extends RecyclerView.Adapter<InDocMiniAdapter.MyVi
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view= LayoutInflater.from(context).inflate(R.layout.item_filter_rview,parent,false);
+        View view= LayoutInflater.from(context).inflate(R.layout.item_in_doc_mini_object,parent,false);
 
         return new MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        if(selected==position){
-            holder.root.setBackground(context.getDrawable(R.color.colorAccent));
-        }else{
-            holder.root.setBackground(context.getDrawable(android.R.color.transparent));
-        }
+
+        holder.root.setBackground(context.getDrawable(R.color.colorAccent));
+
 
         holder.img.setImageBitmap(images.get(position));
         holder.name.setText(String.valueOf(position+1));

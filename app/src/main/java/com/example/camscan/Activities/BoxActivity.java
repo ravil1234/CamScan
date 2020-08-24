@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -38,6 +39,7 @@ import com.example.camscan.RenderScriptJava.Filter1;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
 import com.example.camscan.RenderScriptJava.GrayScale;
 import com.example.camscan.RenderScriptJava.Inversion;
+import com.example.camscan.RenderScriptJava.rotator;
 import com.example.camscan.UtilityClass;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -87,7 +89,17 @@ public class BoxActivity extends AppCompatActivity {
         vp2.setAdapter(adapter);
 
 
-        populateList();
+        vp2.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                vp2.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                int width=vp2.getWidth();
+                int height=vp2.getHeight();
+                adapter.setDimensions(width,height);
+                populateList();
+            }
+        });
+//        populateList();
 
         bnv.getMenu().setGroupCheckable(0,false,true);
         bnv.setOnNavigationItemSelectedListener(new MyNavListener());
@@ -245,122 +257,35 @@ public class BoxActivity extends AppCompatActivity {
         c.setMatrix(m);
         c.drawBitmap(B, 0,0, p);
 
-        Bitmap resized=Bitmap.createBitmap(result,minLeft,minTop,wid,hei);
+        result=Bitmap.createBitmap(result,minLeft,minTop,wid,hei);
 //        Log.e(TAG, "cornerPin: "+ result.getHeight()+" "+result.getWidth());
      //   Log.e(TAG, "cornerPin: "+resized.getHeight()+" "+resized.getWidth() );
-        return resized;
+        return result;
 
     }
 
-    //FIlters That are to be applied
-    private Bitmap applyFlatCorrection(Bitmap cropped) {
-        System.gc();
 
-        try {
-            return new MyAsync().execute(cropped).get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
-
-    }
-    private Bitmap applyBnW(Bitmap cropped) {
-        System.gc();
-        BlackAndWhite bw=new BlackAndWhite(this);
-        Bitmap bnw=bw.toBnwRender(cropped.copy(cropped.getConfig(),false));
-
-        bw.clear();
-        return bnw;
-    }
-
-    private Bitmap applyGrayScale(Bitmap cropped) {
-        System.gc();
-
-        Bitmap gray=new GrayScale().toGrayscale(cropped.copy(cropped.getConfig(),false));
-        return gray;
-    }
-
-    private Bitmap applyExposure(int exp,Bitmap cropped) {
-        System.gc();
-        Filter1 f1=new Filter1(this);
-        Bitmap filtered=f1.filter(exp,cropped.copy(cropped.getConfig(),false));
-
-        f1.cleanUp();
-        return filtered;
-    }
-
-    private Bitmap applyInvert(Bitmap cropped) {
-        System.gc();
-
-        Inversion inv=new Inversion(this);
-        Bitmap inverted=inv.setInversion(cropped.copy(cropped.getConfig(),false));
-        inv.clear();
-        return inverted;
-    }
-
-    //Filters end
 
     public void onNextPressed(View view){
         String[] save=null;
-        for(MyPicture p:list){
-            Bitmap image=p.getImg();
-            if(image==null){
-                image= BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
-            }
-            Bitmap transformed=cornerPin(image,p.getCoordinates());
+        Bitmap transformed=null;
+        if(list.size()==1){
+            MyPicture p =list.get(0);
+            transformed= BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
+            transformed=cornerPin(transformed,p.getCoordinates());
             Bitmap emptyBitmap = Bitmap.createBitmap(transformed.getWidth(), transformed.getHeight(),
                     transformed.getConfig());
             if(transformed.sameAs(emptyBitmap)){
                 Toast.makeText(this, "Can't Crop", Toast.LENGTH_SHORT).show();
-                vp2.setCurrentItem(list.indexOf(p));
+                vp2.setCurrentItem(0);
+                transformed.recycle();
                 return;
             }
-            if(list.size()==1){
-                //send direct to filter activity
-                save=saveBitmap(transformed);
-            }else{
-                //transforming each image into flatCorrection
-                int filter=getDefaultFilter();
-                Bitmap filtered=null;
-                switch (filter){
-                    case 0:{//original
-                        filtered=transformed;
-
-                        break;
-                    }
-                    case 1:{//luminious
-                        filtered=applyExposure(100,transformed);
-
-                        break;
-                    }
-                    case 2:{//flat correction
-                        filtered=applyFlatCorrection(transformed);
-                         break;
-                    }
-                    case 3:{//grayscale
-                        filtered=applyGrayScale(transformed);
-                        break;
-                    }
-                    case 4:{//bnw
-                        filtered=applyBnW(transformed);
-                        break;
-                    }
-                    case 5:{//inverted
-                        filtered=applyInvert(transformed);
-                        break;
-                    }
-                }
-                String[] names=p.getEditedName().split(".jpg");
-                Uri savedEdited= UtilityClass.saveImage(BoxActivity.this,filtered,names[0],false);
-                p.setEditedUri(savedEdited.toString());
-
-            }
+            save=saveBitmap(transformed);
         }
 
         if(list.size()!=1 && currDoc.getDid()!=0){
-            currDoc.setfP_URI(list.get(0).getEditedUri());
+            currDoc.setfP_URI(list.get(0).getOriginalUri());
         }
         for(MyPicture p:list){
             p.setImg(null);
@@ -380,50 +305,104 @@ public class BoxActivity extends AppCompatActivity {
         }else{
             //goto indoc activity
 
-            Intent intent=new Intent(BoxActivity.this,InDocRecyclerActivity.class);
+            int screenWidth=vp2.getWidth();
+            int screenHeight=vp2.getHeight();
+
+            Intent intent=new Intent(BoxActivity.this,MyDocumentActivity.class);
             intent.putExtra("MyPicture",myPics);
             intent.putExtra("MyDocument",myDoc);
+            intent.putExtra("Dimensions",screenWidth+" "+screenHeight);
          //   Log.e(TAG, "onNextPressed: "+myPics );
             intent.putExtra("from","BoxActivity");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         }
 
     }
 
-    private int getDefaultFilter() {
-        //see into setting and get the id of the filter starting with zero as original
-        //TODO see tfrom the settings
-        return 0;
-    }
-
     public void rotateBitmapClockWise(View view){
 
-        int currIndex=vp2.getCurrentItem();
-        MyPicture currPic=list.get(currIndex);
-        Bitmap image=currPic.getImg();
-        if(image!=null){
-            Matrix matrix=new Matrix();
-            matrix.preRotate(90);
-            image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
-            currPic.setImg(image);
-            currPic.setCoordinates(null);
-            adapter.notifyDataSetChanged();
+        AlertDialog.Builder builder=new AlertDialog.Builder(BoxActivity.this);
+        View view2=LayoutInflater.from(this).inflate(R.layout.fragment_progress,null);
+        builder.setView(view2);
+        AlertDialog d=builder.create();
+        d.show();
+        stopInteraction();
 
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int currIndex=vp2.getCurrentItem();
+                MyPicture currPic=list.get(currIndex);
+                Bitmap image=BitmapFactory.decodeFile(Uri.parse(currPic.getOriginalUri()).getPath());
+                if(image!=null){
+//                    Matrix matrix=new Matrix();
+//                    matrix.preRotate(90);
+//                    image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
+                    //currPic.setImg(image);
+                    rotator r=new rotator(BoxActivity.this);
+                    image=r.rotate(image,true);
+                    currPic.setCoordinates(null);
+                    String name=Uri.parse(currPic.getOriginalUri()).getLastPathSegment();
+                    Uri savedUri=UtilityClass.saveImage(BoxActivity.this,image,name,true);
+                    currPic.setOriginalUri(savedUri.toString());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            resumeInteraction();
+                            d.dismiss();
+                            adapter.notifyDataSetChanged();
+                        }
+                    });
+
+                    image.recycle();
+
+                }
+            }
+        }).start();
+
     }
-    public void rotateBitmapAntiClockWise(View view){
-        int currIndex=vp2.getCurrentItem();
-        MyPicture currPic=list.get(currIndex);
-        Bitmap image=currPic.getImg();
-        if(image!=null){
-            Matrix matrix=new Matrix();
-            matrix.preRotate(-90);
-            image=Bitmap.createBitmap(image,0,0,image.getWidth(),image.getHeight(),matrix,true);
-            currPic.setImg(image);
-            currPic.setCoordinates(null);
-            adapter.notifyDataSetChanged();
-        }
+    public void rotateBitmapAntiClockWise(View view) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(BoxActivity.this);
+        View view2 = LayoutInflater.from(this).inflate(R.layout.fragment_progress, null);
+        builder.setView(view2);
+        AlertDialog d = builder.create();
+        d.show();
+        stopInteraction();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int currIndex = vp2.getCurrentItem();
+                MyPicture currPic = list.get(currIndex);
+                Bitmap image=BitmapFactory.decodeFile(Uri.parse(currPic.getOriginalUri()).getPath());// = currPic.getImg();
+                if (image != null) {
+//                    Matrix matrix = new Matrix();
+//                    matrix.preRotate(-90);
+//                    image = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+//                    currPic.setImg(image);
+                    rotator r=new rotator(BoxActivity.this);
+                    image=r.rotate(image,false);
+                    currPic.setCoordinates(null);
+                    String name=Uri.parse(currPic.getOriginalUri()).getLastPathSegment();
+                    Uri savedUri=UtilityClass.saveImage(BoxActivity.this,image,name,true);
+                    currPic.setOriginalUri(savedUri.toString());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            resumeInteraction();
+                            d.dismiss();
+                            adapter.notifyDataSetChanged();
+                        }
+                    });
+
+
+                }
+
+            }
+        }).start();
     }
 
     public void resetCurrPoint(View view){
@@ -444,28 +423,41 @@ public class BoxActivity extends AppCompatActivity {
     public void retakePic(){
         int index=vp2.getCurrentItem();
         MyPicture p=list.get(index);
-        String picString=UtilityClass.getStringFromObject(p);
-        Intent intent=new Intent(BoxActivity.this,CamActivity.class);
-        intent.putExtra("MyPicture",picString);
-        startActivityForResult(intent,101);
+        //String picString=UtilityClass.getStringFromObject(p);
+        Intent intent=new Intent(BoxActivity.this,SingleCameraActivity.class);
+        intent.putExtra("PICTURE_URI",p.getOriginalUri());
+        startActivityForResult(intent,UtilityClass.RETAKE_REQ_CODE);
+    }
+
+    public void stopInteraction(){
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+    public void resumeInteraction(){
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode==101){
+        if(requestCode==UtilityClass.RETAKE_REQ_CODE){
             if(resultCode==RESULT_OK){
                 //returned something
-                String newPic=data.getStringExtra("MyPicture");
-                MyPicture pics=UtilityClass.getPicFromString(newPic);
-                if(pics!=null){
-                    int index=vp2.getCurrentItem();
-                    list.set(index,pics);
-                    adapter.notifyDataSetChanged();
-                }
+                //String newPic=data.getStringExtra("MyPicture");
+                //MyPicture pics=UtilityClass.getPicFromString(newPic);
+//                if(pics!=null){
+//
+//                    list.set(index,pics);
+//                    adapter.notifyDataSetChanged();
+//                }
+                int index=vp2.getCurrentItem();
+                MyPicture p=list.get(index);
+                p.setImg(null);
+                adapter.notifyDataSetChanged();
             }else if(resultCode==RESULT_CANCELED){
                 //cancelled!! dont do anything
+                Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
             }
         }
 

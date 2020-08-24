@@ -32,6 +32,8 @@
                 android:text="B/w"
                 android:textSize="12sp"
                 android:gravity="center"
+                android:textColor="#fff"
+                android:background="#54000000"
                 />
         </LinearLayout>
         <LinearLayout
@@ -51,6 +53,8 @@
                 android:text="Invert"
                 android:textSize="12sp"
                 android:gravity="center"
+                android:textColor="#fff"
+                android:background="#54000000"
                 />
         </LinearLayout>
     </LinearLayout>
@@ -78,13 +82,15 @@
                 android:text="Original"
                 android:textSize="12sp"
                 android:gravity="center"
+                android:textColor="#fff"
+                android:background="#54000000"
                 />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/fragment_filter_effects_icon"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginTop="50dp"
             android:layout_gravity="center_horizontal"
             android:background="@drawable/back"
@@ -106,6 +112,8 @@
                 android:text="Grayscale"
                 android:textSize="12sp"
                 android:gravity="center"
+                android:textColor="#fff"
+                android:background="#54000000"
                 />
         </LinearLayout>
     </LinearLayout>
@@ -133,6 +141,8 @@
                 android:text="Luminous"
                 android:textSize="12sp"
                 android:gravity="center"
+                android:textColor="#fff"
+                android:background="#54000000"
                 />
         </LinearLayout>
         <LinearLayout
@@ -153,6 +163,8 @@
                 android:text="Correction"
                 android:textSize="12sp"
                 android:gravity="center"
+                android:textColor="#fff"
+                android:background="#54000000"
                 />
         </LinearLayout>
     </LinearLayout>

@@ -10,7 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -99,10 +101,20 @@ public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.
 
 
         if(current.getImg()==null){
-            Bitmap imageBitmap= BitmapFactory.decodeFile(imgUri.getPath());
-            current.setImg(imageBitmap);
+            //Bitmap imageBitmap= BitmapFactory.decodeFile(imgUri.getPath());
+            Bitmap imageBitmap=UtilityClass.populateImage(context,Uri.parse(current.getOriginalUri()),false,screenWidth,screenHeight);
+            //current.setImg(imageBitmap);
             mbl.setBitmap(imageBitmap);
             img.setImageBitmap(imageBitmap);
+           // current.setImg(imageBitmap);
+                //            if(img.getHeight()!=0){
+                //               // Log.e(TAG, "onBindViewHolder: "+imageBitmap.getWidth()+" "+img.getWidth()+" "+imageBitmap.getHeight()+" "+img.getHeight() );
+                //                FrameLayout.LayoutParams param2=(FrameLayout.LayoutParams)holder.imgView.getLayoutParams();
+                //       //         FrameLayout.LayoutParams params=(FrameLayout.LayoutParams)holder.boxLayout.getLayoutParams();
+                //                holder.boxLayout.setLayoutParams(param2);
+                //
+                //            }
+//            Log.e(TAG, "onBindViewHolder: "+imageBitmap.getWidth()+" "+imageBitmap.getHeight()+" "+screenWidth+" "+screenHeight );
 //            mbl.updateViewPos(current.getCoordinates());
         }else{
             img.setImageBitmap(current.getImg());
@@ -110,7 +122,7 @@ public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.
 
         }
 
-       // Log.e(TAG, "onBindViewHolder: "+dotWidth );
+       // Log.e(TAG, "onBindViewHolder: "+screenHeight+" "+screenWidth );
         if(current.getCoordinates().get(3).x==0 && current.getCoordinates().get(3).y==0){
             //set the bounding box to default position
            // mbl.initViewPos();
@@ -133,4 +145,8 @@ public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.
 
     }
 
+    public void setDimensions(int w,int h){
+        screenWidth=w;
+        screenHeight=h;
+    }
 }

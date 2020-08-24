@@ -14,9 +14,12 @@
         <activity android:name=".Activities.InDocRecyclerActivity"
             android:hardwareAccelerated="false"
             ></activity>
+        <activity android:name=".Activities.MyDocumentActivity"
+            android:hardwareAccelerated="false"/>
         <activity android:name=".Activities.FilterActivity" />
         <activity android:name=".Activities.BoxActivity"
             android:hardwareAccelerated="false"
+            android:noHistory="true"
             >
         </activity>
         <activity android:name=".Activities.CamActivity" />
@@ -31,6 +34,7 @@
         <activity android:name=".Activities.CameraXActivity" />
         <activity android:name=".Activities.CapturedImageActivity" />
         <activity android:name=".Activities.HomeScreenActivity" />
+        <activity android:name=".Activities.PdfSettingsActivity"/>
     </application>
 
     <uses-feature android:name="android.hardware.camera.any" />

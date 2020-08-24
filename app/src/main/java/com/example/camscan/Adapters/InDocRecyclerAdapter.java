@@ -4,18 +4,28 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.camscan.Activities.InDocRecyclerActivity;
+import com.example.camscan.Activities.MyDocumentActivity;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
+import com.example.camscan.RenderScriptJava.BlackAndWhite;
+import com.example.camscan.RenderScriptJava.Filter1;
+import com.example.camscan.RenderScriptJava.FlatCorrection;
+import com.example.camscan.RenderScriptJava.GrayScale;
+import com.example.camscan.RenderScriptJava.Inversion;
 import com.example.camscan.UtilityClass;
 
 import java.io.FileNotFoundException;
@@ -40,6 +50,7 @@ public class InDocRecyclerAdapter extends RecyclerView.Adapter<InDocRecyclerAdap
 
         ImageView img;
         TextView name,page;
+        ProgressBar pbar;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -47,6 +58,7 @@ public class InDocRecyclerAdapter extends RecyclerView.Adapter<InDocRecyclerAdap
             itemView.setOnLongClickListener(olcl);
             img=itemView.findViewById(R.id.in_doc_todo_img);
             name=itemView.findViewById(R.id.in_doc_todo_name);
+            pbar=itemView.findViewById(R.id.in_doc_todo_pbar);
           //  page=itemView.findViewById(R.id.in_doc_todo_page);
 
         }
@@ -61,62 +73,73 @@ public class InDocRecyclerAdapter extends RecyclerView.Adapter<InDocRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        MyPicture current=images.get(position);
+        final MyPicture current=images.get(position);
 
         holder.name.setText(current.getEditedName());
-//        holder.page.setVisibility(View.VISIBLE);
-//        holder.page.setText(String.format("%d/%d", position + 1, images.size()));
+        Thread t=new Thread(new Runnable() {
+            @Override
+            public synchronized void run() {
+                if(current.getEditedUri()==null){
+                    //not yet filtered
+                    final Uri uri=Uri.parse(current.getOriginalUri());
+                    Bitmap image=UtilityClass.populateImage(context,uri,false,viewWidth,viewHeight);
+                    if(image!=null){
+                        ((MyDocumentActivity)context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                holder.img.setImageBitmap(image);
+                            }
+                        });
 
-        final Uri uri=Uri.parse(current.getEditedUri());
-
-        if(current.getImg()==null) {
-            /*
-            if (viewHeight == 0 || viewWidth == 0) {
-                ViewTreeObserver vto = holder.img.getViewTreeObserver();
-
-                vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        viewHeight = holder.img.getHeight();
-                        viewWidth = holder.img.getWidth();
-
-                        Bitmap img = UtilityClass.populateImage(context, uri, false, viewWidth, viewHeight);
-                        holder.img.setImageBitmap(img);
-                        holder.img.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        current.setImg(img);
-
+                    }else{
+                        Log.e("THIS", "onBindViewHolder: "+"Cant load Original image" );
                     }
-                });
-            } else {
-                Bitmap img = UtilityClass.populateImage(context, uri, false, viewWidth, viewHeight);
-                holder.img.setImageBitmap(img);
-                current.setImg(img);
-            }
-            */
-            Bitmap image=null;
-            try{
-                image=BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uri));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            if(image!=null){
-                holder.img.setImageBitmap(image);
-                current.setImg(image);
-            }else{
-                images.remove(current);
-//                notifyDataSetChanged();
-            }
+                }else{
+                    //already edited
 
-        }else{
+                    final Uri uri=Uri.parse(current.getEditedUri());
+                    Bitmap image=UtilityClass.populateImage(context,uri,false,viewWidth,viewHeight);
+                    if(image!=null){
+                        ((MyDocumentActivity)context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                holder.img.setImageBitmap(image);
+                                holder.pbar.setVisibility(View.INVISIBLE);
+                            }
+                        });
+                    }else{
+                        Log.e("THIS", "onBindViewHolder: "+"Can't load Edited Image" );
+                        ((MyDocumentActivity)context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //show the reset button
+                            }
+                        });
+                    }
 
-            holder.img.setImageBitmap(current.getImg());
-        }
+                }
+
+            }
+        });
+        t.start();
+//        try {
+//            t.join();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+
 
     }
 
     @Override
     public int getItemCount() {
         return images.size();
+    }
+
+    public void getDimensions(int w,int h){
+        viewWidth=w;
+        viewHeight=h;
     }
 
 

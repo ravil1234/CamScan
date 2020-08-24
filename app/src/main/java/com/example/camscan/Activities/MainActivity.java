@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
     ImageView gallery,single_mode_img,batch_mode_img,last_img;
    boolean single_mode;
    ArrayList<MyPicture > myPictureList;
+   boolean isNew=true;
+   MyDocument savedDoc;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -85,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camerax);
         getSupportActionBar().hide();
 
+//        Intent intent=new Intent(this,MyDocumentActivity.class);
+//        startActivity(intent);
+//        finish();
 
         mPreviewView = findViewById(R.id.previewView);
         captureImage = findViewById(R.id.captureImg);
@@ -134,6 +139,16 @@ public class MainActivity extends AppCompatActivity {
             startCamera(); //start camera if permission has been granted by user
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        }
+
+        String from=getIntent().getStringExtra("from");
+        if(from!=null){
+            if(from.equals("InDocRecyclerActivity")){
+                //came from recycelr activity from more pages
+                isNew=false;
+                String doc=getIntent().getStringExtra("MyDocument");
+                savedDoc=UtilityClass.getDocFromJson(doc);
+            }
         }
     }
     private void startCamera() {
@@ -210,17 +225,21 @@ public class MainActivity extends AppCompatActivity {
     }
     private  void call_save_list(String uri)
     {
-        ArrayList<Point> pointArrayList=new ArrayList<>();
-        Point p=new Point(0,0);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,"","",
-                myPictureList.size()+1,pointArrayList));
+
+        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,null,String.valueOf(myPictureList.size()+1),
+                myPictureList.size()+1,null));
         String mypic= UtilityClass.getStringFromObject(myPictureList);
-        MyDocument document=new MyDocument("NewFolder"+System.currentTimeMillis(),
-                System.currentTimeMillis(),(long)0,myPictureList.size(),"");
+
+        MyDocument document=null;
+        if(isNew){
+            document=new MyDocument("NewFolder"+System.currentTimeMillis(),
+                    System.currentTimeMillis(),(long)0,myPictureList.size(),"");
+        }else{
+            document=savedDoc;
+            document.setpCount(document.getpCount()+myPictureList.size());
+            document.setTimeEdited(System.currentTimeMillis());
+        }
+
         String mydoc=UtilityClass.getStringFromObject(document);
         if(single_mode)
         {
@@ -228,6 +247,8 @@ public class MainActivity extends AppCompatActivity {
              intent.putExtra("MyPicture",mypic);
              intent.putExtra("MyDocument",mydoc);
               startActivity(intent);
+              isNew=true;
+              finish();
         }
         if(myPictureList.size()>0)
             tick_img.setVisibility(View.VISIBLE);
@@ -242,11 +263,12 @@ public class MainActivity extends AppCompatActivity {
                 i.putExtra("MyPicture",mypic);
                 i.putExtra("MyDocument",mydoc);
                 startActivity(i);
+                isNew=true;
+                finish();
             }
         });
     }
-  private File  saveimagefile()
-  {
+  private File  saveimagefile(){
       File dir;
       File f=null;
       if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q){

@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:background="#D6D5D5"
         >
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -21,43 +21,61 @@
             <androidx.viewpager2.widget.ViewPager2
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="4"
+                android:layout_weight="1"
                 android:scrollbars="horizontal"
                 android:id="@+id/in_doc_pageViewer"
-                android:paddingStart="40dp"
-                android:paddingEnd="40dp"
-                android:layout_marginTop="16dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:layout_marginBottom="16dp"
                 />
-            <RelativeLayout
-                android:id="@+id/in_doc_mini_r_cont"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/in_doc_mini_rview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:listitem="@layout/item_filter_rview"
-                    android:scrollbars="horizontal"
-                    android:layout_centerVertical="true"
-                    android:scrollbarSize="0dp"
-                    />
-            </RelativeLayout>
             <include layout="@layout/fragment_in_doc_page_settings"
-                android:visibility="gone"
                 android:id="@+id/in_doc_page_setting"
-                android:layout_weight="2"
-                android:layout_height="0dp"
+                android:visibility="gone"
+                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 />
+        </LinearLayout>
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            >
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/in_doc_bottom_sheet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_behavior="@string/bottom_sheet_behavior"
+                app:behavior_hideable="true"
+                app:behavior_peekHeight="25dp"
+                >
+                <LinearLayout
+                    android:id="@+id/in_doc_mini_r_cont"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    >
+                    <ImageView
+                        android:id="@+id/in_doc_recyclerDraggable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_more_horiz_black_24dp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_alignParentBottom="true"
+                        />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/in_doc_mini_rview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:listitem="@layout/item_in_doc_mini_object"
+                        android:scrollbars="horizontal"
+                        android:layout_centerVertical="true"
+                        android:scrollbarSize="0dp"
+                        />
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 
 
 
-        </androidx.appcompat.widget.LinearLayoutCompat>
         <include layout="@layout/fragment_in_doc_share"
             android:visibility="gone"
             android:id="@+id/in_doc_share_window"

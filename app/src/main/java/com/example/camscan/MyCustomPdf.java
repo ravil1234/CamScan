@@ -237,7 +237,6 @@ public class MyCustomPdf {
             if(stamp!=null) {
                 try {
                     writer.getDirectContent().addImage(stamp);
-                    Log.e("HERE", "onEndPage: "+"HERE" );
                 } catch (DocumentException e) {
                     e.printStackTrace();
                     Log.e("HERE", "onEndPage: "+"HERE2" );

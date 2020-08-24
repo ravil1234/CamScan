@@ -6,8 +6,13 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.util.Log;
+
 import com.example.camscan.ScriptC_BCE;
 import com.example.camscan.ScriptC_FlatCorrection;
+
+import static androidx.camera.core.CameraXThreads.TAG;
+
 public class FlatCorrection {
 
     RenderScript rs;
@@ -90,20 +95,26 @@ public class FlatCorrection {
 
         ScriptC_BCE script3=new ScriptC_BCE(rs);
 
-        Bitmap res=Bitmap.createBitmap(image);
+       // Bitmap res=Bitmap.createBitmap(image);
 
         tmpIn=Allocation.createFromBitmap(rs,corrected);
         tmpOut=Allocation.createTyped(rs,tmpIn.getType());
 
-        script3.invoke_setVals(getFactor(80),40,40);
+//        int AvgMean=(int)((mean[0]+mean[1]+mean[2])/3);
+//        if(AvgMean<160){
+//            script3.invoke_setVals(getFactor(80),70,60);
+//        }else{
+            script3.invoke_setVals(getFactor(70),60,-15);
+        //}
+
         script3.forEach_Evaluate(tmpIn,tmpOut);
 
-        tmpOut.copyTo(res);
+        tmpOut.copyTo(image);
 
         tmpIn.destroy();
         tmpOut.destroy();
         script3.destroy();
-        return res;
+        return image;
 
 
 
