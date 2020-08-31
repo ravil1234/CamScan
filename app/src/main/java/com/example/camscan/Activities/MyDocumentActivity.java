@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,9 +62,11 @@ import com.example.camscan.RenderScriptJava.Filter1;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
 import com.example.camscan.RenderScriptJava.GrayScale;
 import com.example.camscan.RenderScriptJava.Inversion;
+import com.example.camscan.RenderScriptJava.rotator;
 import com.example.camscan.UtilityClass;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
 
 import org.spongycastle.pqc.math.ntru.util.Util;
 
@@ -73,6 +76,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class MyDocumentActivity extends AppCompatActivity {
 
@@ -158,7 +162,31 @@ public class MyDocumentActivity extends AppCompatActivity {
             if(did!=-1){
                 //from on item click
                 currDoc=getDocFromDatabase(did);
-                list=getImagesFromDatabase(did);
+                List<MyPicture> lst =getImagesFromDatabase(did);
+                if(lst!=null){
+                    list.addAll(lst);
+                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (MyPicture p:list) {
+                            if (p.getEditedUri() != null) {
+                                Bitmap b = UtilityClass.populateImage(MyDocumentActivity.this, Uri.parse(p.getEditedUri()),
+                                        true, 0, 0);
+                                tNails.add(b);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        miniAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }).start();
+
+                adapter.notifyDataSetChanged();
+
             }else{
                 //from import images
 
@@ -739,6 +767,19 @@ public class MyDocumentActivity extends AppCompatActivity {
 
                 break;
             }
+            case UtilityClass.RETAKE_REQ_CODE:{
+                if(resultCode==RESULT_OK){
+                    //now image is updated
+                    int currItem=vp2.getCurrentItem();
+                    MyPicture currPic=list.get(currItem);
+                    //so that it wont go back
+                    currPic.setCoordinates(null);
+                    onEditClicked(null);
+                }else{
+                    Toast.makeText(this, "Canceled", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
         }
     }
 
@@ -844,6 +885,10 @@ public class MyDocumentActivity extends AppCompatActivity {
     private void updatePic(MyPicture pic){
         MyDatabase db=MyDatabase.getInstance(this);
         db.myPicDao().updatePic(pic);
+    }
+    private void deletePicFromDB(MyPicture pic){
+        MyDatabase db=MyDatabase.getInstance(MyDocumentActivity.this);
+        db.myPicDao().deletePic(pic);
     }
     //DATABASE END
 
@@ -1286,6 +1331,307 @@ public class MyDocumentActivity extends AppCompatActivity {
     }
     //EMAIL END
 
+
+    //PAGES
+    public void onSwapLeftClicked(View view){
+        int itemPos=vp2.getCurrentItem();
+        MyPicture currPic=list.get(itemPos);
+        if(itemPos!=0){
+            MyPicture leftPic=list.get(itemPos-1);
+            int currPos=currPic.getPosition();
+            currPic.setPosition(leftPic.getPosition());
+            leftPic.setPosition(currPos);
+            updatePic(leftPic);
+            updatePic(currPic);
+            list.set(itemPos,leftPic);
+            list.set(itemPos-1,currPic);
+            adapter.notifyDataSetChanged();
+            //swap item pos and itemPos -1 in tNails
+            Bitmap tmp=tNails.get(itemPos);
+            tNails.set(itemPos,tNails.get(itemPos-1));
+            tNails.set(itemPos-1,tmp);
+            miniAdapter.notifyDataSetChanged();
+            vp2.setCurrentItem(itemPos-1);
+        }
+    }
+
+    public void onRetakeClicked(View view){
+        int currItem=vp2.getCurrentItem();
+        MyPicture currPic=list.get(currItem);
+        //so that it wont go back
+        currPic.setImg(null);
+
+        String jsonString=new Gson().toJson(currPic);
+        String jsonDoc=new Gson().toJson(currDoc);
+
+        Intent intent=new Intent(MyDocumentActivity.this,SingleCameraActivity.class);
+        intent.putExtra("PICTURE_URI",currPic.getOriginalUri());
+        startActivityForResult(intent,UtilityClass.RETAKE_REQ_CODE);
+    }
+
+    public void onEditClicked(View view){
+        int currItem=vp2.getCurrentItem();
+        MyPicture currPic=list.get(currItem);
+        //so that it wont go back
+        currPic.setImg(null);
+        ArrayList<MyPicture> pics=new ArrayList<>();
+        pics.add(currPic);
+
+        String jsonString=UtilityClass.getStringFromObject(pics);
+        String jsonDoc=UtilityClass.getStringFromObject(currDoc);
+        if(jsonString!=null && jsonDoc!=null){
+            //Send it both back to Bounding Box activity
+            Intent intent=new Intent(MyDocumentActivity.this,BoxActivity.class);
+            intent.putExtra("MyPicture",jsonString);
+            intent.putExtra("MyDocument",jsonDoc);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    public void onSwapRightClicked(View view){
+        int itemPos=vp2.getCurrentItem();
+        MyPicture currPic=list.get(itemPos);
+        if(itemPos<list.size()-1){
+            MyPicture rightPic=list.get(itemPos+1);
+            int currPos=currPic.getPosition();
+            currPic.setPosition(rightPic.getPosition());
+            rightPic.setPosition(currPos);
+            updatePic(rightPic);
+            updatePic(currPic);
+            list.set(itemPos,rightPic);
+            list.set(itemPos+1,currPic);
+            adapter.notifyItemChanged(itemPos);
+            adapter.notifyItemChanged(itemPos+1);
+            //swap item pos and itemPos -1 in tNails
+            Bitmap tmp=tNails.get(itemPos);
+            tNails.set(itemPos,tNails.get(itemPos+1));
+            tNails.set(itemPos+1,tmp);
+            miniAdapter.notifyDataSetChanged();
+            vp2.setCurrentItem(itemPos+1);
+        }
+    }
+    public void onDeleteClicked(View view){
+        if(list.size()>1) {
+            int currItem = vp2.getCurrentItem();
+            MyPicture currPic = list.get(currItem);
+            String uriEdited = currPic.getEditedUri();
+            String uriOriginal = currPic.getOriginalUri();
+            list.remove(currItem);
+            tNails.remove(currItem);
+            miniAdapter.notifyDataSetChanged();
+            adapter.notifyItemChanged(currItem);
+            resetPositions(currPic.getPosition());
+            deletePicFromDB(currPic);
+            UtilityClass.deleteFromStorage(Uri.parse(uriEdited));
+            UtilityClass.deleteFromStorage(Uri.parse(uriOriginal));
+        }else{
+            AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
+            builder.setTitle("Delete");
+            builder.setMessage("Deleting this image will delete this document");
+            builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    deletePicFromDB(list.get(0));
+                    UtilityClass.deleteFromStorage(Uri.parse(list.get(0).getEditedUri()));
+                    UtilityClass.deleteFromStorage(Uri.parse(list.get(0).getOriginalUri()));
+                    list.clear();
+                    MyDatabase db=MyDatabase.getInstance(MyDocumentActivity.this);
+                    db.myDocumentDao().deleteDoc(currDoc);
+                    finish();
+                }
+            }).setNegativeButton("Cancel",null);
+
+            builder.create().show();
+        }
+    }
+
+    private void resetPositions(int deletedPos) {
+        for(MyPicture p:list){
+            p.setPosition(list.indexOf(p)+1);
+            updatePic(p);
+        }
+    }
+
+    public void onShareClicked(View view){
+        int index=vp2.getCurrentItem();
+        MyPicture p =list.get(index);
+        Intent intent=new Intent(Intent.ACTION_SEND);
+        intent.setType("image/*");
+        //Log.e("ATG", "onShareClicked: "+p.getEditedUri() );
+        intent.putExtra(Intent.EXTRA_STREAM,Uri.parse(p.getEditedUri()));
+        startActivity(Intent.createChooser(intent,"Share"));
+
+        closePageOption();
+        isImgOpen=false;
+    }
+    public void onRotateClicked(View view){
+
+        int currPicIndex=vp2.getCurrentItem();
+        MyPicture currPic=list.get(currPicIndex);
+
+        AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
+        View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
+        builder.setView(v);
+        AlertDialog d=builder.create();
+        d.show();
+        stopInteraction();
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap currBitmap=BitmapFactory.decodeFile(Uri.parse(currPic.getEditedUri()).getPath());
+                if(currBitmap==null){
+                    //load bit map
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            d.dismiss();
+                            resumeInteraction();
+                            Toast.makeText(MyDocumentActivity.this, "File NOT EXIST ", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                }else{
+
+
+                    rotator r=new rotator(MyDocumentActivity.this);
+                    currBitmap=r.rotate(currBitmap,true);
+
+                    tNails.set(currPicIndex,Bitmap.createScaledBitmap(currBitmap,100,100,false));
+                    UtilityClass.saveImage(MyDocumentActivity.this,currBitmap,Uri.parse(currPic.getEditedUri()).getLastPathSegment(),false);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            d.dismiss();
+                            resumeInteraction();
+                            adapter.notifyItemChanged(currPicIndex);
+
+                            miniAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+
+                }
+
+            }
+        }).start();
+
+    }
+    public void onMoveClicked(View view){
+        AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
+        View view1=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_move_to,null);
+        builder.setView(view1);
+        builder.setTitle("Move To");
+
+        TextView prev,curr,next;
+        SeekBar sBar;
+        prev=view1.findViewById(R.id.move_to_prev);
+        curr=view1.findViewById(R.id.move_to_curr);
+        next=view1.findViewById(R.id.move_to_next);
+        sBar=view1.findViewById(R.id.move_to_seekbar);
+
+        //initialize
+        int index=vp2.getCurrentItem();
+        Point currPoint=new Point();
+        curr.setText(String.valueOf(index+1));
+        ArrayList<Point> intervals=new ArrayList<>();
+        for(int i=0;i<=list.size();i++){
+            Point p=new Point(i,i+1);
+            if(p.y==index+1){
+                p.y+=1;
+                currPoint=p;
+
+            }
+            if(p.x!=index+1){
+                intervals.add(p);
+//                Log.e("THA", "onMoveClicked: "+p.x+" "+p.y+" "+list.size() );
+            }
+        }
+
+        if(currPoint.x==0){
+            prev.setText("s");
+        }else{
+            prev.setText(String.valueOf(currPoint.x));
+        }
+        if(currPoint.y==intervals.size()+1){
+            next.setText("e");
+        }else {
+            next.setText(String.valueOf(currPoint.y));
+        }
+
+        sBar.setMax(intervals.size()-1);
+        sBar.setProgress(index);
+        sBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                Point p=intervals.get(i);
+                if(p.x==0){
+                    prev.setText("s");
+                }else{
+                    prev.setText(String.valueOf(p.x));
+                }
+                if(p.y==intervals.size()+1){
+                    next.setText("e");
+                }else {
+                    next.setText(String.valueOf(p.y));
+                }
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        //initialize END
+
+
+        builder.setPositiveButton("Move", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Point p=intervals.get(sBar.getProgress());
+                MyPicture pic=list.get(index);
+                list.add(p.x,pic);
+                Bitmap cur=tNails.get(index);
+                tNails.add(p.x,cur);
+                if(index>p.x){
+                    list.remove(index+1);
+                    tNails.remove(index+1);
+                }else{
+                    list.remove(index);
+                    tNails.remove(index);
+                }
+                adapter.notifyDataSetChanged();
+                miniAdapter.notifyDataSetChanged();
+                closePageOption();
+                isImgOpen=false;
+                vp2.setCurrentItem(p.x,true);
+
+
+                for(MyPicture l:list){
+                    l.setPosition(list.indexOf(l)+1);
+                    updatePic(l);
+
+                }
+
+            }
+        }).setNegativeButton("Cancel",null);
+//        AlertDialog d=builder.create();
+
+
+        builder.create().show();
+    }
+    //PAGES END
+
     //COMMON
     private void reset(){
         if(isShareOpen){
@@ -1323,8 +1669,6 @@ public class MyDocumentActivity extends AppCompatActivity {
     }
 
     //COMMON END
-
-
 }
 
 

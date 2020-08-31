@@ -9,5 +9,15 @@
         android:layout_height="wrap_content"
         android:scrollbars="none">
     </androidx.recyclerview.widget.RecyclerView>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="50dp"
+        android:src="@drawable/ic_camera_alt_black_24dp"
+        android:onClick="gotoCamera"
+        />
 
 </RelativeLayout>

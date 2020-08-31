@@ -5,9 +5,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+
 import com.example.camscan.AdapterClass.GridViewImages;
 import com.example.camscan.AdapterClass.ListViewImages;
 import com.example.camscan.Database.MyDatabase;
@@ -48,8 +52,9 @@ public class HomeScreenActivity extends AppCompatActivity {
        }
         GridLayoutManager mGridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 3);
         recyclerViewlayout.setLayoutManager(mGridLayoutManager);
-        GridViewImages myAdapter = new  GridViewImages(HomeScreenActivity.this, gridViewImagesListList);
+        GridViewImages myAdapter = new  GridViewImages(HomeScreenActivity.this, gridViewImagesListList,new MyClickListener());
         recyclerViewlayout.setAdapter(myAdapter);
+
     }
     public  String dateformatter(long timestamp)
     {
@@ -73,17 +78,33 @@ public class HomeScreenActivity extends AppCompatActivity {
             recyclerViewlayout.setHasFixedSize(true);
             LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
             recyclerViewlayout.setLayoutManager(linearLayoutManager);
-            ListViewImages myAdapter = new  ListViewImages(HomeScreenActivity.this, gridViewImagesListList);
+            ListViewImages myAdapter = new  ListViewImages(HomeScreenActivity.this, gridViewImagesListList,new MyClickListener());
             recyclerViewlayout.setAdapter(myAdapter);
             return(true);
         case R.id.grid:
             //add the function to perform here
             GridLayoutManager mGridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 3);
             recyclerViewlayout.setLayoutManager(mGridLayoutManager);
-            GridViewImages myAdapter1 = new  GridViewImages(HomeScreenActivity.this, gridViewImagesListList);
+            GridViewImages myAdapter1 = new  GridViewImages(HomeScreenActivity.this, gridViewImagesListList,new MyClickListener());
             recyclerViewlayout.setAdapter(myAdapter1);
             return(true);
      }
         return(super.onOptionsItemSelected(item));
+    }
+    public void gotoCamera(View view){
+        Intent intent=new Intent(HomeScreenActivity.this,MainActivity.class);
+        startActivity(intent);
+    }
+
+    public class MyClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            GridViewImagesList cur=gridViewImagesListList.get(recyclerViewlayout.getChildLayoutPosition(view));
+            Intent intent=new Intent(HomeScreenActivity.this,MyDocumentActivity.class);
+            intent.putExtra("from","HomeScreenActivity");
+            intent.putExtra("did",cur.getDid());
+            startActivity(intent);
+        }
     }
 }

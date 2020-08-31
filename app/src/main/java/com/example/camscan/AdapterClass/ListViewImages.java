@@ -13,15 +13,19 @@ public class ListViewImages extends RecyclerView.Adapter<ListViewHolder> {
 
     private Context mContext;
     private List<GridViewImagesList> gridViewImagesLists;
+    View.OnClickListener mListener;
 
-    public ListViewImages(Context mContext, List<GridViewImagesList> serviceObjects) {
+    public ListViewImages(Context mContext, List<GridViewImagesList> serviceObjects, View.OnClickListener listener) {
         this.mContext = mContext;
         this.gridViewImagesLists = serviceObjects;
+        mListener=listener;
+
     }
 
     @Override
     public ListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View mView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_view_homescreen, parent, false);
+
         return new ListViewHolder(mView);
     }
     @Override
@@ -30,11 +34,7 @@ public class ListViewImages extends RecyclerView.Adapter<ListViewHolder> {
         holder.mTitle.setText(gridViewImagesList.getImage_date());
 //        Picasso.with(mContext).load(serviceObject.getImage()).placeholder(R.drawable.accept_terms).into(holder.mImage);
 //        holder.mTitle.setText(serviceObject.getName());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            }
-        });
+        holder.itemView.setOnClickListener(mListener);
     }
     @Override
     public int getItemCount() {
