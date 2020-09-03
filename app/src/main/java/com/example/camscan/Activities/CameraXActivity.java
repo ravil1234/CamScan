@@ -1,7 +1,9 @@
 package com.example.camscan.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -14,6 +16,7 @@ import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
@@ -41,9 +44,13 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 //import com.example.camscan.UtilityClass;
@@ -54,6 +61,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,36 +79,79 @@ public class CameraXActivity extends AppCompatActivity {
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
     private int flashMode;
     PreviewView mPreviewView;
-    ImageView captureImage;
+    View captureImage,view;
     TextView tick_img;
-    View view;
     MotionEvent motionEvent;
-    CardView flashmode_btn;
-    ImageView gallery,single_mode_img,batch_mode_img,last_img;
+    MyDocument savedDoc;
+    ImageView flashmode_btn;
+    ImageView gallery,single_mode_img,batch_mode_img,last_img,focus_camera;
     boolean single_mode;
+    boolean isNew=true;
+    RelativeLayout show_grid_view;
+    LinearLayout line_horizontal,line_vertical;
   ArrayList<MyPicture > myPictureList;
+  SharedPreferences preferences;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camerax);
+        setContentView(R.layout.testing_layout);
         getSupportActionBar().hide();
+        preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
         mPreviewView = findViewById(R.id.previewView);
-        captureImage = findViewById(R.id.captureImg);
+        captureImage = findViewById(R.id.captureImage);
         flashmode_btn = findViewById(R.id.flash_mode);
         gallery = findViewById(R.id.gallery);
         single_mode_img=findViewById(R.id.single_mode);
         batch_mode_img=findViewById(R.id.batch_mode);
         tick_img=findViewById(R.id.tick_img);
         last_img=findViewById(R.id.last_img);
+        show_grid_view=findViewById(R.id.show_hide_grid);
+        line_horizontal=findViewById(R.id.line_horizontal);
+        line_vertical=findViewById(R.id.line_vertical);
+        focus_camera=findViewById(R.id.focus_camera);
         flashMode = ImageCapture.FLASH_MODE_AUTO;
         myPictureList=new ArrayList<>();
         single_mode=true;
         last_img.setVisibility(View.INVISIBLE);
+        if(preferences.contains("flash_mode"))
+        {
+            flashMode=preferences.getInt("flash_mode",0);
+        }
+        if(preferences.contains("grid"))
+        {
+            if(preferences.getInt("grid",0)==1)
+            {
+                line_vertical.setVisibility(View.VISIBLE);
+                line_horizontal.setVisibility(View.VISIBLE);
+                focus_camera.setVisibility(View.VISIBLE);
+            }
+        }
         flashmode_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Dialog box;
+                showPopupMenu(view,true,R.style.MyPopupOtherStyle);
+            }
+        });
+        show_grid_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                if(line_horizontal.getVisibility()==View.GONE)
+                {
+                    line_horizontal.setVisibility(View.VISIBLE);
+                    line_vertical.setVisibility(View.VISIBLE);
+                    focus_camera.setVisibility(View.VISIBLE);
+                    preferences.edit().putInt("grid",1).apply();
+                }
+                else
+                {
+                    line_horizontal.setVisibility(View.GONE);
+                    line_vertical.setVisibility(View.GONE);
+                    focus_camera.setVisibility(View.GONE);
+                    preferences.edit().putInt("grid",-1).apply();
+                }
             }
         });
         gallery.setOnClickListener(new View.OnClickListener() {
@@ -117,7 +169,7 @@ public class CameraXActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 single_mode=false;
-                Toast.makeText(CameraXActivity.this,"Batch_Mode On",Toast.LENGTH_LONG).show();
+                Toast.makeText(CameraXActivity.this,"Batch Mode On",Toast.LENGTH_LONG).show();
             }
         });
         single_mode_img.setOnClickListener(new View.OnClickListener() {
@@ -125,7 +177,7 @@ public class CameraXActivity extends AppCompatActivity {
             public void onClick(View view)
             {
                 single_mode=true;
-                Toast.makeText(CameraXActivity.this,"Single_Mode On",Toast.LENGTH_LONG).show();
+                Toast.makeText(CameraXActivity.this,"Single Mode On",Toast.LENGTH_LONG).show();
             }
         });
         if (allPermissionsGranted()) {
@@ -133,6 +185,67 @@ public class CameraXActivity extends AppCompatActivity {
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
+        String from=getIntent().getStringExtra("from");
+        if(from!=null)
+        {
+            if(from.equals("InDocRecyclerActivity")){
+                //came from recycelr activity from more pages
+                isNew=false;
+                String doc=getIntent().getStringExtra("MyDocument");
+                savedDoc=UtilityClass.getDocFromJson(doc);
+            }
+        }
+    }
+    private void showPopupMenu(View anchor, boolean isWithIcons, int style) {
+        //init the wrapper with style
+        Context wrapper = new ContextThemeWrapper(this, style);
+        PopupMenu popup = new PopupMenu(wrapper, anchor);
+        if (isWithIcons) {
+            try {
+                Field[] fields = popup.getClass().getDeclaredFields();
+                for (Field field : fields) {
+                    if ("mPopup".equals(field.getName())) {
+                        field.setAccessible(true);
+                        Object menuPopupHelper = field.get(popup);
+                        assert menuPopupHelper != null;
+                        Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                        Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+                        setForceIcons.invoke(menuPopupHelper, true);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        popup.getMenuInflater().inflate(R.menu.flash_popup_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.flash_auto:
+                        flashMode=ImageCapture.FLASH_MODE_AUTO;
+                        flashmode_btn.setImageResource(R.drawable.automatic_flash);
+                        preferences.edit().putInt("flash_mode",flashMode).apply();
+                        Toast.makeText(CameraXActivity.this, "Flash Auto !", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.flash_on:
+                        flashMode=ImageCapture.FLASH_MODE_ON;
+                        flashmode_btn.setImageResource(R.drawable.flash);
+                        preferences.edit().putInt("flash_mode",flashMode).apply();
+                        Toast.makeText(CameraXActivity.this, "Flash On !", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.flash_off:
+                        flashMode=ImageCapture.FLASH_MODE_OFF;
+                        flashmode_btn.setImageResource(R.drawable.flash_off);
+                        preferences.edit().putInt("flash_mode",flashMode).apply();
+                        Toast.makeText(CameraXActivity.this, "Flash Off !", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                return true;
+            }
+        });
+        popup.show();
     }
     private void startCamera() {
 
@@ -209,43 +322,90 @@ public class CameraXActivity extends AppCompatActivity {
             });
         });
     }
-    private  void call_save_list(String uri)
-    {
-        ArrayList<Point> pointArrayList=new ArrayList<>();
-        Point p=new Point(0,0);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        pointArrayList.add(p);
-        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,"","",
-                myPictureList.size()+1,pointArrayList));
-        String mypic= UtilityClass.getStringFromObject(myPictureList);
-        MyDocument document=new MyDocument("NewFolder"+System.currentTimeMillis(),
+//    private  void call_save_list(String uri)
+//    {
+//        ArrayList<Point> pointArrayList=new ArrayList<>();
+//        Point p=new Point(0,0);
+//        pointArrayList.add(p);
+//        pointArrayList.add(p);
+//        pointArrayList.add(p);
+//        pointArrayList.add(p);
+//        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,"","",
+//                myPictureList.size()+1,pointArrayList));
+//        String mypic= UtilityClass.getStringFromObject(myPictureList);
+//        MyDocument document=new MyDocument("NewFolder"+System.currentTimeMillis(),
+//                System.currentTimeMillis(),(long)0,myPictureList.size(),"");
+//        String mydoc=UtilityClass.getStringFromObject(document);
+//        if(single_mode)
+//        {
+//            Intent intent = new Intent(CameraXActivity.this, BoxActivity.class);
+//            intent.putExtra("MyPicture",mypic);
+//            intent.putExtra("MyDocument",mydoc);
+//            startActivity(intent);
+//        }
+//        if(myPictureList.size()>0)
+//            tick_img.setVisibility(View.VISIBLE);
+//        gallery.setVisibility(View.GONE);
+//        last_img.setVisibility(View.VISIBLE);
+//        Picasso.with(CameraXActivity.this).load(uri).into(last_img);
+//        tick_img.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view)
+//            {
+//                Intent i=new Intent(CameraXActivity.this,BoxActivity.class);
+//                i.putExtra("MyPicture",mypic);
+//                i.putExtra("MyDocument",mydoc);
+//                startActivity(i);
+//            }
+//        });
+//    }
+private  void call_save_list(String uri)
+{
+
+    myPictureList.add(new MyPicture(myPictureList.size()+1,uri,null,String.valueOf(myPictureList.size()+1),
+            myPictureList.size()+1,null));
+    String mypic= UtilityClass.getStringFromObject(myPictureList);
+
+    MyDocument document=null;
+    if(isNew){
+        document=new MyDocument("NewFolder"+System.currentTimeMillis(),
                 System.currentTimeMillis(),(long)0,myPictureList.size(),"");
-        String mydoc=UtilityClass.getStringFromObject(document);
-        if(single_mode)
-        {
-            Intent intent = new Intent(CameraXActivity.this, BoxActivity.class);
-            intent.putExtra("MyPicture",mypic);
-            intent.putExtra("MyDocument",mydoc);
-            startActivity(intent);
-        }
-        if(myPictureList.size()>0)
-            tick_img.setVisibility(View.VISIBLE);
-        gallery.setVisibility(View.GONE);
-        last_img.setVisibility(View.VISIBLE);
-        Picasso.with(CameraXActivity.this).load(uri).into(last_img);
-        tick_img.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Intent i=new Intent(CameraXActivity.this,BoxActivity.class);
-                i.putExtra("MyPicture",mypic);
-                i.putExtra("MyDocument",mydoc);
-                startActivity(i);
-            }
-        });
+    }else{
+        document=savedDoc;
+        document.setpCount(document.getpCount()+myPictureList.size());
+        document.setTimeEdited(System.currentTimeMillis());
     }
+
+    String mydoc=UtilityClass.getStringFromObject(document);
+    if(single_mode)
+    {
+        Intent intent = new Intent(CameraXActivity.this, BoxActivity.class);
+        intent.putExtra("MyPicture",mypic);
+        intent.putExtra("MyDocument",mydoc);
+        startActivity(intent);
+        isNew=true;
+        finish();
+    }
+    if(myPictureList.size()>0)
+        tick_img.setVisibility(View.VISIBLE);
+    gallery.setVisibility(View.GONE);
+    last_img.setVisibility(View.VISIBLE);
+    Picasso.with(CameraXActivity.this).load(uri).into(last_img);
+    batch_mode_img.setVisibility(View.GONE);
+    single_mode_img.setVisibility(View.GONE);
+    tick_img.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view)
+        {
+            Intent i=new Intent(CameraXActivity.this,BoxActivity.class);
+            i.putExtra("MyPicture",mypic);
+            i.putExtra("MyDocument",mydoc);
+            startActivity(i);
+            isNew=true;
+            finish();
+        }
+    });
+}
     private File  saveimagefile()
     {
         File dir;

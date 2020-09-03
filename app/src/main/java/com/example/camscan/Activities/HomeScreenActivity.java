@@ -92,7 +92,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         return(super.onOptionsItemSelected(item));
     }
     public void gotoCamera(View view){
-        Intent intent=new Intent(HomeScreenActivity.this,MainActivity.class);
+        Intent intent=new Intent(HomeScreenActivity.this,CameraXActivity.class);
         startActivity(intent);
     }
 

@@ -1,36 +1,86 @@
 package com.example.camscan.Activities;
 import  androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.cardview.widget.CardView;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import android.content.Context;
 import  android.graphics.Bitmap;
 import  android.graphics.BitmapFactory;
 import  android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.MenuItem;
+import android.view.View;
 import  android.widget.ImageView;
+import android.widget.Toast;
+
 import com.example.camscan.ObjectClass.BitmapObject;
 import com.example.camscan.R;
 import com.squareup.picasso.Picasso;
 
 public class CapturedImageActivity extends AppCompatActivity
 {
+    CardView top_card_view;
+    ImageView flash_mode;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_captured_image);
-        ImageView imageView =findViewById(R.id.imageView);
-//        Bundle extras = getIntent().getExtras();
-//        assert extras != null;
-//        byte[] byteArray = extras.getByteArray("captured_image");
-//        Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray != null ? byteArray.length : 0);
+        setContentView(R.layout.testing_layout);
+        getSupportActionBar().hide();
+        top_card_view=findViewById(R.id.top_card_view);
+        flash_mode=findViewById(R.id.flash_mode);
+        flash_mode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPopupMenu(view,true,R.style.MyPopupOtherStyle);
+            }
+        });
 
-//        if(BitmapObject.bitmap_image!=null)
-//        {
-//            imageView.setImageBitmap(BitmapObject.bitmap_image);
-//            Log.d("resolution",BitmapObject.bitmap_image.getHeight()+" * "+BitmapObject.bitmap_image.getWidth());
-//        }
-        Log.d("image_uri","-> "+getIntent().getStringExtra("uri"));
-        Bitmap myBitmap = BitmapFactory.decodeFile(getIntent().getStringExtra("uri"));
-        imageView.setImageBitmap(myBitmap);
-      // Picasso.with(this).load(getIntent().getStringExtra("uri")).into(imageView);
-          BitmapObject.bitmap_image=null;
+      //  top_card_view.setBackgroundResource(R.drawable.card_view_background);
+    }
+    private void showPopupMenu(View anchor, boolean isWithIcons, int style) {
+        //init the wrapper with style
+        Context wrapper = new ContextThemeWrapper(this, style);
+        PopupMenu popup = new PopupMenu(wrapper, anchor);
+        if (isWithIcons) {
+            try {
+                Field[] fields = popup.getClass().getDeclaredFields();
+                for (Field field : fields) {
+                    if ("mPopup".equals(field.getName())) {
+                        field.setAccessible(true);
+                        Object menuPopupHelper = field.get(popup);
+                        assert menuPopupHelper != null;
+                        Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                        Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+                        setForceIcons.invoke(menuPopupHelper, true);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        popup.getMenuInflater().inflate(R.menu.flash_popup_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.flash_auto:
+                        Toast.makeText(CapturedImageActivity.this, "Flash Auto !", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.flash_on:
+                        Toast.makeText(CapturedImageActivity.this, "Flash On !", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.flash_off:
+                        Toast.makeText(CapturedImageActivity.this, "Flash Off !", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                return true;
+            }
+        });
+        popup.show();
     }
 }

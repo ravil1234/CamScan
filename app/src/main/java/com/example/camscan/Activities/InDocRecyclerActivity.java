@@ -1684,7 +1684,7 @@ public class InDocRecyclerActivity extends AppCompatActivity {
     //EXTRA
     private void addMorePages() {
         //goto camera activity
-        Intent intent=new Intent(InDocRecyclerActivity.this,MainActivity.class);
+        Intent intent=new Intent(InDocRecyclerActivity.this,CameraXActivity.class);
         intent.putExtra(UtilityClass.getStringFromObject(currentDoc),"MyDocument");
         intent.putExtra("from","InDocRecyclerActivity");
         startActivity(intent);

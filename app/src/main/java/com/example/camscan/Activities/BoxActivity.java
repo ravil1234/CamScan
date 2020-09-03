@@ -368,7 +368,7 @@ public class BoxActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(BoxActivity.this);
         View view2 = LayoutInflater.from(this).inflate(R.layout.fragment_progress, null);
         builder.setView(view2);
-        AlertDialog d = builder.create();
+        final AlertDialog d = builder.create();
         d.show();
         stopInteraction();
 
@@ -397,8 +397,6 @@ public class BoxActivity extends AppCompatActivity {
                             adapter.notifyDataSetChanged();
                         }
                     });
-
-
                 }
 
             }
