@@ -2,6 +2,7 @@ package com.example.camscan.Adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,19 +12,25 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.camscan.Activities.MyDocumentActivity;
+import com.example.camscan.Callbacks.ItemMoveCallback;
+import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
-public class InDocMiniAdapter extends RecyclerView.Adapter<InDocMiniAdapter.MyViewHolder> {
+public class InDocMiniAdapter extends RecyclerView.Adapter<InDocMiniAdapter.MyViewHolder> implements ItemMoveCallback.ItemTouchHelperContract {
     private Context context;
     ArrayList<Bitmap> images;
+    ArrayList<MyPicture> pictures;
     View.OnClickListener ocl;
     int selected=0;
-    public InDocMiniAdapter(Context context, ArrayList<Bitmap> imgs, View.OnClickListener ocl){
+    public InDocMiniAdapter(Context context, ArrayList<Bitmap> imgs,ArrayList<MyPicture> pics, View.OnClickListener ocl){
         this.context=context;
         images=imgs;
         this.ocl=ocl;
+        pictures=pics;
     }
 
     @NonNull
@@ -67,4 +74,30 @@ public class InDocMiniAdapter extends RecyclerView.Adapter<InDocMiniAdapter.MyVi
         selected=pos;
     }
 
+    @Override
+    public void onRowMoved(int fromPosition, int toPosition) {
+        if(fromPosition<toPosition){
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(images, i, i + 1);
+                Collections.swap(pictures,i,i+1);
+            }
+        }else{
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(images, i, i - 1);
+                Collections.swap(pictures,i,i-1);
+            }
+        }
+            notifyItemMoved(fromPosition,toPosition);
+        ((MyDocumentActivity)context).updateListFromMiniAdapter(fromPosition,toPosition);
+    }
+
+    @Override
+    public void onRowSelected(MyViewHolder myViewHolder) {
+        myViewHolder.root.setBackgroundColor(Color.GRAY);
+    }
+
+    @Override
+    public void onRowClear(MyViewHolder myViewHolder) {
+        myViewHolder.root.setBackgroundColor(Color.WHITE);
+    }
 }

@@ -39,13 +39,14 @@ public class HomeScreenActivity extends AppCompatActivity {
     private void set_image_list()
     {
        List<MyDocument> myDocuments= MyDatabase.getInstance(this).myDocumentDao().getAllDocs();
+       MyDatabase db=MyDatabase.getInstance(HomeScreenActivity.this);
        for(MyDocument myDocument:myDocuments)
        {
 
             int did=myDocument.getDid();
             String name=myDocument.getdName();
             long date=myDocument.getTimeCreated();
-            int pcount=myDocument.getpCount();
+            int pcount=db.myDocumentDao().getCount(did);
             String fp_uri=myDocument.getfP_URI();
            long date_edited=myDocument.getTimeEdited();
            gridViewImagesListList.add(new GridViewImagesList(did,fp_uri,dateformatter(date),pcount,dateformatter(date_edited)));

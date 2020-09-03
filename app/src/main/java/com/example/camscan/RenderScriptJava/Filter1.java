@@ -2,8 +2,8 @@ package com.example.camscan.RenderScriptJava;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.renderscript.Allocation;
-import android.renderscript.RenderScript;
+import androidx.renderscript.Allocation;
+import androidx.renderscript.RenderScript;
 
 import com.example.camscan.ScriptC_filter1;
 

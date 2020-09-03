@@ -42,6 +42,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
@@ -51,6 +52,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.camscan.Adapters.InDocMiniAdapter;
 import com.example.camscan.Adapters.InDocRecyclerAdapter;
 import com.example.camscan.Adapters.NavMenuAdapter;
+import com.example.camscan.Callbacks.ItemMoveCallback;
 import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.MyCustomPdf;
 import com.example.camscan.Objects.MyDocument;
@@ -140,14 +142,15 @@ public class MyDocumentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_in_doc_recycler);
 
-
+        //Debugger.initialize(this);
         initializeViews();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         initializeNavBar();
-        initializeBottomBar();
+
         initializeVP();
 
+        initializeBottomBar();
     }
 
     private void fillImages() {
@@ -168,7 +171,8 @@ public class MyDocumentActivity extends AppCompatActivity {
                 }
                 new Thread(new Runnable() {
                     @Override
-                    public void run() {
+                    public  void run() {
+                        int index=0;
                         for (MyPicture p:list) {
                             if (p.getEditedUri() != null) {
                                 Bitmap b = UtilityClass.populateImage(MyDocumentActivity.this, Uri.parse(p.getEditedUri()),
@@ -180,19 +184,58 @@ public class MyDocumentActivity extends AppCompatActivity {
                                         miniAdapter.notifyDataSetChanged();
                                     }
                                 });
+                            }else{
+                                //if not edited yet
+                                Bitmap original=BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
+                                if(original!=null){
+                                    original=cornerPin(original,p.getCoordinates(),p.getS_width(),p.getS_height());
+                                    Bitmap emptyBitmap = Bitmap.createBitmap(original.getWidth(), original.getHeight(),
+                                            original.getConfig());
+                                    if(original.sameAs(emptyBitmap)){
+                                        //Toast.makeText(MyDocumentActivity.this, "Can't Crop", Toast.LENGTH_SHORT).show();
+                                        Log.e("Thread", "run: "+"Cant Crop"+p.getEditedName() );
+                                        index++;
+                                        continue;
+                                    }
+                                    original=getFilteredBitmap(original);
+                                    Uri edited=UtilityClass.saveImage(MyDocumentActivity.this,original,Uri.parse(p.getOriginalUri()).getLastPathSegment(),false);
+                                    p.setEditedUri(edited.toString());
+                                    // tNails.set(index,Bitmap.createScaledBitmap(original,100,100,true));
+                                    tNails.add(UtilityClass.populateImage(MyDocumentActivity.this,edited,true,0,0));
+                                    if (original != null) {
+                                        original.recycle();
+                                        original = null;
+                                    }
+
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            //  list.add(p);
+                                            updatePic(p);
+                                            adapter.notifyDataSetChanged();
+                                            miniAdapter.notifyDataSetChanged();
+
+                                        }
+                                    });
+                                }else{
+                                    Log.e("THIS", "run: "+"LOAD FAILED" );
+                                    list.remove(p);
+                                }
+
                             }
+                            index++;
                         }
+                        isLoading=false;
+                        System.gc();
                     }
                 }).start();
-
                 adapter.notifyDataSetChanged();
 
             }else{
-                //from import images
-
-                //create new document
-
-                currDoc=new MyDocument(UtilityClass.getUniqueDocName(),System.currentTimeMillis(),System.currentTimeMillis(),0,null);
+                /*from import images create new document*/
+                long time=System.currentTimeMillis();
+                currDoc=new MyDocument(UtilityClass.appName+UtilityClass.lineSeparator+time%1000000,time,time,null);
                 long newDid=saveDocInDatabase(currDoc);
                 currDoc.setDid((int)newDid);
                 String[] uris=getIntent().getStringArrayExtra("uris");
@@ -206,14 +249,15 @@ public class MyDocumentActivity extends AppCompatActivity {
 
                     if(currPic!=null){
                         final MyPicture p=new MyPicture();
-                        Uri original=UtilityClass.saveImage(MyDocumentActivity.this,currPic,"CSImport",true);
+                        Uri original=UtilityClass.saveImage(MyDocumentActivity.this,currPic,currDoc.getdName()+UtilityClass.lineSeparator+System.currentTimeMillis()%10000,true);
                         p.setDid(currDoc.getDid());
                         p.setOriginalUri(original.toString());
                         p.setCoordinates(null);
                         p.setEditedName(original.getLastPathSegment());
-                        p.setDid(0);
                         p.setPid(0);
+
                         p.setPosition(index++);
+
                         addImageInList(p);
 
                         //now apply filter
@@ -225,6 +269,8 @@ public class MyDocumentActivity extends AppCompatActivity {
                             public synchronized void run() {
                                 Bitmap filtered=getFilteredBitmap(finalCopy);
                                 Uri edited=UtilityClass.saveImage(MyDocumentActivity.this,filtered,Uri.parse(p.getOriginalUri()).getLastPathSegment(),false);
+                                Bitmap n=UtilityClass.populateImage(MyDocumentActivity.this,edited,true,0,0);
+                                tNails.add(n);
                                 p.setEditedUri(edited.toString());
                                 if(ind==uris.length-1){
                                     isLoading=false;
@@ -233,15 +279,16 @@ public class MyDocumentActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         adapter.notifyDataSetChanged();
+                                        miniAdapter.notifyDataSetChanged();
                                     }
                                 });
                             }
                         }).start();
                     }
                 }
-                currDoc.setpCount(list.size());
                 updateDoc(currDoc);
-
+                isLoading=false;
+                System.gc();
             }
 
         }
@@ -249,7 +296,7 @@ public class MyDocumentActivity extends AppCompatActivity {
             //directly from box activity without any filters applied
             String docString=getIntent().getStringExtra("MyDocument");
             String picString=getIntent().getStringExtra("MyPicture");
-            String[] dimss=getIntent().getStringExtra("Dimensions").split(" ");
+
             currDoc=UtilityClass.getDocFromJson(docString);
             ArrayList<MyPicture> newPics=UtilityClass.getListOfPics(picString);
 
@@ -257,17 +304,20 @@ public class MyDocumentActivity extends AppCompatActivity {
                 long i=saveDocInDatabase(currDoc);
                 currDoc.setDid((int)i);
             }
+            ArrayList<MyPicture> oldPics=getImagesFromDatabase(currDoc.getDid());
+            for(MyPicture p:oldPics){
+                Bitmap b=UtilityClass.populateImage(this,Uri.parse(p.getEditedUri()),true,0,0);
+                tNails.add(b);
+                miniAdapter.notifyDataSetChanged();
+            }
+            list.addAll(oldPics);
 
-            list.addAll(getImagesFromDatabase(currDoc.getDid()));
             adapter.notifyDataSetChanged();
-
-            int w=Integer.valueOf(dimss[0]);
-            int h=Integer.valueOf(dimss[1]);
 
 
             for(MyPicture p:newPics){
+                p.setDid(currDoc.getDid());
                 addImageInList(p);
-
             }
 
             new Thread(new Runnable() {
@@ -277,7 +327,7 @@ public class MyDocumentActivity extends AppCompatActivity {
                     for(MyPicture p:newPics){
                         Bitmap original=BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
                         if(original!=null){
-                            original=cornerPin(original,p.getCoordinates(),w,h);
+                            original=cornerPin(original,p.getCoordinates(),p.getS_width(),p.getS_height());
                             Bitmap emptyBitmap = Bitmap.createBitmap(original.getWidth(), original.getHeight(),
                                     original.getConfig());
                             if(original.sameAs(emptyBitmap)){
@@ -289,15 +339,17 @@ public class MyDocumentActivity extends AppCompatActivity {
                             Uri edited=UtilityClass.saveImage(MyDocumentActivity.this,original,Uri.parse(p.getOriginalUri()).getLastPathSegment(),false);
                             p.setEditedUri(edited.toString());
                            // tNails.set(index,Bitmap.createScaledBitmap(original,100,100,true));
-                            p.setDid(currDoc.getDid());
+
                             tNails.add(UtilityClass.populateImage(MyDocumentActivity.this,edited,true,0,0));
                             if (original != null) {
                                 original.recycle();
                                 original = null;
                             }
-                            if(index>=newPics.size()){
+                            if(index==newPics.size()-1){
+                                //last image
                                 isLoading=false;
                             }
+                            index++;
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -310,54 +362,16 @@ public class MyDocumentActivity extends AppCompatActivity {
                             });
                         }else{
                             Log.e("THIS", "run: "+"LOAD FAILED" );
+                            list.remove(p);
                         }
 
 
                     }
+                    System.gc();
                 }
             }).start();
-/*
-            for(MyPicture p:newPics){
-                Bitmap original=BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
-                if(original!=null){
-                    original=cornerPin(original,p.getCoordinates(),w,h);
-                    Bitmap emptyBitmap = Bitmap.createBitmap(original.getWidth(), original.getHeight(),
-                            original.getConfig());
-                    if(original.sameAs(emptyBitmap)){
-                        Toast.makeText(this, "Can't Crop", Toast.LENGTH_SHORT).show();
-                        continue;
-                    }
-                    Bitmap finalOriginal = original;
-                    addImageInList(p);
-                    Thread t=new Thread(new Runnable() {
-                        @Override
-                        public synchronized void run() {
-                            Bitmap filtered=getFilteredBitmap(finalOriginal);
-                            Uri edited=UtilityClass.saveImage(MyDocumentActivity.this,filtered,Uri.parse(p.getOriginalUri()).getLastPathSegment(),false);
-                            p.setEditedUri(edited.toString());
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                  //  list.add(p);
-                                    finalOriginal.recycle();
-                                    adapter.notifyDataSetChanged();
-                                }
-                            });
-                        }
-                    });
-                    t.start();
-                    try {
-                        t.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }else{
-                    Log.e("THIS", "fillImages: "+"Image Load ERROR 212" );
-                    newPics.remove(p);
-                }
-            }
-*/
-            currDoc.setpCount(currDoc.getpCount()+newPics.size());
+
+
             updateDoc(currDoc);
 
         }
@@ -369,13 +383,15 @@ public class MyDocumentActivity extends AppCompatActivity {
 
             //add doc
             if(currDoc.getDid()==0){
-                Log.e("FILTER OPTION", "fillImages: "+"did 0" );
+                //new doc
+                currDoc.setfP_URI(newPics.get(0).getEditedUri());
                 long i=saveDocInDatabase(currDoc);
                 currDoc.setDid((int)i);
                 newPics.get(0).setDid((int)i);
             }
 
             //only one image
+
             long id=addImage(newPics.get(0));
             newPics=getImagesFromDatabase(currDoc.getDid());
             for(MyPicture p:newPics){
@@ -385,10 +401,11 @@ public class MyDocumentActivity extends AppCompatActivity {
             isLoading=false;
             list.addAll(newPics);
             adapter.notifyDataSetChanged();
+            System.gc();
         }
 
         //update the mini recycelr view
-
+      //  isLoading=false;
     }
 
     private void initializeViews() {
@@ -444,7 +461,7 @@ public class MyDocumentActivity extends AppCompatActivity {
     private void initializeBottomBar(){
         //MINI ADAPTER
         tNails=new ArrayList<>();
-        miniAdapter=new InDocMiniAdapter(this, tNails, new View.OnClickListener() {
+        miniAdapter=new InDocMiniAdapter(this, tNails,list, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 TextView num=view.findViewById(R.id.filter_item_name);
@@ -455,6 +472,14 @@ public class MyDocumentActivity extends AppCompatActivity {
 
             }
         });
+
+        ItemTouchHelper.Callback callback=new ItemMoveCallback(miniAdapter);
+        ItemTouchHelper touchHelper=new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(miniRView);
+
+
+
+
         miniRView.setAdapter(miniAdapter);
         miniRView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
 
@@ -492,6 +517,7 @@ public class MyDocumentActivity extends AppCompatActivity {
 
         //MINI ADAPTER END
     }
+
     private void initializeVP(){
         //VP
         list=new ArrayList<>();
@@ -576,11 +602,8 @@ public class MyDocumentActivity extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             switch (i){
-                case 0:{//EDIT page
-                        if(!isLoading && !isShareOpen && !isImgOpen){
-                            expandPager();
-                            isImgOpen=true;
-                        }
+                case 0:{//Import From Gallery
+                        importPic();
                     break;
                 }
                 case 1:{//secure pdf
@@ -695,6 +718,8 @@ public class MyDocumentActivity extends AppCompatActivity {
 
         }
     }
+
+
     //LISTENERS END
 
     //OVERRRIDE
@@ -705,16 +730,31 @@ public class MyDocumentActivity extends AppCompatActivity {
         }
 
         switch(item.getItemId()){
-            case R.id.In_doc_menu_import:{
-                importPic();
+            case R.id.In_doc_menu_edit:{
+                if(!isLoading && !isShareOpen && !isImgOpen){
+                    expandPager();
+                    Toast.makeText(this, "Long Press To Edit", Toast.LENGTH_SHORT).show();
+                    isImgOpen=true;
+                }else if(isLoading){
+                    Toast.makeText(this, "Task In Progress", Toast.LENGTH_SHORT).show();
+                }
                 break;
             }
             case R.id.In_doc_menu_pdf:{
-                convertToPDF();
+                if(!isLoading) {
+                    convertToPDF();
+                }else{
+                    Toast.makeText(this, "Task In Progress", Toast.LENGTH_SHORT).show();
+                }
                 break;
             }
             case R.id.In_doc_menu_share:{
-                share(true);
+                if(!isLoading) {
+                    share(true);
+                }
+                else{
+                    Toast.makeText(this, "Task In Progress", Toast.LENGTH_SHORT).show();
+                }
                 break;
             }
         }
@@ -787,7 +827,7 @@ public class MyDocumentActivity extends AppCompatActivity {
 
     //NAV
     private void populateMenuListItems() {
-        menuList.add(new NavMenuObject(false,"Edit Page",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(false,"Import Image From Gallery",R.drawable.ic_fullscreen_black_24dp,true));
         menuList.add(new NavMenuObject(false,"Secure PDf",R.drawable.ic_picture_as_pdf_black_24dp,true));
         menuList.add(new NavMenuObject(false,"Pdf Setting",R.drawable.ic_picture_as_pdf_black_24dp,true));
         //pdf etting
@@ -889,6 +929,14 @@ public class MyDocumentActivity extends AppCompatActivity {
     private void deletePicFromDB(MyPicture pic){
         MyDatabase db=MyDatabase.getInstance(MyDocumentActivity.this);
         db.myPicDao().deletePic(pic);
+    }
+    public void updateListFromMiniAdapter(int i,int j){
+        int index=1;
+        for(MyPicture p:list){
+            p.setPosition(index++);
+            updatePic(p);
+            adapter.notifyItemMoved(i,j);
+        }
     }
     //DATABASE END
 
@@ -1044,12 +1092,7 @@ public class MyDocumentActivity extends AppCompatActivity {
     }
 
     public void shareAsPdf(View view){
-        if(currDoc.getPdf_uri()!=null){
-            File f=new File(Uri.parse(currDoc.getPdf_uri()).getPath());
-            if(f.exists()){
-                f.delete();
-            }
-        }
+
         Uri savedPdf=savePdf(null,false);
 
         //simple share intent
@@ -1094,8 +1137,9 @@ public class MyDocumentActivity extends AppCompatActivity {
         View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
         builder.setView(v);
         AlertDialog d=builder.create();
+        d.setCancelable(false);
         d.show();
-        stopInteraction();
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -1108,7 +1152,6 @@ public class MyDocumentActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         //simple intent
-                        resumeInteraction();
                         d.dismiss();
                         Intent intent = new Intent();
                         intent.setAction(Intent.ACTION_SEND);
@@ -1174,30 +1217,23 @@ public class MyDocumentActivity extends AppCompatActivity {
     }
 
     private void convertToPDF(){
-        if(currDoc.getPdf_uri()!=null){
-            File f=new File(Uri.parse(currDoc.getPdf_uri()).getPath());
-            if(f.exists()){
-                f.delete();
-            }
-        }
+
         AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
         View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
         builder.setView(v);
         AlertDialog d=builder.create();
+        d.setCancelable(false);
         d.show();
-        stopInteraction();
         new Thread(new Runnable() {
             @Override
             public void run() {
 
                 Uri pdf_uri=savePdf(null,false);
                 if(pdf_uri!=null){
-                    currDoc.setPdf_uri(pdf_uri.toString());
-                    updateDoc(currDoc);
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            resumeInteraction();
                             d.dismiss();
                             Toast.makeText(MyDocumentActivity.this, "Pdf Saved at :"+pdf_uri.toString(), Toast.LENGTH_SHORT).show();
                         }
@@ -1206,7 +1242,7 @@ public class MyDocumentActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            resumeInteraction();
+
                             d.dismiss();
                             Toast.makeText(MyDocumentActivity.this, "Pdf Failed to Save", Toast.LENGTH_SHORT).show();
                         }
@@ -1235,7 +1271,7 @@ public class MyDocumentActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent,"Select Picture"), UtilityClass.IMPORT_REQ_CODE);
     }
 
-    public void addImageWithFilter(Uri uri){
+    public void addImageWithFilter(@NonNull Uri uri){
         InputStream is=null;
 
         try{
@@ -1280,29 +1316,22 @@ public class MyDocumentActivity extends AppCompatActivity {
 
     //EMAIL
     private void sendEmail(){
-        if(currDoc.getPdf_uri()!=null){
-            File f=new File(Uri.parse(currDoc.getPdf_uri()).getPath());
-            if(f.exists()){
-                f.delete();
-            }
-        }
+
         AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
         View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
         builder.setView(v);
         AlertDialog d=builder.create();
+        d.setCancelable(false);
         d.show();
-        stopInteraction();
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 Uri pdf_uri=savePdf(null,false);
                 if(pdf_uri!=null){
-                    currDoc.setPdf_uri(pdf_uri.toString());
-                    updateDoc(currDoc);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            resumeInteraction();
                             d.dismiss();
 
                             Intent emailIntent = new Intent(Intent.ACTION_SEND);
@@ -1319,7 +1348,6 @@ public class MyDocumentActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            resumeInteraction();
                             d.dismiss();
                             Toast.makeText(MyDocumentActivity.this, "Pdf Failed to Save", Toast.LENGTH_SHORT).show();
                         }
@@ -1359,7 +1387,6 @@ public class MyDocumentActivity extends AppCompatActivity {
         int currItem=vp2.getCurrentItem();
         MyPicture currPic=list.get(currItem);
         //so that it wont go back
-        currPic.setImg(null);
 
         String jsonString=new Gson().toJson(currPic);
         String jsonDoc=new Gson().toJson(currDoc);
@@ -1373,7 +1400,6 @@ public class MyDocumentActivity extends AppCompatActivity {
         int currItem=vp2.getCurrentItem();
         MyPicture currPic=list.get(currItem);
         //so that it wont go back
-        currPic.setImg(null);
         ArrayList<MyPicture> pics=new ArrayList<>();
         pics.add(currPic);
 
@@ -1474,8 +1500,9 @@ public class MyDocumentActivity extends AppCompatActivity {
         View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
         builder.setView(v);
         AlertDialog d=builder.create();
+        d.setCancelable(false);
         d.show();
-        stopInteraction();
+
 
 
         new Thread(new Runnable() {
@@ -1488,7 +1515,6 @@ public class MyDocumentActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             d.dismiss();
-                            resumeInteraction();
                             Toast.makeText(MyDocumentActivity.this, "File NOT EXIST ", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -1506,7 +1532,6 @@ public class MyDocumentActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             d.dismiss();
-                            resumeInteraction();
                             adapter.notifyItemChanged(currPicIndex);
 
                             miniAdapter.notifyDataSetChanged();
@@ -1640,13 +1665,6 @@ public class MyDocumentActivity extends AppCompatActivity {
         bsb.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
     }
-    public void stopInteraction(){
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-    public void resumeInteraction(){
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
     public void reverseList(){
         Collections.reverse(list);
         adapter.notifyDataSetChanged();
@@ -1663,9 +1681,10 @@ public class MyDocumentActivity extends AppCompatActivity {
     private void addMorePages() {
         //goto camera activity
         Intent intent=new Intent(MyDocumentActivity.this,MainActivity.class);
-        intent.putExtra(UtilityClass.getStringFromObject(currDoc),"MyDocument");
-        intent.putExtra("from","InDocRecyclerActivity");
+        intent.putExtra("MyDocument",UtilityClass.getStringFromObject(currDoc));
+        intent.putExtra("from","MyDocumentActivity");
         startActivity(intent);
+        finish();
     }
 
     //COMMON END

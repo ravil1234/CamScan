@@ -34,7 +34,8 @@ public class UtilityClass {
     public static final String PDF_SETTING="CAM_SCAN_PDF_SETTINGS";
     public static final int IMPORT_REQ_CODE=101;
     public static final int RETAKE_REQ_CODE=102;
-    public static final String lineSeparator="$$__$$";
+    public static final String lineSeparator="__";
+    public static final String appName="CamScan";
 
     public static Uri saveImage(Context context, Bitmap img, String name, boolean isOriginal){
         File dir;
@@ -108,16 +109,8 @@ public class UtilityClass {
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-//        InputStream is=null;
-//        try {
-//            is=context.getContentResolver().openInputStream(imgUri);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        if(is!=null){
+
           BitmapFactory.decodeFile(imgUri.getPath(),options);
-//        }
-        // Calculate inSampleSize
         if(isThumb){
             options.inSampleSize = calculateInSampleSize(options,100, 100);
 
@@ -125,13 +118,8 @@ public class UtilityClass {
             options.inSampleSize = calculateInSampleSize(options,viewWidth, viewHeight);
         }
 
-        // Log.e(TAG, "onClick: " + imageView.getWidth() + " " + imageView.getHeight());
-        // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
-
-        //Bitmap bmp= BitmapFactory.decodeStream(is,null,options);
-        Bitmap bmp=BitmapFactory.decodeFile(imgUri.getPath(),options);
-        return bmp;
+        return  BitmapFactory.decodeFile(imgUri.getPath(),options);
 
     }
 
@@ -157,7 +145,7 @@ public class UtilityClass {
         return inSampleSize;
     }
     public static Uri saveLongImage(Context context, ArrayList<Uri> uris,String name){
-        int minWidth=214748364;
+        int minWidth=99979939;
         int[] heights=new int[uris.size()];
         int[] widths=new int[uris.size()];
         int totalHeight=0;
@@ -185,12 +173,17 @@ public class UtilityClass {
         int currentPos=0;
         i=0;
         for(Uri u:uris){
-            BitmapFactory.Options options=new BitmapFactory.Options();
-            options.inJustDecodeBounds=false;
-            options.inSampleSize=calculateInSampleSize(options,minWidth,heights[i]);
-            Bitmap img=BitmapFactory.decodeFile(u.getPath(),options);
+//            BitmapFactory.Options options=new BitmapFactory.Options();
+//            options.inJustDecodeBounds=false;
+//            options.inSampleSize=calculateInSampleSize(options,minWidth,heights[i]);
+            Bitmap img=BitmapFactory.decodeFile(u.getPath());
+            img=Bitmap.createScaledBitmap(img,minWidth,heights[i],true);
             cs.drawBitmap(img,0,currentPos,null);
             currentPos+=heights[i++];
+            if(img!=null){
+                img.recycle();
+                img=null;
+            }
         }
         File f;
         File dir;
@@ -241,19 +234,15 @@ public class UtilityClass {
             String dName = obj.getString("dName");
             long timeCreated = obj.getLong("timeCreated");
             long timeEdited = obj.getLong("timeEdited");
-            int pCount = obj.getInt("pCount");
             String fP_URI=null;
             if(obj.has("fp_URI")){
                 fP_URI = obj.getString("fP_URI");
             }
-            String pdfURI=null;
-            if(obj.has("pdf_uri")){
-                pdfURI=obj.getString("pdf_uri");
-            }
 
-            MyDocument mydoc = new MyDocument(dName, timeCreated, timeEdited, pCount, fP_URI);
+
+            MyDocument mydoc = new MyDocument(dName, timeCreated, timeEdited, fP_URI);
             mydoc.setDid(did);
-            mydoc.setPdf_uri(pdfURI);
+
             return mydoc;
         }catch (JSONException e){
             e.printStackTrace();
@@ -276,8 +265,10 @@ public class UtilityClass {
                 if(obj.has("editedUri")){
                     editedUri=obj.getString("editedUri");
                 }
+                int w=obj.getInt("s_width");
+                int h=obj.getInt("s_height");
                 MyPicture pic=new MyPicture(obj.getInt("did"), obj.getString("originalUri"), editedUri,
-                        obj.getString("editedName"), obj.getInt("position"), coordinates);
+                        obj.getString("editedName"), obj.getInt("position"), coordinates,w,h);
                 pic.setPid(obj.getInt("pid"));
                 arraylistpicture.add(pic);
             }
@@ -301,8 +292,10 @@ public class UtilityClass {
             if(obj.has("editedUri")){
                 editedUri=obj.getString("editedUri");
             }
+            int w=obj.getInt("s_width");
+            int h=obj.getInt("s_height");
             MyPicture pic=new MyPicture(obj.getInt("did"), obj.getString("originalUri"), editedUri,
-                    obj.getString("editedName"), obj.getInt("position"), coordinates);
+                    obj.getString("editedName"), obj.getInt("position"), coordinates,w,h);
             pic.setPid(obj.getInt("pid"));
             return pic;
         } catch (JSONException e) {

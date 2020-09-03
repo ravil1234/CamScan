@@ -43,28 +43,43 @@ public class MyPicture {
     private int y4;
     @ColumnInfo(name = "position")
     private int position;
-    @Ignore
-    private Bitmap img=null;
+
+    @ColumnInfo(name= "s_width")
+    private int s_width;
+
+    @ColumnInfo(name= "s_height")
+    private int s_height;
+
 
     public MyPicture() {
     }
 
-    public Bitmap getImg() {
-        return img;
-    }
 
-    public void setImg(Bitmap img) {
-        this.img = img;
-    }
-
-    public MyPicture(int did, String originalUri, String editedUri, String editedName, int position, ArrayList<Point> coordinates) {
-
-        this.did = did;
+    public MyPicture(int did,String originalUri, String editedUri, String editedName, int position, ArrayList<Point> coordinates,int width,int height) {
         this.originalUri = originalUri;
         this.editedUri = editedUri;
         this.editedName = editedName;
         this.position = position;
         setCoordinates(coordinates);
+        s_width=width;
+        s_height=height;
+        this.did=did;
+    }
+
+    public int getS_width() {
+        return s_width;
+    }
+
+    public void setS_width(int s_width) {
+        this.s_width = s_width;
+    }
+
+    public int getS_height() {
+        return s_height;
+    }
+
+    public void setS_height(int s_height) {
+        this.s_height = s_height;
     }
 
     public void setCoordinates(ArrayList<Point> pts){

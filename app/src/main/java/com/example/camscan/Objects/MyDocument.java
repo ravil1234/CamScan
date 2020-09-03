@@ -15,32 +15,18 @@ public class MyDocument {
     private long timeCreated;
     @ColumnInfo(name="timeEdited")
     private long timeEdited;
-    @ColumnInfo(name="pCount")
-    public int pCount;
     @ColumnInfo(name="fp_uri")
     public String fP_URI;
-    @ColumnInfo(name="pdf_uri")
-    public String pdf_uri;
 
     @Ignore
-    public MyDocument(String dName, long timeCreated, long timeEdited, int pCount, String fP_URI) {
+    public MyDocument(String dName, long timeCreated, long timeEdited,String fP_URI) {
         this.dName = dName;
         this.timeCreated = timeCreated;
         this.timeEdited = timeEdited;
-        this.pCount = pCount;
         this.fP_URI = fP_URI;
-        pdf_uri=null;
     }
 
     public MyDocument() {
-    }
-
-    public String getPdf_uri() {
-        return pdf_uri;
-    }
-
-    public void setPdf_uri(String pdf_uri) {
-        this.pdf_uri = pdf_uri;
     }
 
     public int getDid() {
@@ -76,13 +62,6 @@ public class MyDocument {
         this.timeEdited = timeEdited;
     }
 
-    public int getpCount() {
-        return pCount;
-    }
-
-    public void setpCount(int pCount) {
-        this.pCount = pCount;
-    }
 
     public String getfP_URI() {
         return fP_URI;

@@ -7,8 +7,10 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.renderscript.Allocation;
-import android.renderscript.RenderScript;
+
+import androidx.renderscript.Allocation;
+import androidx.renderscript.RenderScript;
+
 import com.example.camscan.ScriptC_BlackNdWhite;
 public class BlackAndWhite {
 
@@ -73,7 +75,7 @@ public class BlackAndWhite {
         ScriptC_BlackNdWhite script=new ScriptC_BlackNdWhite(rs);
 
         Allocation tmpIn=Allocation.createFromBitmap(rs,image);
-        Allocation tmpOut=Allocation.createFromBitmap(rs,output);
+        Allocation tmpOut= Allocation.createFromBitmap(rs,output);
 
         script.invoke_setThresh(0.4f);
         script.forEach_applyBWFilter(tmpIn,tmpOut);

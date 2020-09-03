@@ -388,47 +388,6 @@ public class FilterActivity extends AppCompatActivity {
     }
 
 
-//    private class MyOnclickListener implements View.OnClickListener {
-//        @Override
-//        public void onClick(View view) {
-//
-//
-//            int pos=rView.getChildLayoutPosition(view);
-//            switch(types.get(pos)){
-//                case 1:{//original
-//                    image.setImageBitmap(cropped);
-//                    selected=cropped;
-//                    break;
-//                }
-//                case 2:{//exposure
-//                    applyExposure();
-//                    break;
-//                }
-//                case 3:{//flat
-//                    applyFlatCorrection();
-//
-//                    break;
-//                }
-//                case 4:{
-//                    //grayscale
-//                    applyGrayScale();
-//                    break;
-//                }
-//                case 5:{
-//                    //bnw
-//                    applyBnW();
-//                    break;
-//                }
-//                case 6:{
-//                    //invert
-//                    applyInvert();
-//                    break;
-//                }
-//            }
-//            adapter.selected=pos;
-//            adapter.notifyDataSetChanged();
-//        }
-//    }
     private void setupThumbnales(Bitmap source) {
         if(!isEffectThreadRunning){
             new Thread(new Runnable() {
@@ -530,7 +489,10 @@ public class FilterActivity extends AppCompatActivity {
                 String name=list.get(0).getEditedName();
                 Uri ediUri=UtilityClass.saveImage(FilterActivity.this,img,name,false);
                 list.get(0).setEditedUri(ediUri.toString());
-
+                if(currDoc.getDid()==0){
+                    //new doc
+                    currDoc.setfP_URI(ediUri.toString());
+                }
                 //convertinto json and send
                 String myPicJson=UtilityClass.getStringFromObject(list);
                 String myDocJson= UtilityClass.getStringFromObject(currDoc);

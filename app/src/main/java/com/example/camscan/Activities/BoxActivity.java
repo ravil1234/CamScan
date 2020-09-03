@@ -163,8 +163,8 @@ public class BoxActivity extends AppCompatActivity {
     }
 
     private void addDummyData() {
-        currDoc=new MyDocument("MyDoc",21648612l,1354516l,1,null);
-        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406622666226.jpg",null,"01",1,null));
+        currDoc=new MyDocument("MyDoc",21648612l,1354516l,null);
+        list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406622666226.jpg",null,"01",1,null,0,0));
       //  list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/159514406650066500.jpg",null,"02",2,null));
        // list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595087242244242244.jpg",null,"03",3,null));
        // list.add(new MyPicture(0,"file:///storage/emulated/0/CamScan/.original/1595133729167729167.jpg",null,"04",4,null));
@@ -268,9 +268,13 @@ public class BoxActivity extends AppCompatActivity {
 
     public void onNextPressed(View view){
         String[] save=null;
+        int screenWidth=vp2.getWidth();
+        int screenHeight=vp2.getHeight();
         Bitmap transformed=null;
         if(list.size()==1){
             MyPicture p =list.get(0);
+            p.setS_width(screenWidth);
+            p.setS_height(screenHeight);
             transformed= BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
             transformed=cornerPin(transformed,p.getCoordinates());
             Bitmap emptyBitmap = Bitmap.createBitmap(transformed.getWidth(), transformed.getHeight(),
@@ -284,11 +288,14 @@ public class BoxActivity extends AppCompatActivity {
             save=saveBitmap(transformed);
         }
 
-        if(list.size()!=1 && currDoc.getDid()!=0){
-            currDoc.setfP_URI(list.get(0).getOriginalUri());
-        }
-        for(MyPicture p:list){
-            p.setImg(null);
+//        if(list.size()!=1 && currDoc.getDid()!=0){
+//            //multi images which are added to existing doc
+//            //from final to MainActivity then to box activity with multiple images
+//            currDoc.setfP_URI(list.get(0).getOriginalUri());
+//        }
+        for(MyPicture p :list){
+            p.setS_width(screenWidth);
+            p.setS_height(screenHeight);
         }
         String myPics=new Gson().toJson(list);
         String myDoc=new Gson().toJson(currDoc);
@@ -299,20 +306,14 @@ public class BoxActivity extends AppCompatActivity {
             intent.putExtra("name",save[0]);
             intent.putExtra("MyPicture",myPics);
             intent.putExtra("MyDocument",myDoc);
-//            //  Log.e(TAG, "onClick: "+sa[1] );
             startActivity(intent);
             finish();
         }else{
             //goto indoc activity
 
-            int screenWidth=vp2.getWidth();
-            int screenHeight=vp2.getHeight();
-
             Intent intent=new Intent(BoxActivity.this,MyDocumentActivity.class);
             intent.putExtra("MyPicture",myPics);
             intent.putExtra("MyDocument",myDoc);
-            intent.putExtra("Dimensions",screenWidth+" "+screenHeight);
-         //   Log.e(TAG, "onNextPressed: "+myPics );
             intent.putExtra("from","BoxActivity");
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -443,35 +444,27 @@ public class BoxActivity extends AppCompatActivity {
 
         if(requestCode==UtilityClass.RETAKE_REQ_CODE){
             if(resultCode==RESULT_OK){
-                //returned something
-                //String newPic=data.getStringExtra("MyPicture");
-                //MyPicture pics=UtilityClass.getPicFromString(newPic);
-//                if(pics!=null){
-//
-//                    list.set(index,pics);
-//                    adapter.notifyDataSetChanged();
-//                }
-                int index=vp2.getCurrentItem();
-                MyPicture p=list.get(index);
-                p.setImg(null);
+
+//                int index=vp2.getCurrentItem();
+//                MyPicture p=list.get(index);
                 adapter.notifyDataSetChanged();
             }else if(resultCode==RESULT_CANCELED){
                 //cancelled!! dont do anything
-                Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show();
             }
         }
 
     }
-
-    public  class MyAsync extends AsyncTask<Bitmap,Void,Bitmap>{
-
-        @Override
-        protected Bitmap doInBackground(Bitmap... bitmaps) {
-            FlatCorrection fc=new FlatCorrection(BoxActivity.this);
-            Bitmap blur=fc.flatCorr(bitmaps[0].copy(bitmaps[0].getConfig(),false));
-            return blur;
-        }
-    }
+//
+//    public  class MyAsync extends AsyncTask<Bitmap,Void,Bitmap>{
+//
+//        @Override
+//        protected Bitmap doInBackground(Bitmap... bitmaps) {
+//            FlatCorrection fc=new FlatCorrection(BoxActivity.this);
+//            Bitmap blur=fc.flatCorr(bitmaps[0].copy(bitmaps[0].getConfig(),false));
+//            return blur;
+//        }
+//    }
 
 
     private class MyNavListener implements BottomNavigationView.OnNavigationItemSelectedListener{

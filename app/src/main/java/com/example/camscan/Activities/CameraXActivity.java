@@ -217,11 +217,11 @@ public class CameraXActivity extends AppCompatActivity {
         pointArrayList.add(p);
         pointArrayList.add(p);
         pointArrayList.add(p);
-        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,"","",
-                myPictureList.size()+1,pointArrayList));
+        myPictureList.add(new MyPicture(0,uri,null,"",
+                myPictureList.size()+1,pointArrayList,0,0));
         String mypic= UtilityClass.getStringFromObject(myPictureList);
         MyDocument document=new MyDocument("NewFolder"+System.currentTimeMillis(),
-                System.currentTimeMillis(),(long)0,myPictureList.size(),"");
+                System.currentTimeMillis(),(long)0,"");
         String mydoc=UtilityClass.getStringFromObject(document);
         if(single_mode)
         {
