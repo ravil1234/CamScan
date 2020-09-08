@@ -1,5 +1,7 @@
 package com.example.camscan.Activities;
 
+import android.animation.LayoutTransition;
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,13 +25,14 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,22 +73,25 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 
-import org.spongycastle.pqc.math.ntru.util.Util;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class MyDocumentActivity extends AppCompatActivity {
 
     //VIEWS
     ImageView docIcon;
-    ImageView docRenameBtn;
-    TextView doc_name,doc_pageCount,time_create,last_updated;
+    //ImageView docRenameBtn;
+    //TextView doc_name,doc_pageCount,time_create,last_updated;
+    TextView doc_name;
+    ImageView doc_about;
 
     DrawerLayout dl;
     NavigationView nv;
@@ -100,8 +106,11 @@ public class MyDocumentActivity extends AppCompatActivity {
 
     //NAV DRAWER
     ArrayList<NavMenuObject> menuList;
+    View aboutUs,shareApp,exitDoc;
+
     ActionBarDrawerToggle abdt;
     NavMenuAdapter menuAdapter;
+
     //NAV DRAWER END
 
 
@@ -131,26 +140,34 @@ public class MyDocumentActivity extends AppCompatActivity {
 
     MyDocument currDoc;
     //dATABASE END
-
     //SHARE
     View shareWindow;
+
     boolean isShareOpen=false;
     //SHARE END
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_in_doc_recycler);
+        setContentView(R.layout.activity_my_document);
 
         //Debugger.initialize(this);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setTitle("Document");
         initializeViews();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         initializeNavBar();
 
         initializeVP();
 
         initializeBottomBar();
+
+        vp2.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+        vp2.getLayoutTransition().setDuration(500);
+
+
+
     }
 
     private void fillImages() {
@@ -175,12 +192,20 @@ public class MyDocumentActivity extends AppCompatActivity {
                         int index=0;
                         for (MyPicture p:list) {
                             if (p.getEditedUri() != null) {
+                              //  Log.e("PAGES", "run: "+p.getPosition() );
                                 Bitmap b = UtilityClass.populateImage(MyDocumentActivity.this, Uri.parse(p.getEditedUri()),
                                         true, 0, 0);
                                 tNails.add(b);
+                                if(p.getPosition()==1){
+                                    currDoc.setfP_URI(p.getEditedUri());
+                                    updateDoc(currDoc);
+                                }
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
+                                        if(p.getPosition()==1){
+                                            updateHeader();
+                                        }
                                         miniAdapter.notifyDataSetChanged();
                                     }
                                 });
@@ -200,6 +225,16 @@ public class MyDocumentActivity extends AppCompatActivity {
                                     original=getFilteredBitmap(original);
                                     Uri edited=UtilityClass.saveImage(MyDocumentActivity.this,original,Uri.parse(p.getOriginalUri()).getLastPathSegment(),false);
                                     p.setEditedUri(edited.toString());
+                                    if(p.getPosition()==1){
+
+                                        if(currDoc.getfP_URI()==null || !currDoc.getfP_URI().equals(p.getEditedUri())){
+                                            currDoc.setfP_URI(p.getEditedUri());
+                                            updateDoc(currDoc);
+                                        }
+
+
+                                    }
+
                                     // tNails.set(index,Bitmap.createScaledBitmap(original,100,100,true));
                                     tNails.add(UtilityClass.populateImage(MyDocumentActivity.this,edited,true,0,0));
                                     if (original != null) {
@@ -215,7 +250,9 @@ public class MyDocumentActivity extends AppCompatActivity {
                                             updatePic(p);
                                             adapter.notifyDataSetChanged();
                                             miniAdapter.notifyDataSetChanged();
-
+                                            if(p.getPosition()==1){
+                                                updateHeader();
+                                            }
                                         }
                                     });
                                 }else{
@@ -275,9 +312,18 @@ public class MyDocumentActivity extends AppCompatActivity {
                                 if(ind==uris.length-1){
                                     isLoading=false;
                                 }
+                                if(p.getPosition()==1){
+                                    if(currDoc.getfP_URI()==null || !currDoc.getfP_URI().equals(p.getEditedUri())){
+                                        currDoc.setfP_URI(p.getEditedUri());
+                                        updateDoc(currDoc);
+                                    }
+
+                                }
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
+                                        if(p.getPosition()==1)
+                                            updateHeader();
                                         adapter.notifyDataSetChanged();
                                         miniAdapter.notifyDataSetChanged();
                                     }
@@ -306,6 +352,11 @@ public class MyDocumentActivity extends AppCompatActivity {
             }
             ArrayList<MyPicture> oldPics=getImagesFromDatabase(currDoc.getDid());
             for(MyPicture p:oldPics){
+                if(p.getPosition()==1){
+                    currDoc.setfP_URI(p.getEditedUri());
+                    updateDoc(currDoc);
+                    updateHeader();
+                }
                 Bitmap b=UtilityClass.populateImage(this,Uri.parse(p.getEditedUri()),true,0,0);
                 tNails.add(b);
                 miniAdapter.notifyDataSetChanged();
@@ -332,9 +383,11 @@ public class MyDocumentActivity extends AppCompatActivity {
                                     original.getConfig());
                             if(original.sameAs(emptyBitmap)){
                                 //Toast.makeText(MyDocumentActivity.this, "Can't Crop", Toast.LENGTH_SHORT).show();
+                                emptyBitmap.recycle();
                                 Log.e("Thread", "run: "+"Cant Crop"+p.getEditedName() );
                                 continue;
                             }
+                            emptyBitmap.recycle();
                             original=getFilteredBitmap(original);
                             Uri edited=UtilityClass.saveImage(MyDocumentActivity.this,original,Uri.parse(p.getOriginalUri()).getLastPathSegment(),false);
                             p.setEditedUri(edited.toString());
@@ -350,11 +403,21 @@ public class MyDocumentActivity extends AppCompatActivity {
                                 isLoading=false;
                             }
                             index++;
+
+                            if(p.getPosition()==1){
+                                if(currDoc.getfP_URI()==null || !currDoc.getfP_URI().equals(p.getEditedUri())){
+                                    currDoc.setfP_URI(p.getEditedUri());
+                                    updateDoc(currDoc);
+                                }
+
+                            }
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     //  list.add(p);
                                     updatePic(p);
+                                    if(p.getPosition()==1)
+                                        updateHeader();
                                     adapter.notifyDataSetChanged();
                                     miniAdapter.notifyDataSetChanged();
 
@@ -406,6 +469,7 @@ public class MyDocumentActivity extends AppCompatActivity {
 
         //update the mini recycelr view
       //  isLoading=false;
+        updateHeader();
     }
 
     private void initializeViews() {
@@ -424,11 +488,13 @@ public class MyDocumentActivity extends AppCompatActivity {
         //header
         View view=findViewById(R.id.in_doc_nav_header);
         docIcon=view.findViewById(R.id.nav_header_image);
-        docRenameBtn=view.findViewById(R.id.nav_header_rename);
+        doc_about=view.findViewById(R.id.nav_header_about);
         doc_name=view.findViewById(R.id.nav_header_name);
-        doc_pageCount=view.findViewById(R.id.nav_header_pageCount);
-        time_create=view.findViewById(R.id.nav_header_createTime);
-        last_updated=view.findViewById(R.id.nav_header_lastUpdateTime);
+
+        //others
+        shareApp=findViewById(R.id.in_doc_shareApp);
+        exitDoc=findViewById(R.id.in_doc_nav_list_exit);
+        aboutUs=findViewById(R.id.in_doc_aboutUs);
 
     }
 
@@ -448,6 +514,54 @@ public class MyDocumentActivity extends AppCompatActivity {
         menuListView.setOnItemClickListener(new MyMenuOnClickListener());
         //MENU END
 
+        doc_about.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //POPUP FRAGMENT WITH DETAILS
+                aboutDocClicked();
+            }
+        });
+
+        TextView tv1=shareApp.findViewById(R.id.item_nav_title);
+        tv1.setText("Share App");
+        TextView tv2=aboutUs.findViewById(R.id.item_nav_title);
+        tv2.setText("About Us");
+        TextView tv3=exitDoc.findViewById(R.id.item_nav_title);
+        tv3.setText("Close Document");
+
+        ImageView icon_share=shareApp.findViewById(R.id.item_nav_icon);
+        icon_share.setImageDrawable(getResources().getDrawable(R.drawable.move_to));
+        ImageView icon_about_us=aboutUs.findViewById(R.id.item_nav_icon);
+        icon_about_us.setImageDrawable(getResources().getDrawable(R.drawable.about_us));
+        ImageView icon_close=exitDoc.findViewById(R.id.item_nav_icon);
+        icon_close.setImageDrawable(getResources().getDrawable(R.drawable.cross));
+
+        shareApp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onShareAppClicked();
+                }
+        });
+        aboutUs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onAboutUsClicked();
+            }
+        });
+        exitDoc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onExitDocClicked();
+            }
+        });
+
+        doc_name.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                aboutClicked();
+            }
+        });
+
         if(Build.VERSION.SDK_INT>=24){
             try{
                 Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
@@ -458,6 +572,7 @@ public class MyDocumentActivity extends AppCompatActivity {
         }
 
     }
+
     private void initializeBottomBar(){
         //MINI ADAPTER
         tNails=new ArrayList<>();
@@ -530,17 +645,17 @@ public class MyDocumentActivity extends AppCompatActivity {
         vp2.setOffscreenPageLimit(3);
         vp2.getChildAt(0).setOverScrollMode(View.OVER_SCROLL_NEVER);
 
-        CompositePageTransformer cpf=new CompositePageTransformer();
-        cpf.addTransformer(new MarginPageTransformer(40));
-        cpf.addTransformer(new ViewPager2.PageTransformer() {
-            @Override
-            public void transformPage(@NonNull View page, float position) {
-                float r=1-Math.abs(position);
-                page.setScaleY(0.85f+r*0.15f);
-            }
-        });
-
-        vp2.setPageTransformer(cpf);
+//        CompositePageTransformer cpf=new CompositePageTransformer();
+//        cpf.addTransformer(new MarginPageTransformer(40));
+//        cpf.addTransformer(new ViewPager2.PageTransformer() {
+//            @Override
+//            public void transformPage(@NonNull View page, float position) {
+//                float r=1-Math.abs(position);
+//                page.setScaleY(0.85f+r*0.15f);
+//            }
+//        });
+//
+//        vp2.setPageTransformer(cpf);
 
         vp2.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -598,125 +713,144 @@ public class MyDocumentActivity extends AppCompatActivity {
 
 
     private class MyMenuOnClickListener implements AdapterView.OnItemClickListener{
-
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            switch (i){
-                case 0:{//Import From Gallery
+            if(!isLoading){
+                switch (i){
+                    case 0:{//Import From Gallery
                         importPic();
-                    break;
-                }
-                case 1:{//secure pdf
-                    AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
-                    builder.setTitle("Set Password");
-                    View dialog=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_rename,null);
+                        break;
+                    }
+                    case 1:{//secure pdf
+                        if(!isLoading) {
 
-                    builder.setView(dialog);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MyDocumentActivity.this);
+                            builder.setTitle("Set Password");
+                            View dialog = LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_rename, null);
+                            builder.setCancelable(false);
+                            builder.setView(dialog);
 
-                    EditText newNameView=dialog.findViewById(R.id.rename_fragment_eview);
-                    newNameView.setSelectAllOnFocus(true);
-                    //newNameView.setText(currentDoc1.getDocName());
-                    String pass=getPdfPassword();
-                    newNameView.setText(pass);
+                            EditText newNameView = dialog.findViewById(R.id.rename_fragment_eview);
+                            newNameView.setSelectAllOnFocus(true);
+                            //newNameView.setText(currentDoc1.getDocName());
+                            String pass = getPdfPassword();
+                            newNameView.setText(pass);
 
-                    newNameView.setOnTouchListener(new View.OnTouchListener() {
-                        @Override
-                        public boolean onTouch(View view, MotionEvent motionEvent) {
 
-                            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                                if(motionEvent.getRawX() >= (newNameView.getRight() - newNameView.getCompoundDrawables()[2].getBounds().width())) {
-                                    // your action here
-                                    newNameView.setText("");
-                                    return true;
+                            newNameView.setOnTouchListener(new View.OnTouchListener() {
+                                @Override
+                                public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                                        if (motionEvent.getRawX() >= (newNameView.getRight() - newNameView.getCompoundDrawables()[2].getBounds().width())) {
+                                            // your action here
+                                            newNameView.setText("");
+                                            return true;
+                                        }
+                                    }
+                                    return false;
                                 }
-                            }
-                            return false;
+                            });
+
+                            builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    String newPass = newNameView.getText().toString();
+                                    if (!newPass.equals("")) {
+
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(MyDocumentActivity.this);
+                                        ProgressBar pbar=new ProgressBar(MyDocumentActivity.this,null,android.R.attr.progressBarStyleHorizontal);
+                                        pbar.setIndeterminate(false);
+                                        pbar.setMax(100);
+
+                                        builder.setView(pbar);
+                                        builder.setTitle("Loading");
+                                        AlertDialog d = builder.create();
+                                        d.setCancelable(false);
+                                        d.show();
+                                        new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Uri pdfUri = savePdf(newPass, true, pbar);
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        d.dismiss();
+                                                        if (pdfUri != null) {
+                                                            Toast.makeText(MyDocumentActivity.this, "Pdf saved at " + pdfUri, Toast.LENGTH_SHORT).show();
+                                                        } else {
+                                                            Toast.makeText(MyDocumentActivity.this, "Pdf Saving Failed", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                });
+
+
+                                            }
+                                        }).start();
+                                    } else {
+                                        Toast.makeText(MyDocumentActivity.this, "Password can't be null", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            }).setNegativeButton("Cancel", null);
+                            builder.create().show();
                         }
-                    });
-
-                    builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            String newPass=newNameView.getText().toString();
-                            if(!newPass.equals("")){
-                                Uri pdfUri=savePdf(newPass,true);
-                                Toast.makeText(MyDocumentActivity.this,"Pdf saved at "+pdfUri, Toast.LENGTH_SHORT).show();
-                            }else{
-                                Toast.makeText(MyDocumentActivity.this, "Password can't be null", Toast.LENGTH_SHORT).show();
-                            }
+                        else{
+                            Toast.makeText(MyDocumentActivity.this, "Task In Progress", Toast.LENGTH_SHORT).show();
                         }
-                    }).setNegativeButton("Cancel",null);
-
-                    builder.create().show();
-
-                    break;
-                }
-                case 2:{//pdf setting
-                    Intent intent=new Intent(MyDocumentActivity.this,PdfSettingsActivity.class);
-                    startActivity(intent);
-                    break;
-                }
-                case 3:{//email
+                        break;
+                    }
+                    case 2:{//pdf setting
+                        Intent intent=new Intent(MyDocumentActivity.this,PdfSettingsActivity.class);
+                        startActivity(intent);
+                        break;
+                    }
+                    case 3:{//email
                         sendEmail();
-                    break;
-                }
-                case 4:{//share
+                        break;
+                    }
+                    case 4:{//share
                         share(true);
-                    break;
-                }
+                        break;
+                    }
 
-                case 5:{//Reverse Items
-                    reverseList();
-                    break;
-                }
-                case 6:{//Add more Pages
-                    addMorePages();
-                    break;
-                }
-                case 7:{//About us
-                    AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
-                    builder.setTitle("About App");
-                    builder.setMessage(getResources().getString(R.string.lorem));
-                    builder.setPositiveButton("OK",null);
-                    builder.create().show();
-                    break;
-                }
-                case 8:{//Share app
-                    Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-                    /*This will be the actual content you wish you share.*/
-                    String shareBody = "Hey! This is the awesome app I found which will help you to manage your documents in one place. Make sure to Check is out.!";
-                    /*The type of the content is text, obviously.*/
-                    intent.setType("text/plain");
-                    /*Applying information Subject and Body.*/
-                    intent.putExtra(android.content.Intent.EXTRA_SUBJECT,"Cam Scan Available in PlayStore!!!");
-                    intent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
-                    /*Fire!*/
-                    startActivity(Intent.createChooser(intent, "Share Via"));
-                    break;
+                    case 5:{//Reverse Items
+                        reverseList();
+                        break;
+                    }
+                    case 6:{//Add more Pages
+                        addMorePages();
+                        break;
+                    }
+                    case 7:{//delete doc
+                        AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
+                        builder.setTitle("Do You Really Want to Delete this Document?");
+                        builder.setMessage("This will delete all of its images");
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteDocument();
+                            }
+                        }).setNegativeButton("Cancel",null);
+                        builder.create().show();
+                        break;
+                    }
 
                 }
-                case 9:{//Exit
-                    AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
-                    builder.setTitle("Close This Document?");
-//                    builder.setMessage("Close This Document");
-                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            finish();
-                        }
-                    }).setNegativeButton("No",null);
-                    builder.create().show();
-                    break;
-                }
-
-
-
+            }else{
+                Toast.makeText(MyDocumentActivity.this, "Task In Progress", Toast.LENGTH_SHORT).show();
             }
 
             dl.closeDrawer(Gravity.LEFT);
-            reset();
+            if(i!=4){
+                reset();
+            }
+
 
         }
+    }
+
+    public  interface pdfProgress{
+        void onUpdate(int perc);
     }
 
 
@@ -737,6 +871,10 @@ public class MyDocumentActivity extends AppCompatActivity {
                     isImgOpen=true;
                 }else if(isLoading){
                     Toast.makeText(this, "Task In Progress", Toast.LENGTH_SHORT).show();
+                }else if(isImgOpen){
+                    closePageOption();
+                    shareClose();
+                    isImgOpen=false;
                 }
                 break;
             }
@@ -785,7 +923,6 @@ public class MyDocumentActivity extends AppCompatActivity {
 
                             } else if (data.getData() != null) {
                                 Uri imgUri = data.getData();
-
                                 addImageWithFilter(imgUri);
 
 
@@ -825,35 +962,176 @@ public class MyDocumentActivity extends AppCompatActivity {
 
     //OVERRRIDE END
 
+    //ANIMATE
+
+    //ENIMATE END
+
     //NAV
     private void populateMenuListItems() {
-        menuList.add(new NavMenuObject(false,"Import Image From Gallery",R.drawable.ic_fullscreen_black_24dp,true));
-        menuList.add(new NavMenuObject(false,"Secure PDf",R.drawable.ic_picture_as_pdf_black_24dp,true));
-        menuList.add(new NavMenuObject(false,"Pdf Setting",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(false,"Import Image From Gallery",R.drawable.import1,true));
+        menuList.add(new NavMenuObject(false,"Secure PDf",R.drawable.pdf_lock,true));
+        menuList.add(new NavMenuObject(false,"Pdf Setting",R.drawable.pdf_setting,true));
         //pdf etting
 //        menuList.add(new NavMenuObject(false,"Password",0,false));
 //        menuList.add(new NavMenuObject(false,"Orientation",0,false));
 //        menuList.add(new NavMenuObject(false,"PageSize",0,false));
 //        menuList.add(new NavMenuObject(false,"Margin",0,false));
         //
-        menuList.add(new NavMenuObject(false,"Email",R.drawable.ic_picture_as_pdf_black_24dp,true));
-        menuList.add(new NavMenuObject(false,"Share",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(false,"Email",R.drawable.email,true));
+        menuList.add(new NavMenuObject(false,"Share",R.drawable.share_app_black,true));
         //share
 //        menuList.add(new NavMenuObject(false,"As Images",0,false));
 //        menuList.add(new NavMenuObject(false,"As Long Image",0,false));
 //        menuList.add(new NavMenuObject(false,"As PDF",0,false));
         //
-        menuList.add(new NavMenuObject(false,"Reverse Order",R.drawable.ic_picture_as_pdf_black_24dp,true));
-        menuList.add(new NavMenuObject(false,"Add more Pages",R.drawable.ic_picture_as_pdf_black_24dp,true));
-        //---------------------
-        menuList.add(new NavMenuObject(false,"About Us",R.drawable.ic_picture_as_pdf_black_24dp,true));
-        menuList.add(new NavMenuObject(false,"Share App",R.drawable.ic_picture_as_pdf_black_24dp,true));
-        menuList.add(new NavMenuObject(false,"Close Document",R.drawable.ic_picture_as_pdf_black_24dp,true));
+        menuList.add(new NavMenuObject(false,"Reverse Order",R.drawable.reverse,true));
+        menuList.add(new NavMenuObject(false,"Add more Pages",R.drawable.add_more,true));
+        menuList.add(new NavMenuObject(false,"Delete Document",R.drawable.trash,true));
 
+    }
+    private boolean noDocLikeThis(String name){
+        List<MyDocument> l=MyDatabase.getInstance(this).myDocumentDao().getDocsWithSameName(name);
+        if(l!=null){
+            if(l.size()==0){
+                return true;
+            }
+
+            if(l.size()>1){
+                return false;
+            }
+            else {
+                if(l.get(0).getDid()==currDoc.getDid()){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    //mini VIew
+    private void updateHeader(){
+        currDoc=getDocFromDatabase(currDoc.getDid());
+        doc_name.setText(currDoc.getdName());
+        if(currDoc.getfP_URI()!=null){
+            Bitmap b=UtilityClass.populateImage(this,Uri.parse(currDoc.getfP_URI()),true,0,0);
+            b=UtilityClass.getRoundedCroppedBitmap(b);
+            docIcon.setImageBitmap(b);
+        }else{
+            if(list!=null && list.size()>0 && list.get(0).getEditedUri()!=null){
+                currDoc.setfP_URI(list.get(0).getEditedUri());
+            }
+        }
+
+    }
+    private void aboutClicked(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
+        builder.setTitle("Rename Document");
+        View dialog=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_rename,null);
+
+        builder.setView(dialog);
+
+        EditText newNameView=dialog.findViewById(R.id.rename_fragment_eview);
+        newNameView.setSelectAllOnFocus(true);
+        //newNameView.setText(currentDoc1.getDocName());
+
+        newNameView.setText(currDoc.getdName());
+
+        newNameView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    if(motionEvent.getRawX() >= (newNameView.getRight() - newNameView.getCompoundDrawables()[2].getBounds().width())) {
+                        // your action here
+                        newNameView.setText("");
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String newName=newNameView.getText().toString();
+                if(!newName.equals("")){
+                    if(noDocLikeThis(newName)){
+                        currDoc.setdName(newName);
+                        updateDoc(currDoc);
+                        updateHeader();
+                    }else{
+                        Toast.makeText(MyDocumentActivity.this,"A Document With similar name exists",Toast.LENGTH_LONG).show();
+                    }
+                }else{
+                    Toast.makeText(MyDocumentActivity.this, "Name can't be Empty", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).setNegativeButton("Cancel",null);
+
+        builder.create().show();
+    }
+    private void aboutDocClicked(){
+        AlertDialog.Builder b=new AlertDialog.Builder(this);
+        View v= LayoutInflater.from(this).inflate(R.layout.fragment_about_doc,null);
+        b.setView(v);
+        b.setTitle("Details");
+        TextView name,pc,timeCreated,lastModified;
+        name=v.findViewById(R.id.frag_about_doc_name);
+        pc=v.findViewById(R.id.frag_about_doc_pc);
+        timeCreated=v.findViewById(R.id.frag_about_doc_created_at);
+        lastModified=v.findViewById(R.id.frag_about_doc_lastModified);
+
+        name.setText(currDoc.getdName());
+        int count=MyDatabase.getInstance(MyDocumentActivity.this).myPicDao().getCount(currDoc.getDid());
+        pc.setText(String.valueOf(count));
+        timeCreated.setText(getDate(currDoc.getTimeCreated()));
+        lastModified.setText(getDate(currDoc.getTimeEdited()));
+
+        b.setNegativeButton("Ok",null);
+
+        b.create().show();
+
+    }
+    private void onShareAppClicked(){
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        /*This will be the actual content you wish you share.*/
+        String shareBody = "Hey! This is the awesome app I found which will help you to manage your documents in one place. Make sure to Check is out.!";
+        /*The type of the content is text, obviously.*/
+        intent.setType("text/plain");
+        /*Applying information Subject and Body.*/
+        intent.putExtra(android.content.Intent.EXTRA_SUBJECT,"Cam Scan Available in PlayStore!!!");
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+        /*Fire!*/
+        startActivity(Intent.createChooser(intent, "Share Via"));
+    }
+    private void onAboutUsClicked(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
+        builder.setTitle("About App");
+        builder.setMessage(getResources().getString(R.string.lorem));
+        builder.setPositiveButton("OK",null);
+        builder.create().show();
+    }
+    private void onExitDocClicked(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
+        builder.setTitle("Close This Document?");
+//                    builder.setMessage("Close This Document");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                finish();
+            }
+        }).setNegativeButton("No",null);
+        builder.create().show();
+    }
+    private String getDate(long timestamp){
+        DateFormat d=new SimpleDateFormat("dd/MM/yyyy ");
+        return d.format(new Date(timestamp));
     }
     //NAV END
 
-    //mini VIew
     private void addIntoMiniAdapter(){
         for(MyPicture p:list){
             updateMiniAdapter(p);
@@ -875,18 +1153,27 @@ public class MyDocumentActivity extends AppCompatActivity {
 
     //VP
     private void expandPager() {
-        Toast.makeText(this, "Expanded", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Expanded", Toast.LENGTH_SHORT).show();
+//        pageSettingLayout.animate().translationY(-pageSettingLayout.getHeight());
+
+        Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.my_doc_anim_slide_up);
+
+        pageSettingLayout.setVisibility(View.VISIBLE);
+        pageSettingLayout.startAnimation(slideUp);
+
 
         miniCont.setVisibility(View.GONE);
         vp2.setUserInputEnabled(false);
 
-        pageSettingLayout.setVisibility(View.VISIBLE);
+//        pageSettingLayout.setVisibility(View.VISIBLE);
 
     }
 
     private void closePageOption() {
-        Toast.makeText(this, "Closed", Toast.LENGTH_SHORT).show();
-
+        //Toast.makeText(this, "Closed", Toast.LENGTH_SHORT).show();
+       // pageSettingLayout.animate().translationY(pageSettingLayout.getHeight());
+        Animation slideDown=AnimationUtils.loadAnimation(this,R.anim.my_doc_anim_slide_down);
+        pageSettingLayout.startAnimation(slideDown);
         miniCont.setVisibility(View.VISIBLE);
         vp2.setUserInputEnabled(true);
         pageSettingLayout.setVisibility(View.GONE);
@@ -919,8 +1206,17 @@ public class MyDocumentActivity extends AppCompatActivity {
         return db.myDocumentDao().insertNewDoc(d);
     }
     private void updateDoc(MyDocument doc){
+
+        if(list.size()>0 && list.get(0).getEditedUri()!=null){
+            doc.setfP_URI(list.get(0).getEditedUri());
+        }
         MyDatabase db=MyDatabase.getInstance(this);
-        db.myDocumentDao().updateDoc(doc);
+        MyDocument d=getDocFromDatabase(currDoc.getDid());
+        if(doc!=d){
+            doc.setTimeEdited(System.currentTimeMillis());
+            db.myDocumentDao().updateDoc(doc);
+
+        }
     }
     private void updatePic(MyPicture pic){
         MyDatabase db=MyDatabase.getInstance(this);
@@ -956,12 +1252,14 @@ public class MyDocumentActivity extends AppCompatActivity {
                 Filter1 fil=new Filter1(this);
                 result=fil.filter(100,bitmap);
                 // result=applyExposure(100,transformed);
+
                 fil.cleanUp();
                 break;
             }
             case 2:{//flat correction
                 FlatCorrection corr=new FlatCorrection(this);
                 result=corr.flatCorr(bitmap);
+
                 corr.clear();
                 break;
             }
@@ -975,15 +1273,19 @@ public class MyDocumentActivity extends AppCompatActivity {
                 BlackAndWhite bnw=new BlackAndWhite(this);
                 result=bnw.toBnwRender(bitmap);
                 bnw.clear();
+
                 break;
             }
             case 5:{//inverted
                 Inversion inv=new Inversion(this);
                 result=inv.setInversion(bitmap);
                 inv.clear();
+
                 break;
             }
         }
+
+
         return result;
     }
 
@@ -1044,6 +1346,10 @@ public class MyDocumentActivity extends AppCompatActivity {
         c.drawBitmap(B, 0,0, p);
 
         result=Bitmap.createBitmap(result,minLeft,minTop,wid,hei);
+        if(B!=null){
+            B.recycle();
+            B=null;
+        }
 //        Log.e(TAG, "cornerPin: "+ result.getHeight()+" "+result.getWidth());
         //   Log.e(TAG, "cornerPin: "+resized.getHeight()+" "+resized.getWidth() );
 
@@ -1055,6 +1361,60 @@ public class MyDocumentActivity extends AppCompatActivity {
     }
     //BITMAP OPS END
 
+    //DELETE
+    private void deleteDocument(){
+        AlertDialog.Builder b=new AlertDialog.Builder(this);
+        View v=LayoutInflater.from(this).inflate(R.layout.fragment_progress,null);
+        b.setView(v);
+        AlertDialog d=b.create();
+        d.setCancelable(false);
+        d.show();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for(MyPicture p:list){
+                    Uri u1=Uri.parse(p.getOriginalUri());
+                    Uri u2=Uri.parse(p.getEditedUri());
+
+                    try {
+                        File f = new File(u1.getPath());
+                        if (f.exists()) {
+                            f.delete();
+                        }
+                        f=new File(u2.getPath());
+                        if(f.exists()){
+                            f.delete();
+                        }
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
+                        d.dismiss();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MyDocumentActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    deletePicFromDB(p);
+                }
+                MyDatabase.getInstance(MyDocumentActivity.this).myDocumentDao().deleteDoc(currDoc);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MyDocumentActivity.this, "Document Deleted", Toast.LENGTH_SHORT).show();
+                        d.dismiss();
+                        finish();
+                    }
+                });
+
+
+            }
+        }).start();
+    }
+    //DELETE END
+
+
     //SHARE
     private void share(boolean isFull){
         if(!isShareOpen){
@@ -1063,17 +1423,17 @@ public class MyDocumentActivity extends AppCompatActivity {
             shareClose();
             return;
         }
-        if(isFull){
-            //want to send complete document
-            //open share window
-
-        }else{
-            //sharing only a single image
-            //Share as a image
-            //share as a pdf
-            LinearLayout long_box=shareWindow.findViewById(R.id.in_doc_share_frag_long);
-            long_box.setVisibility(View.GONE);
-        }
+//        if(isFull){
+//            //want to send complete document
+//            //open share window
+//
+//        }else{
+//            //sharing only a single image
+//            //Share as a image
+//            //share as a pdf
+//            LinearLayout long_box=shareWindow.findViewById(R.id.in_doc_share_frag_long);
+//            long_box.setVisibility(View.GONE);
+//        }
     }
     private void shareOpen(){
         if(!isShareOpen){
@@ -1092,21 +1452,53 @@ public class MyDocumentActivity extends AppCompatActivity {
     }
 
     public void shareAsPdf(View view){
+        AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
+        //View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
+        ProgressBar pbar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+        pbar.setIndeterminate(false);
+        pbar.setMax(100);
 
-        Uri savedPdf=savePdf(null,false);
+        builder.setView(pbar);
+        builder.setTitle("Loading");
 
-        //simple share intent
-        if(savedPdf!=null){
-                Intent intentShareFile=new Intent(Intent.ACTION_SEND);
-                intentShareFile.setType("application/pdf");
-                intentShareFile.putExtra(Intent.EXTRA_STREAM, savedPdf);
+        //ProgressBar pb=v.findViewById(R.id.frag_progress_bar);
+        AlertDialog d=builder.create();
+        d.setCancelable(false);
+        d.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Uri savedPdf = savePdf(null, false,pbar);
 
-                intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
-                        "Document from CamScan...");
-                intentShareFile.putExtra(Intent.EXTRA_TEXT, "Document made from CamScan");
+                if(savedPdf!=null){
+                    Intent intentShareFile=new Intent(Intent.ACTION_SEND);
+                    intentShareFile.setType("application/pdf");
+                    intentShareFile.putExtra(Intent.EXTRA_STREAM, savedPdf);
 
-                startActivity(Intent.createChooser(intentShareFile, "Share as Pdf"));
+                    intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
+                            "Document from CamScan...");
+                    intentShareFile.putExtra(Intent.EXTRA_TEXT, "Document made from CamScan");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            d.dismiss();
+                            startActivity(Intent.createChooser(intentShareFile, "Share as Pdf"));
+                        }
+                    });
+                }else{
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            d.dismiss();
+                            Toast.makeText(MyDocumentActivity.this, "Time Out", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
             }
+        }).start();
+        //simple share intent
+
 
         shareClose();
 
@@ -1131,68 +1523,71 @@ public class MyDocumentActivity extends AppCompatActivity {
 
         shareClose();
     }
-    public void shareAsLongimage(View view){
+    public void shareAsLongimage(View view) {
+        if (list.size() <= 10) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MyDocumentActivity.this);
+            View v = LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress, null);
+            builder.setView(v);
+            AlertDialog d = builder.create();
+            d.setCancelable(false);
+            d.show();
 
-        AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
-        View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
-        builder.setView(v);
-        AlertDialog d=builder.create();
-        d.setCancelable(false);
-        d.show();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ArrayList<Uri> uris=new ArrayList<>();
-                for(MyPicture p:list){
-                    uris.add(Uri.parse(p.getEditedUri()));
-                }
-                Uri savedLongImage=UtilityClass.saveLongImage(MyDocumentActivity.this,uris,currDoc.getdName());
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //simple intent
-                        d.dismiss();
-                        Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_SEND);
-                        //intent.putExtra(Intent.EXTRA_SUBJECT, "Here are some files.");
-                        intent.setType("image/jpeg"); /* This example is sharing jpeg images. */
-
-                        intent.putExtra(Intent.EXTRA_STREAM, savedLongImage);
-                        startActivity(Intent.createChooser(intent,"Share as LongImage"));
-
-                        shareClose();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ArrayList<Uri> uris = new ArrayList<>();
+                    for (MyPicture p : list) {
+                        uris.add(Uri.parse(p.getEditedUri()));
                     }
-                });
-            }
-        }).start();
+                    Uri savedLongImage = UtilityClass.saveLongImage(MyDocumentActivity.this, uris, currDoc.getdName());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //simple intent
+                            d.dismiss();
+                            Intent intent = new Intent();
+                            intent.setAction(Intent.ACTION_SEND);
+                            //intent.putExtra(Intent.EXTRA_SUBJECT, "Here are some files.");
+                            intent.setType("image/jpeg"); /* This example is sharing jpeg images. */
 
+                            intent.putExtra(Intent.EXTRA_STREAM, savedLongImage);
+                            startActivity(Intent.createChooser(intent, "Share as LongImage"));
 
+                            shareClose();
+                        }
+                    });
+                }
+            }).start();
+
+        }else{
+            Toast.makeText(this, "Documents are more than 10", Toast.LENGTH_SHORT).show();
+        }
     }
 
     //PDF
-    public Uri savePdf(String pass,boolean isPassSet){
+    public Uri savePdf(String pass, boolean isPassSet, ProgressBar pBar){
+
         if(isPerMissionGranted()){
-            ArrayList<Bitmap> pdfList=new ArrayList<>();
+            ArrayList<Uri> pdfList=new ArrayList<>();
             for(MyPicture p:list){
-                Uri current=Uri.parse(p.getEditedUri());
-                InputStream is=null;
-                Bitmap img=null;
-                try{
-
-                    is=getContentResolver().openInputStream(current);
-                    img=BitmapFactory.decodeStream(is);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                if(img!=null){
-                    pdfList.add(img);
-                }
-
+                pdfList.add(Uri.parse(p.getEditedUri()));
             }
 
             MyCustomPdf pdf = new MyCustomPdf(this, pdfList, isPassSet);
-            Uri savedPdf=pdf.savePdf2(currDoc.getdName(),pass);
+            Uri savedPdf=pdf.savePdf2(currDoc.getdName(), pass, new pdfProgress() {
+                @Override
+                public void onUpdate(int perc) {
+                    //Log.e("THIS", "onUpdate: "+perc );
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            pBar.setProgress(perc);
+                            //Log.e("TAG", "run: "+perc );
+                        }
+                    });
+
+                }
+            });
             if (savedPdf!=null) {
                 //Toast.makeText(this, "SAVED", Toast.LENGTH_SHORT).show();
                 Log.e("PDF MY DOCACTIVITY", "savePdf: "+"PDF SAVED" );
@@ -1205,7 +1600,7 @@ public class MyDocumentActivity extends AppCompatActivity {
 
         }else{
             ActivityCompat.requestPermissions(this,new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"},101);
-            return savePdf(pass,isPassSet);
+            return savePdf(pass,isPassSet,pBar);
         }
     }
 
@@ -1219,8 +1614,12 @@ public class MyDocumentActivity extends AppCompatActivity {
     private void convertToPDF(){
 
         AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
-        View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
-        builder.setView(v);
+        ProgressBar pbar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+        pbar.setIndeterminate(false);
+        pbar.setMax(100);
+
+        builder.setView(pbar);
+        builder.setTitle("Loading");
         AlertDialog d=builder.create();
         d.setCancelable(false);
         d.show();
@@ -1228,7 +1627,7 @@ public class MyDocumentActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                Uri pdf_uri=savePdf(null,false);
+                Uri pdf_uri=savePdf(null,false,pbar);
                 if(pdf_uri!=null){
 
                     runOnUiThread(new Runnable() {
@@ -1291,16 +1690,26 @@ public class MyDocumentActivity extends AppCompatActivity {
         MyPicture p=new MyPicture();
         p.setDid(currDoc.getDid());
         p.setCoordinates(null);
-        Uri original=UtilityClass.saveImage(MyDocumentActivity.this,img,uri.getLastPathSegment(),true);
+        String picName=currDoc.dName+UtilityClass.lineSeparator+System.currentTimeMillis()%100000;
+        Uri original=UtilityClass.saveImage(MyDocumentActivity.this,img,picName,true);
         p.setOriginalUri(original.toString());
+        p.setPosition(list.size()+1);
+        p.setEditedName(picName);
+        list.add(p);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
+
         img=getFilteredBitmap(img);
         Uri edited=UtilityClass.saveImage(MyDocumentActivity.this,img,uri.getLastPathSegment(),false);
         p.setEditedUri(edited.toString());
-        p.setPosition(list.size()+1);
-        p.setEditedName(String.valueOf(list.size()+1));
+
 
         long i=addImage(p);
-        list.add(p);
+
         tNails.add(UtilityClass.populateImage(MyDocumentActivity.this,edited,true,0,0));
         runOnUiThread(new Runnable() {
             @Override
@@ -1311,6 +1720,10 @@ public class MyDocumentActivity extends AppCompatActivity {
         });
 
         p.setPid((int)i);
+        if(img!=null){
+            img.recycle();
+            img=null;
+        }
     }
     //IMAGE END
 
@@ -1318,8 +1731,12 @@ public class MyDocumentActivity extends AppCompatActivity {
     private void sendEmail(){
 
         AlertDialog.Builder builder=new AlertDialog.Builder(MyDocumentActivity.this);
-        View  v=LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_progress,null);
-        builder.setView(v);
+        ProgressBar pbar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+        pbar.setIndeterminate(false);
+        pbar.setMax(100);
+
+        builder.setView(pbar);
+        builder.setTitle("Loading");
         AlertDialog d=builder.create();
         d.setCancelable(false);
         d.show();
@@ -1327,7 +1744,7 @@ public class MyDocumentActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Uri pdf_uri=savePdf(null,false);
+                Uri pdf_uri=savePdf(null,false,pbar);
                 if(pdf_uri!=null){
                     runOnUiThread(new Runnable() {
                         @Override
@@ -1380,6 +1797,8 @@ public class MyDocumentActivity extends AppCompatActivity {
             tNails.set(itemPos-1,tmp);
             miniAdapter.notifyDataSetChanged();
             vp2.setCurrentItem(itemPos-1);
+        }else{
+            Toast.makeText(this, "No Left Image", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1435,6 +1854,8 @@ public class MyDocumentActivity extends AppCompatActivity {
             tNails.set(itemPos+1,tmp);
             miniAdapter.notifyDataSetChanged();
             vp2.setCurrentItem(itemPos+1);
+        }else{
+            Toast.makeText(this, "No Right Image", Toast.LENGTH_SHORT).show();
         }
     }
     public void onDeleteClicked(View view){

@@ -1,5 +1,6 @@
 package com.example.camscan.Activities;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -56,11 +57,16 @@ public class PdfSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting_pdf);
 
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle("Pdf Setting");
+
         borderSwitch=findViewById(R.id.pdf_setting_item4);
         light=findViewById(R.id.pdf_setting_item4_light);
         pass=findViewById(R.id.pdf_setting_text2);
         pageSize=findViewById(R.id.pdf_setting_text1);
         orientation=findViewById(R.id.pdf_setting_text3);
+
 
         fillDefaultSettings();
 

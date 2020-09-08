@@ -52,24 +52,6 @@ public class BlackAndWhite {
     }
 
 
-    public Bitmap toBnW(Bitmap bmpOriginal)
-    {
-        int width, height;
-        height = bmpOriginal.getHeight();
-        width = bmpOriginal.getWidth();
-
-        Bitmap bmpBnW = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmpBnW);
-        Paint paint = new Paint();
-        ColorMatrix cm = new ColorMatrix();
-        cm.setSaturation(0);
-
-        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
-        paint.setColorFilter(f);
-        c.drawBitmap(bmpOriginal, 0, 0, paint);
-        return bmpBnW;
-    }
-
     public Bitmap toBnwRender(Bitmap image){
         Bitmap output=Bitmap.createBitmap(image);
         ScriptC_BlackNdWhite script=new ScriptC_BlackNdWhite(rs);

@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.BoxActivity">
+    tools:context=".Activities.BoxActivity"
+    android:background="@color/colorPrimaryLight"
+    android:orientation="vertical"
+    >
 
     <ImageView
         android:id="@+id/box_temp_btn"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:visibility="invisible"
         />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/box_viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="25sp"
-        android:layout_marginBottom="100sp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="24dp"
 
         />
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/box_navigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="96dp"
         android:layout_gravity="bottom"
         android:background="@color/colorPrimaryDark"
         app:labelVisibilityMode="labeled"
@@ -36,4 +40,4 @@
 
 
 
-</FrameLayout>
+</LinearLayout>

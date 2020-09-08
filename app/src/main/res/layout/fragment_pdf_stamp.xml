@@ -22,6 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Default"
+            android:textColor="@color/colorPrimaryDark"
             />
         <RadioButton
             android:id="@+id/frag_pdf_stamp_gallery"
@@ -29,6 +30,7 @@
             android:layout_height="wrap_content"
             android:text="Choose From Gallery"
             android:layout_marginTop="8dp"
+            android:textColor="@color/colorPrimaryDark"
             />
     </RadioGroup>
     <TextView

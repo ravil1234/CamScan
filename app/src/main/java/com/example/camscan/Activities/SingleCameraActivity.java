@@ -169,7 +169,8 @@ public class SingleCameraActivity extends AppCompatActivity {
         preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageAnalysis, imageCapture);
         captureImage.setOnClickListener(v -> {
-            File my_file=new File(uri);
+
+            File my_file=new File(Uri.parse(uri).getPath());
             ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(my_file).build();
             imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
                 @Override
@@ -187,6 +188,9 @@ public class SingleCameraActivity extends AppCompatActivity {
                 @Override
                 public void onError(@NonNull ImageCaptureException error) {
                     error.printStackTrace();
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_CANCELED,returnIntent);
+                    finish();
                 }
             });
         });
@@ -205,6 +209,7 @@ public class SingleCameraActivity extends AppCompatActivity {
         Intent returnIntent = new Intent();
     //    returnIntent.putExtra("PICTURE_URI",uri);
         setResult(Activity.RESULT_OK,returnIntent);
+        Log.e("this", "call_save_list: "+uri );
         finish();
     }
     private boolean allPermissionsGranted() {

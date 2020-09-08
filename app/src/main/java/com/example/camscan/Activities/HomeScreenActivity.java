@@ -46,7 +46,7 @@ public class HomeScreenActivity extends AppCompatActivity {
             int did=myDocument.getDid();
             String name=myDocument.getdName();
             long date=myDocument.getTimeCreated();
-            int pcount=db.myDocumentDao().getCount(did);
+            int pcount=db.myPicDao().getCount(did);
             String fp_uri=myDocument.getfP_URI();
            long date_edited=myDocument.getTimeEdited();
            gridViewImagesListList.add(new GridViewImagesList(did,fp_uri,dateformatter(date),pcount,dateformatter(date_edited)));

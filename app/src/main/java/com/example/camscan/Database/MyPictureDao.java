@@ -19,6 +19,9 @@ public interface MyPictureDao {
     @Query("SELECT * From mypicture")
     List<MyPicture> getAllPics();
 
+    @Query("SELECT COUNT(pid) FROM mypicture where did=:did")
+    int getCount(int did);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertIntoDoc(MyPicture pic);
 

@@ -100,7 +100,7 @@ public class MyBoxLine extends View {
     protected void onDraw(Canvas canvas) {
 
     Paint  p=new Paint();
-    p.setColor(Color.GREEN);
+    p.setColor(getResources().getColor(R.color.colorPrimary));
     p.setStyle(Paint.Style.STROKE);
     p.setStrokeWidth(4);
 

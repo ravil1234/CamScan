@@ -20,8 +20,8 @@ public interface MyDocumentDao {
 @Query("SELECT * fROM mydocument where did=:did")
     MyDocument getDocumentWithId(int did);
 
-@Query("SELECT COUNT(did) FROM mydocument WHERE did=:did")
-    int getCount(int did);
+@Query("SELECT * FROM mydocument where dname=:name")
+    List<MyDocument> getDocsWithSameName(String name);
 
 @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertNewDoc(MyDocument doc);

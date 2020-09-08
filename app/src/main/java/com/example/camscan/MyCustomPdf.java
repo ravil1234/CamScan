@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.example.camscan.Activities.MyDocumentActivity;
 import com.example.camscan.Objects.PageSize;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.text.BadElementException;
@@ -68,10 +69,11 @@ public class MyCustomPdf {
 
     private Context context;
     private ArrayList<Bitmap> images;
+    private ArrayList<Uri> imgUris;
 
-    public MyCustomPdf(Context context,ArrayList<Bitmap> images,Boolean isPassSet){
+    public MyCustomPdf(Context context,ArrayList<Uri> images,Boolean isPassSet){
         this.context=context;
-        this.images=images;
+        this.imgUris=images;
         this.isPassSet=isPassSet;
         getDefaultSettings();
 
@@ -85,124 +87,92 @@ public class MyCustomPdf {
         PASSWORD=pref.getString("PDF_PAGE_PASSWORD","admin");
         stampUri=pref.getString("PDF_STAMP_URI","android.resource://"+context.getPackageName()+"/"+R.drawable.stamp);
     }
-  /*
-    public Boolean savePdf(String name){
-        PdfDocument doc=new PdfDocument();
-        if(isPassSet){
 
-        }
-        int h=getHeight();
-        int w=getWidth();
-        for(int i=0;i<images.size();i++){
-            PdfDocument.PageInfo info=new PdfDocument.PageInfo.Builder(w,h,i+1).create();
+    public Uri savePdf2(String name, String pass, MyDocumentActivity.pdfProgress mp){
+      File f;
+      File dir;
+      if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q) {
+          String path = Environment.getExternalStorageDirectory().getPath() + "/CamScan/" + name + ".pdf";
+          String path2=Environment.getExternalStorageDirectory().getPath()+"/CamScan";
+          dir=new File(path2);
+          f = new File(path);
+      }else{
+          f=new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),"CamScan/"+name+".pdf");
+          dir=new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),"CamScan");
+      }
+      Document doc=new Document(getPageSize());
 
-            PdfDocument.Page page=doc.startPage(info);
-            Paint p=new Paint(Color.WHITE);
-            retImg r=resize(images.get(i));
-            page.getCanvas().drawBitmap(r.img,r.x,r.y,p);
-
-            doc.finishPage(page);
-        }
-
-        String path= Environment.getExternalStorageDirectory().getPath()+"/"+name+".pdf";
-        File f=new File(path);
-
-        try{
-            doc.writeTo(new FileOutputStream(f));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        doc.close();
-        return true;
+      if(!dir.exists() && !dir.isDirectory()){
+          dir.mkdir();
+      }
 
 
+      //Log.e("SIZE", "savePdf2: "+ com.itextpdf.text.PageSize.A4.getWidth()+" "+ com.itextpdf.text.PageSize.A4.getHeight());
+      try{
+          PdfWriter pdw=PdfWriter.getInstance(doc,new FileOutputStream(f));
+          if(isPassSet){
+              pdw.setEncryption(pass.getBytes(),"ADMIN_IS_BACK".getBytes()
+                      ,PdfWriter.ALLOW_PRINTING|PdfWriter.ALLOW_COPY|PdfWriter.ALLOW_MODIFY_CONTENTS,
+                      PdfWriter.ENCRYPTION_AES_128);
+          }
+
+          pdw.setPageEvent(new MyEvent());
+          doc.open();
+          int a=0;
+          int eachPer=100/imgUris.size();
+          for(Uri i :imgUris){
+              // imgV.setImageBitmap(i);
+
+              Bitmap b=BitmapFactory.decodeFile(i.getPath());
+              ByteArrayOutputStream bos=new ByteArrayOutputStream();
+              retImg ret=resize(b);
+              ret.img.compress(Bitmap.CompressFormat.PNG,100,bos);
+              Image image=Image.getInstance(bos.toByteArray());
+              image.setAlignment(Image.ALIGN_CENTER);
+              image.setAbsolutePosition(ret.x,ret.y);
+
+              if(ORIENTATION==1){
+                  pdw.addPageDictEntry(PdfName.ROTATE, PdfPage.LANDSCAPE);
+              }
+              if(isBorderAdded){
+                  image.setBorder(Rectangle.BOX);
+                  image.setBorderColor(BaseColor.BLACK);
+                  image.setBorderWidth(2f);
+              }
+
+
+
+              doc.add(image);
+              doc.newPage();
+              b.recycle();
+              b=null;
+              a+=eachPer;
+              mp.onUpdate(a);
+              if(imgUris.indexOf(i)==imgUris.size()-1){
+                  mp.onUpdate(100);
+              }
+
+
+          }
+          doc.close();
+
+      }
+      catch(FileNotFoundException e) {
+          e.printStackTrace();
+          return null;
+      } catch (DocumentException e) {
+          e.printStackTrace();
+          return null;
+      } catch (MalformedURLException e) {
+          e.printStackTrace();
+          return null;
+      } catch (IOException e) {
+          e.printStackTrace();
+          return null;
+      }
+      return Uri.fromFile(f);
     }
-*/
-    public Uri savePdf2(String name,String pass){
-        File f;
-        File dir;
-        if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q) {
-            String path = Environment.getExternalStorageDirectory().getPath() + "/CamScan/" + name + ".pdf";
-            String path2=Environment.getExternalStorageDirectory().getPath()+"/CamScan";
-            dir=new File(path2);
-             f = new File(path);
-        }else{
-             f=new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),"CamScan/"+name+".pdf");
-            dir=new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),"CamScan");
-        }
-        Document doc=new Document(getPageSize());
 
-        if(!dir.exists() && !dir.isDirectory()){
-            dir.mkdir();
-        }
-
-
-        //Log.e("SIZE", "savePdf2: "+ com.itextpdf.text.PageSize.A4.getWidth()+" "+ com.itextpdf.text.PageSize.A4.getHeight());
-        try{
-            PdfWriter pdw=PdfWriter.getInstance(doc,new FileOutputStream(f));
-            if(isPassSet){
-                pdw.setEncryption(pass.getBytes(),"ADMIN_IS_BACK".getBytes()
-                        ,PdfWriter.ALLOW_PRINTING|PdfWriter.ALLOW_COPY|PdfWriter.ALLOW_MODIFY_CONTENTS,
-                        PdfWriter.ENCRYPTION_AES_128);
-            }
-
-            pdw.setPageEvent(new MyEvent());
-            doc.open();
-            //Bitmap stamp=BitmapFactory.decodeStream(context.getContentResolver().openInputStream(Uri.parse(stampUri)));
-            //adding stamp
-            //PdfStamper stamper=new PdfStamper(pdw,context.getContentResolver().openOutputStream(Uri.parse(stampUri)));
-
-
-
-
-            for(Bitmap i :images){
-               // imgV.setImageBitmap(i);
-
-
-                ByteArrayOutputStream bos=new ByteArrayOutputStream();
-                retImg ret=resize(i);
-                ret.img.compress(Bitmap.CompressFormat.PNG,100,bos);
-                Image image=Image.getInstance(bos.toByteArray());
-                image.setAlignment(Image.ALIGN_CENTER);
-                image.setAbsolutePosition(ret.x,ret.y);
-
-                if(ORIENTATION==1){
-                    pdw.addPageDictEntry(PdfName.ROTATE, PdfPage.LANDSCAPE);
-                }
-                if(isBorderAdded){
-                    image.setBorder(Rectangle.BOX);
-                    image.setBorderColor(BaseColor.BLACK);
-                    image.setBorderWidth(2f);
-                }
-
-
-
-                doc.add(image);
-                doc.newPage();
-
-            }
-            doc.close();
-
-        }
-        catch(FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (DocumentException e) {
-            e.printStackTrace();
-            return null;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return Uri.fromFile(f);
-    }
 
     private class MyEvent extends PdfPageEventHelper{
         Image stamp;

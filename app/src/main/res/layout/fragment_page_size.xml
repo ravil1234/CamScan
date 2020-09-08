@@ -17,6 +17,7 @@
             android:text="A5 (5.8×8.3in)"
             android:textStyle="bold"
             android:layout_marginTop="8dp"
+            android:textColor="@color/colorPrimaryDark"
             />
         <RadioButton
             android:id="@+id/frag_psize_a4"
@@ -25,6 +26,7 @@
             android:text="A4 (8.3×11.7in)"
             android:textStyle="bold"
             android:layout_marginTop="8dp"
+            android:textColor="@color/colorPrimaryDark"
 
             />
         <RadioButton
@@ -34,7 +36,7 @@
             android:text="A3 (8.4×14in)"
             android:textStyle="bold"
             android:layout_marginTop="8dp"
-
+            android:textColor="@color/colorPrimaryDark"
             />
         <RadioButton
             android:id="@+id/frag_psize_legal"
@@ -43,7 +45,7 @@
             android:text="Legal (11×17in)"
             android:textStyle="bold"
             android:layout_marginTop="8dp"
-
+            android:textColor="@color/colorPrimaryDark"
             />
         <RadioButton
             android:id="@+id/frag_psize_tabloid"
@@ -53,6 +55,7 @@
             android:textStyle="bold"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
+            android:textColor="@color/colorPrimaryDark"
             />
     </RadioGroup>
     <TextView

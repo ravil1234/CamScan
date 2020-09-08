@@ -16,6 +16,7 @@
         android:scaleType="centerCrop"
         android:layout_margin="1dp"
         android:src="@drawable/test_img"
+        android:background="@drawable/small_curve_background"
         />
     <TextView
         android:id="@+id/filter_item_name"

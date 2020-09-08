@@ -162,7 +162,8 @@ public class MainActivity extends AppCompatActivity {
 
                 String doc=getIntent().getStringExtra("MyDocument");
                 savedDoc=UtilityClass.getDocFromJson(doc);
-                picCount= MyDatabase.getInstance(MainActivity.this).myDocumentDao().getCount(savedDoc.getDid());
+                picCount= MyDatabase.getInstance(MainActivity.this).myPicDao().getCount(savedDoc.getDid());
+              //  Log.e("COUNT", "onCreate: "+picCount );
             }
         }
     }
@@ -246,9 +247,10 @@ public class MainActivity extends AppCompatActivity {
         myPictureList.add(p);
 
         MyDocument document=null;
+        long time=System.currentTimeMillis();
         if(isNew){
             document=new MyDocument(currDocName,
-                    System.currentTimeMillis(),(long)0,null);
+                    time,time,null);
         }else{
             document=savedDoc;
             document.setTimeEdited(System.currentTimeMillis());
@@ -371,7 +373,8 @@ return  f;
                     String picName=currDocName+UtilityClass.lineSeparator+System.currentTimeMillis()%100000;
                     Uri orig=UtilityClass.saveImage(MainActivity.this,b,picName,true);
                     if(isNew){
-                        savedDoc=new MyDocument(currDocName,System.currentTimeMillis(),0l,null);
+                        long time=System.currentTimeMillis();
+                        savedDoc=new MyDocument(currDocName,time,time,null);
                     }
                     p.setDid(savedDoc.getDid());
                     p.setEditedName(picName);

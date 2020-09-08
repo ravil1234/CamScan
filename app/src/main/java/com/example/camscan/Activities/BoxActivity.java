@@ -15,6 +15,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.camscan.Adapters.BoxRecyclerAdapter;
+import com.example.camscan.CustomProgressBar;
 import com.example.camscan.MyLayouts.MyBoxLayout;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
@@ -74,12 +76,13 @@ public class BoxActivity extends AppCompatActivity {
 
     BottomNavigationView bnv;
 
+    CustomProgressBar pBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_box);
-
+        pBar=new CustomProgressBar(this);
         initializeViews();
         getSupportActionBar().hide();
 
@@ -258,6 +261,10 @@ public class BoxActivity extends AppCompatActivity {
         c.drawBitmap(B, 0,0, p);
 
         result=Bitmap.createBitmap(result,minLeft,minTop,wid,hei);
+        if(B!=null){
+            B.recycle();
+            B=null;
+        }
 //        Log.e(TAG, "cornerPin: "+ result.getHeight()+" "+result.getWidth());
      //   Log.e(TAG, "cornerPin: "+resized.getHeight()+" "+resized.getWidth() );
         return result;
@@ -265,60 +272,91 @@ public class BoxActivity extends AppCompatActivity {
     }
 
 
-
     public void onNextPressed(View view){
-        String[] save=null;
-        int screenWidth=vp2.getWidth();
-        int screenHeight=vp2.getHeight();
-        Bitmap transformed=null;
-        if(list.size()==1){
-            MyPicture p =list.get(0);
-            p.setS_width(screenWidth);
-            p.setS_height(screenHeight);
-            transformed= BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
-            transformed=cornerPin(transformed,p.getCoordinates());
-            Bitmap emptyBitmap = Bitmap.createBitmap(transformed.getWidth(), transformed.getHeight(),
-                    transformed.getConfig());
-            if(transformed.sameAs(emptyBitmap)){
-                Toast.makeText(this, "Can't Crop", Toast.LENGTH_SHORT).show();
-                vp2.setCurrentItem(0);
-                transformed.recycle();
-                return;
+        AlertDialog.Builder b=new AlertDialog.Builder(this);
+        View v=LayoutInflater.from(this).inflate(R.layout.fragment_progress,null);
+        b.setView(v);
+        AlertDialog d=b.create();
+        d.setCancelable(false);
+        d.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String[] save=null;
+                int screenWidth=vp2.getWidth();
+                int screenHeight=vp2.getHeight();
+                Bitmap transformed=null;
+                if(list.size()==1){
+                    MyPicture p =list.get(0);
+                    p.setS_width(screenWidth);
+                    p.setS_height(screenHeight);
+                    transformed= BitmapFactory.decodeFile(Uri.parse(p.getOriginalUri()).getPath());
+                    transformed=cornerPin(transformed,p.getCoordinates());
+                    Bitmap emptyBitmap = Bitmap.createBitmap(transformed.getWidth(), transformed.getHeight(),
+                            transformed.getConfig());
+
+                    if(transformed.sameAs(emptyBitmap)){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                d.dismiss();
+                                Toast.makeText(BoxActivity.this, "Can't Crop", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        vp2.setCurrentItem(0);
+                        transformed.recycle();
+                        return;
+                    }
+                    save=saveBitmap(transformed);
+                }
+
+                for(MyPicture p :list){
+                    p.setS_width(screenWidth);
+                    p.setS_height(screenHeight);
+                }
+                String myPics=new Gson().toJson(list);
+                String myDoc=new Gson().toJson(currDoc);
+
+                if(list.size()==1){
+                    //single image
+                    Intent intent=new Intent(BoxActivity.this,FilterActivity.class);
+                    intent.putExtra("path",save[1]);
+                    intent.putExtra("name",save[0]);
+                    intent.putExtra("MyPicture",myPics);
+                    intent.putExtra("MyDocument",myDoc);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            d.dismiss();
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+
+                }else{
+                    //goto indoc activity
+
+                    Intent intent=new Intent(BoxActivity.this,MyDocumentActivity.class);
+                    intent.putExtra("MyPicture",myPics);
+                    intent.putExtra("MyDocument",myDoc);
+                    intent.putExtra("from","BoxActivity");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            d.dismiss();
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+
+                }
+
+
             }
-            save=saveBitmap(transformed);
-        }
+        }).start();
 
-//        if(list.size()!=1 && currDoc.getDid()!=0){
-//            //multi images which are added to existing doc
-//            //from final to MainActivity then to box activity with multiple images
-//            currDoc.setfP_URI(list.get(0).getOriginalUri());
-//        }
-        for(MyPicture p :list){
-            p.setS_width(screenWidth);
-            p.setS_height(screenHeight);
-        }
-        String myPics=new Gson().toJson(list);
-        String myDoc=new Gson().toJson(currDoc);
-        if(list.size()==1){
-            //single image
-            Intent intent=new Intent(BoxActivity.this,FilterActivity.class);
-            intent.putExtra("path",save[1]);
-            intent.putExtra("name",save[0]);
-            intent.putExtra("MyPicture",myPics);
-            intent.putExtra("MyDocument",myDoc);
-            startActivity(intent);
-            finish();
-        }else{
-            //goto indoc activity
 
-            Intent intent=new Intent(BoxActivity.this,MyDocumentActivity.class);
-            intent.putExtra("MyPicture",myPics);
-            intent.putExtra("MyDocument",myDoc);
-            intent.putExtra("from","BoxActivity");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-        }
 
     }
 
@@ -328,8 +366,9 @@ public class BoxActivity extends AppCompatActivity {
         View view2=LayoutInflater.from(this).inflate(R.layout.fragment_progress,null);
         builder.setView(view2);
         AlertDialog d=builder.create();
+        d.setCancelable(false);
         d.show();
-        stopInteraction();
+
 
         new Thread(new Runnable() {
             @Override
@@ -351,7 +390,7 @@ public class BoxActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            resumeInteraction();
+                            //resumeInteraction();
                             d.dismiss();
                             adapter.notifyDataSetChanged();
                         }
@@ -498,4 +537,6 @@ public class BoxActivity extends AppCompatActivity {
             return true;
         }
     }
+
+
 }

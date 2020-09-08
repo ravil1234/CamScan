@@ -63,14 +63,30 @@ public class FlatCorrection {
 
         meanS.forEach_getTotalSum2(sumAllocation2);
         float sumArray2[] = new float[1];
-        sumAllocation.copyTo(sumArray2);
+        sumAllocation2.copyTo(sumArray2);
 
         meanS.forEach_getTotalSum3(sumAllocation3);
         float sumArray3[] = new float[1];
-        sumAllocation.copyTo(sumArray3);
+        sumAllocation3.copyTo(sumArray3);
 
         meanS.destroy();
         float [] mean={sumArray[0],sumArray2[0],sumArray3[0]};
+        String m="";
+        boolean isBlack=true;
+        int c=0;
+        for (int i=0;i<3;i++){
+            m+=mean[i]+" ";
+            if(mean[i]>127){
+                c++;
+            }else{
+                int dif=(int)(150-mean[i]);
+                mean[i]+=dif;
+            }
+        }
+        if(c>=2){
+            isBlack=false;
+        }
+        Log.e("THIS", "flatCorr: "+m+" "+c );
 
 
         ScriptC_FlatCorrection script2=new ScriptC_FlatCorrection(rs);
@@ -86,6 +102,10 @@ public class FlatCorrection {
 
         tmpOut.copyTo(input);
         script2.destroy();
+        if(output!=null){
+            output.recycle();
+            output=null;
+        }
 
         //flat corrected now post processing
         ScriptC_BCE script3=new ScriptC_BCE(rs);
@@ -94,8 +114,13 @@ public class FlatCorrection {
 
         tmpIn=Allocation.createFromBitmap(rs,input);
         tmpOut=Allocation.createTyped(rs,tmpIn.getType());
-
-        script3.invoke_setVals(getFactor(120),160,-30);
+        script3.invoke_setVals(getFactor(150),185,-30);
+//        if(isBlack){
+//            script3.invoke_setVals(getFactor(120),100,50);
+//        }else{
+//
+//            script3.invoke_setVals(getFactor(100),50,20);
+//        }
 
         script3.forEach_Evaluate(tmpIn,tmpOut);
 

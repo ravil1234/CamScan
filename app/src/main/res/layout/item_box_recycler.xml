@@ -6,7 +6,7 @@
         android:id="@+id/box_item_img_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/test_img"
+        android:src="@drawable/pbar_back"
         android:layout_gravity="center"
         android:scaleType="fitXY"
 

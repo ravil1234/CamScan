@@ -6,7 +6,7 @@
         android:height="16dp"
         android:width="24dp"/>
     <solid
-        android:color="#000"/>
+        android:color="@color/colorAccent"/>
 
     <corners
         android:radius="8dp"/>
