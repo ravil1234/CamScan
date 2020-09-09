@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.camscan">
 
+    <uses-feature android:name="android.hardware.camera.any" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,37 +15,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.InDocRecyclerActivity"
-            android:hardwareAccelerated="false"
-            ></activity>
-        <activity android:name=".Activities.MyDocumentActivity"
-            android:hardwareAccelerated="false"/>
+        <activity android:name=".Activities.SettingsActivity"></activity>
+        <activity
+            android:name=".Activities.InDocRecyclerActivity"
+            android:hardwareAccelerated="false" />
+        <activity
+            android:name=".Activities.MyDocumentActivity"
+            android:hardwareAccelerated="false" />
         <activity android:name=".Activities.FilterActivity" />
-        <activity android:name=".Activities.BoxActivity"
+        <activity
+            android:name=".Activities.BoxActivity"
             android:hardwareAccelerated="false"
-            android:noHistory="true"
-            >
-        </activity>
+            android:noHistory="true"></activity>
         <activity android:name=".Activities.CamActivity" />
-        <activity android:name=".Activities.MainActivity">
-
-        </activity>
+        <activity android:name=".Activities.MainActivity"></activity>
         <activity android:name=".Activities.HomeScreenActivity" />
         <activity android:name=".Activities.SingleCameraActivity" />
         <activity android:name=".Activities.CameraXActivity" />
         <activity android:name=".Activities.CapturedImageActivity" />
-        <activity android:name=".Activities.SplashScreenActivity" >
+        <activity android:name=".Activities.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.PdfSettingsActivity"/>
+        <activity android:name=".Activities.PdfSettingsActivity" />
     </application>
-
-    <uses-feature android:name="android.hardware.camera.any" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

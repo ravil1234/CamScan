@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_share"
+        android:enabled="true"
+        android:icon="@drawable/share"
+        android:title="Share"
+        app:showAsAction="ifRoom"
+        />
+    <item
+        android:id="@+id/action_lock"
+        android:enabled="true"
+        android:icon="@drawable/password"
+        android:title="Lock"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_tag"
+        android:enabled="true"
+        android:icon="@drawable/tag"
+        android:title="Tag"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_delete"
+        android:enabled="true"
+        android:icon="@drawable/trash"
+        android:title="Delete"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_more"
+        android:enabled="true"
+        android:icon="@drawable/more"
+        android:title="More"
+        app:showAsAction="ifRoom" />
+</menu>

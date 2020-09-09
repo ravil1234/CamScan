@@ -95,7 +95,7 @@ public class CameraXActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.testing_layout);
+        setContentView(R.layout.activity_camerax);
         getSupportActionBar().hide();
         preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
         mPreviewView = findViewById(R.id.previewView);

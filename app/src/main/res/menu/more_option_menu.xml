@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/contact_us"
+        android:icon="@drawable/contact"
+        android:title="Contact Us" />
+    <item
+        android:id="@+id/terms_condition"
+        android:icon="@drawable/accept_terms"
+        android:title="Terms and Condition" />
+    <item
+        android:id="@+id/about_us"
+        android:icon="@drawable/about_us"
+        android:title="About Us" />
+</menu>
