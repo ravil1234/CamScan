@@ -1,10 +1,14 @@
 package com.example.camscan.Activities;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -114,14 +118,16 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void onClick(View view)
             {
-                show_bottom_theme();
+                //show_bottom_theme();
+                show_default_theme(view);
             }
         });
         relativeLayoutView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-                 show_bottom_view();
+                 //show_bottom_view();
+                 show_default_view(view);
             }
         });
         relativeLayoutFilter.setOnClickListener(new View.OnClickListener() {
@@ -135,14 +141,16 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void onClick(View view)
             {
-             show_bottom_activity();
+             //show_bottom_activity();
+             show_default_activity(view);
             }
         });
         relativeLayoutPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-          //Intent
+                Intent i=new Intent(SettingsActivity.this,PdfSettingsActivity.class);
+                 startActivity(i);
             }
         });
         relativeLayoutName.setOnClickListener(new View.OnClickListener() {
@@ -282,5 +290,119 @@ public class SettingsActivity extends AppCompatActivity
         }
         return(super.onOptionsItemSelected(item));
     }
+    public void show_default_activity(View view)
+    {
+        AlertDialog.Builder builder=new AlertDialog.Builder(SettingsActivity.this);
+        builder.setTitle("Default Activity");
+        View dialog= LayoutInflater.from(SettingsActivity.this).inflate(R.layout.dialog_box_settings,null);
+        builder.setView(dialog);
+        RadioButton portBtn=dialog.findViewById(R.id.frag_orient_port);
+        RadioButton landBtn=dialog.findViewById(R.id.frag_orient_land);
+        portBtn.setText("Home Activity");
+        landBtn.setText("Camera Activity");
+        TextView saveBtn=dialog.findViewById(R.id.frag_orient_save);
+        int rad=preferences.getInt("myactivity",0);
+        if(rad==1)
+        {
+            portBtn.setChecked(true);
+        }else
+            {
+            landBtn.setChecked(true);
+        }
+        AlertDialog d=builder.create();
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int radio;
+                if(portBtn.isChecked())
+                {
+                    radio=1;
 
+                }else
+                    {
+                    radio=2;
+                }
+                preferences.edit().putInt("myactivity",radio).apply();
+                d.dismiss();
+            }
+        });
+
+        d.show();
+    }
+    public void show_default_view(View view)
+    {
+        AlertDialog.Builder builder=new AlertDialog.Builder(SettingsActivity.this);
+        builder.setTitle("View Document as ");
+        View dialog= LayoutInflater.from(SettingsActivity.this).inflate(R.layout.dialog_box_settings,null);
+        builder.setView(dialog);
+        RadioButton portBtn=dialog.findViewById(R.id.frag_orient_port);
+        RadioButton landBtn=dialog.findViewById(R.id.frag_orient_land);
+        portBtn.setText("Grid View");
+        landBtn.setText("List View");
+        TextView saveBtn=dialog.findViewById(R.id.frag_orient_save);
+        int rad=preferences.getInt("myview",0);
+        if(rad==1)
+        {
+            portBtn.setChecked(true);
+        }else
+        {
+            landBtn.setChecked(true);
+        }
+        AlertDialog d=builder.create();
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int radio;
+                if(portBtn.isChecked())
+                {
+                    radio=1;
+
+                }else
+                {
+                    radio=2;
+                }
+                preferences.edit().putInt("myview",radio).apply();
+                d.dismiss();
+            }
+        });
+        d.show();
+    }
+    public void show_default_theme(View view)
+    {
+        AlertDialog.Builder builder=new AlertDialog.Builder(SettingsActivity.this);
+        builder.setTitle("App Theme ");
+        View dialog= LayoutInflater.from(SettingsActivity.this).inflate(R.layout.dialog_box_settings,null);
+        builder.setView(dialog);
+        RadioButton portBtn=dialog.findViewById(R.id.frag_orient_port);
+        RadioButton landBtn=dialog.findViewById(R.id.frag_orient_land);
+        portBtn.setText("Dark Mode");
+        landBtn.setText("Light Mode");
+        TextView saveBtn=dialog.findViewById(R.id.frag_orient_save);
+        int rad=preferences.getInt("mytheme",0);
+        if(rad==1)
+        {
+            portBtn.setChecked(true);
+        }else
+        {
+            landBtn.setChecked(true);
+        }
+        AlertDialog d=builder.create();
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int radio;
+                if(portBtn.isChecked())
+                {
+                    radio=1;
+
+                }else
+                {
+                    radio=2;
+                }
+                preferences.edit().putInt("mytheme",radio).apply();
+                d.dismiss();
+            }
+        });
+        d.show();
+    }
 }

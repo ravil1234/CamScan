@@ -1818,7 +1818,7 @@ public class MyDocumentActivity extends AppCompatActivity {
         String jsonString=new Gson().toJson(currPic);
         String jsonDoc=new Gson().toJson(currDoc);
 
-        Intent intent=new Intent(MyDocumentActivity.this,SingleCameraActivity.class);
+        Intent intent=new Intent(MyDocumentActivity.this,SingleCamActivity.class);
         intent.putExtra("PICTURE_URI",currPic.getOriginalUri());
         startActivityForResult(intent,UtilityClass.RETAKE_REQ_CODE);
     }
