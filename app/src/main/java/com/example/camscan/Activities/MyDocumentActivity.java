@@ -156,6 +156,10 @@ public class MyDocumentActivity extends AppCompatActivity {
 
 
         getSupportActionBar().setTitle("Document");
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
         initializeViews();
 
         initializeNavBar();
@@ -1815,10 +1819,10 @@ public class MyDocumentActivity extends AppCompatActivity {
         MyPicture currPic=list.get(currItem);
         //so that it wont go back
 
-        String jsonString=new Gson().toJson(currPic);
-        String jsonDoc=new Gson().toJson(currDoc);
+//        String jsonString=new Gson().toJson(currPic);
+//        String jsonDoc=new Gson().toJson(currDoc);
 
-        Intent intent=new Intent(MyDocumentActivity.this,SingleCameraActivity.class);
+        Intent intent=new Intent(MyDocumentActivity.this,SingleCamActivity.class);
         intent.putExtra("PICTURE_URI",currPic.getOriginalUri());
         startActivityForResult(intent,UtilityClass.RETAKE_REQ_CODE);
     }
@@ -2109,7 +2113,7 @@ public class MyDocumentActivity extends AppCompatActivity {
 
     private void addMorePages() {
         //goto camera activity
-        Intent intent=new Intent(MyDocumentActivity.this,MainActivity.class);
+        Intent intent=new Intent(MyDocumentActivity.this,CameraXActivity.class);
         intent.putExtra("MyDocument",UtilityClass.getStringFromObject(currDoc));
         intent.putExtra("from","MyDocumentActivity");
         startActivity(intent);

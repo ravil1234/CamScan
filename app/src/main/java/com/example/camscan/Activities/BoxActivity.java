@@ -462,7 +462,7 @@ public class BoxActivity extends AppCompatActivity {
         int index=vp2.getCurrentItem();
         MyPicture p=list.get(index);
         //String picString=UtilityClass.getStringFromObject(p);
-        Intent intent=new Intent(BoxActivity.this,SingleCameraActivity.class);
+        Intent intent=new Intent(BoxActivity.this,SingleCamActivity.class);
         intent.putExtra("PICTURE_URI",p.getOriginalUri());
         startActivityForResult(intent,UtilityClass.RETAKE_REQ_CODE);
     }

@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
 
 import com.example.camscan.R;
 import com.example.camscan.UtilityClass;
@@ -60,6 +62,8 @@ public class PdfSettingsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle("Pdf Setting");
+
+
 
         borderSwitch=findViewById(R.id.pdf_setting_item4);
         light=findViewById(R.id.pdf_setting_item4_light);
@@ -419,6 +423,17 @@ public class PdfSettingsActivity extends AppCompatActivity {
             }
         }
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     private Uri saveStamp(Bitmap stamp) {
         File f=null;

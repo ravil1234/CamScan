@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Activities.FilterActivity"
-    android:background="@color/colorPrimaryLight"
+    android:background="#fff"
     >
 
 
@@ -270,7 +270,7 @@
                     android:textColor="#fff"
                     android:layout_marginTop="8dp"
                     android:layout_centerHorizontal="true"
-                    android:textSize="12sp"
+                    android:textSize="8sp"
                     />
             </RelativeLayout>
             <RelativeLayout
@@ -296,7 +296,7 @@
                     android:textColor="#fff"
                     android:layout_marginTop="8dp"
                     android:layout_centerHorizontal="true"
-                    android:textSize="12sp"
+                    android:textSize="8sp"
                     />
             </RelativeLayout>
             <RelativeLayout
@@ -322,7 +322,7 @@
                     android:textColor="#fff"
                     android:layout_marginTop="8dp"
                     android:layout_centerHorizontal="true"
-                    android:textSize="12sp"
+                    android:textSize="8sp"
                     />
 
             </RelativeLayout>
@@ -349,7 +349,7 @@
                     android:textColor="#fff"
                     android:layout_marginTop="8dp"
                     android:layout_centerHorizontal="true"
-                    android:textSize="12sp"
+                    android:textSize="8sp"
                     />
             </RelativeLayout>
             <RelativeLayout
@@ -375,7 +375,7 @@
                     android:textColor="#fff"
                     android:layout_marginTop="8dp"
                     android:layout_centerHorizontal="true"
-                    android:textSize="12sp"
+                    android:textSize="8sp"
                     />
             </RelativeLayout>
             <RelativeLayout
@@ -401,7 +401,7 @@
                     android:textColor="#fff"
                     android:layout_marginTop="8dp"
                     android:layout_centerHorizontal="true"
-                    android:textSize="12sp"
+                    android:textSize="8sp"
                     />
             </RelativeLayout>
 
