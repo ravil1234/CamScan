@@ -36,7 +36,7 @@
         >
     </TextView>
     <com.airbnb.lottie.LottieAnimationView
-        android:visibility="visible"
+        android:visibility="gone"
         android:id="@+id/animation_lottie"
         android:layout_width="800dp"
         android:layout_height="600dp"
@@ -52,8 +52,6 @@
         android:backgroundTint="#ffffff"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="100dp"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/ic_code_scanner_flash_on">
+        android:layout_centerHorizontal="true">
     </ImageView>
-
 </RelativeLayout>
