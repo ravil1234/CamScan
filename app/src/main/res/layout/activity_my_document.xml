@@ -94,12 +94,10 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:headerLayout="@layout/nav_header"
-        android:layout_gravity="start"
         android:id="@+id/in_doc_nav"
         android:fitsSystemWindows="true"
-
         android:background="#DADADA"
-
+        android:layout_gravity="start"
         >
 
         <LinearLayout
@@ -119,6 +117,8 @@
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:fillViewport="true"
+                android:scrollbars="vertical"
+
                 >
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -135,7 +135,7 @@
                         tools:listitem="@layout/item_nav_menu"
                         android:layout_marginTop="4dp"
                         android:scrollbars="vertical"
-                        tools:listfooter="@layout/item_nav_menu"
+
                         />
                     <include layout="@layout/item_nav_menu"
                         android:id="@+id/in_doc_shareApp"

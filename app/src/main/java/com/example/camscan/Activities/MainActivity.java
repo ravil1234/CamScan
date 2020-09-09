@@ -292,6 +292,11 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+
+
+
+
     }
     private File  saveimagefile(){
       File dir;

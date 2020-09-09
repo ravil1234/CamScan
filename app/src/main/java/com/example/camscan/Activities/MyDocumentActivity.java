@@ -75,6 +75,7 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -153,8 +154,8 @@ public class MyDocumentActivity extends AppCompatActivity {
 
         //Debugger.initialize(this);
 
-        ActionBar actionBar = getActionBar();
-        actionBar.setTitle("Document");
+
+        getSupportActionBar().setTitle("Document");
         initializeViews();
 
         initializeNavBar();
@@ -1679,9 +1680,16 @@ public class MyDocumentActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         Bitmap img=null;
+
+
         if(is!=null){
 
             img=BitmapFactory.decodeStream(is);
+        }
+        try {
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         if(img==null){
             Log.e("THIS", "addImageWithFilter: "+"FAILED TO IMPORT" );

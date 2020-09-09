@@ -87,6 +87,7 @@ public class UtilityClass {
             img.compress(Bitmap.CompressFormat.JPEG,100,fos);
 
             fos.close();
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
