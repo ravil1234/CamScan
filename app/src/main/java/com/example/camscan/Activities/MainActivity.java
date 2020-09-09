@@ -1,6 +1,7 @@
 package com.example.camscan.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +10,8 @@ import android.icu.util.TimeUnit;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+
+import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.ObjectClass.BitmapObject;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
@@ -42,9 +45,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.camscan.UtilityClass;
@@ -54,6 +59,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -80,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
    ArrayList<MyPicture > myPictureList;
    boolean isNew=true;
    MyDocument savedDoc;
+   String currDocName;
+   int picCount=0;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -87,13 +95,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camerax);
         getSupportActionBar().hide();
 
+        long time=System.currentTimeMillis()%1000000;
+        currDocName=UtilityClass.appName+UtilityClass.lineSeparator+time;
 //        Intent intent=new Intent(this,MyDocumentActivity.class);
 //        startActivity(intent);
 //        finish();
 
         mPreviewView = findViewById(R.id.previewView);
         captureImage = findViewById(R.id.captureImg);
-        flashmode_btn = findViewById(R.id.flash_mode);
+       // flashmode_btn = findViewById(R.id.flash_mode);
         gallery = findViewById(R.id.gallery);
         single_mode_img=findViewById(R.id.single_mode);
         batch_mode_img=findViewById(R.id.batch_mode);
@@ -117,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
+
+
+
             }
         });
         tick_img.setVisibility(View.INVISIBLE);
@@ -143,11 +156,14 @@ public class MainActivity extends AppCompatActivity {
 
         String from=getIntent().getStringExtra("from");
         if(from!=null){
-            if(from.equals("InDocRecyclerActivity")){
+            if(from.equals("MyDocumentActivity")){
                 //came from recycelr activity from more pages
                 isNew=false;
+
                 String doc=getIntent().getStringExtra("MyDocument");
                 savedDoc=UtilityClass.getDocFromJson(doc);
+                picCount= MyDatabase.getInstance(MainActivity.this).myPicDao().getCount(savedDoc.getDid());
+              //  Log.e("COUNT", "onCreate: "+picCount );
             }
         }
     }
@@ -225,24 +241,28 @@ public class MainActivity extends AppCompatActivity {
     }
     private  void call_save_list(String uri)
     {
-
-        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,null,String.valueOf(myPictureList.size()+1),
-                myPictureList.size()+1,null));
-        String mypic= UtilityClass.getStringFromObject(myPictureList);
+        picCount++;
+        MyPicture p=new MyPicture(0,uri,null,currDocName+UtilityClass.lineSeparator+System.currentTimeMillis()%100000,
+                picCount,null,0,0);
+        myPictureList.add(p);
 
         MyDocument document=null;
+        long time=System.currentTimeMillis();
         if(isNew){
-            document=new MyDocument("NewFolder"+System.currentTimeMillis(),
-                    System.currentTimeMillis(),(long)0,myPictureList.size(),"");
+            document=new MyDocument(currDocName,
+                    time,time,null);
         }else{
             document=savedDoc;
-            document.setpCount(document.getpCount()+myPictureList.size());
             document.setTimeEdited(System.currentTimeMillis());
+            p.setDid(savedDoc.getDid());
         }
 
-        String mydoc=UtilityClass.getStringFromObject(document);
         if(single_mode)
         {
+            String mypic= UtilityClass.getStringFromObject(myPictureList);
+            String mydoc=UtilityClass.getStringFromObject(document);
+
+
             Intent intent = new Intent(MainActivity.this, BoxActivity.class);
              intent.putExtra("MyPicture",mypic);
              intent.putExtra("MyDocument",mydoc);
@@ -255,10 +275,15 @@ public class MainActivity extends AppCompatActivity {
          gallery.setVisibility(View.GONE);
          last_img.setVisibility(View.VISIBLE);
          Picasso.with(MainActivity.this).load(uri).into(last_img);
-         tick_img.setOnClickListener(new View.OnClickListener() {
+        MyDocument finalDocument = document;
+        tick_img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
+                String mypic= UtilityClass.getStringFromObject(myPictureList);
+                String mydoc=UtilityClass.getStringFromObject(finalDocument);
+
+
                 Intent i=new Intent(MainActivity.this,BoxActivity.class);
                 i.putExtra("MyPicture",mypic);
                 i.putExtra("MyDocument",mydoc);
@@ -267,17 +292,22 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+
+
+
+
     }
-  private File  saveimagefile(){
+    private File  saveimagefile(){
       File dir;
       File f=null;
       if(Build.VERSION.SDK_INT< Build.VERSION_CODES.Q){
-              String path= Environment.getExternalStorageDirectory().getPath()+"/CamScan/.Original/"+System.currentTimeMillis()+".jpg";
+              String path= Environment.getExternalStorageDirectory().getPath()+"/CamScan/.Original/"+currDocName+UtilityClass.lineSeparator+System.currentTimeMillis()%10000+".jpg";
               dir=new File(Environment.getExternalStorageDirectory().getPath()+"/CamScan/.Original");
               f=new File(path);
       }
       else{
-              f=new File(MainActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan/.Original/"+System.currentTimeMillis()+".jpg");
+              f=new File(MainActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan/.Original/"+currDocName+UtilityClass.lineSeparator+System.currentTimeMillis()%10000+".jpg");
               dir=new File(MainActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"CamScan/.Original");
           }
       if(!dir.exists() && !dir.isDirectory()){
@@ -312,6 +342,79 @@ return  f;
         }
         return true;
     }
+    private void getPics(final ArrayList<Uri> uris){
+        AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);
+        View v= LayoutInflater.from(this).inflate(R.layout.fragment_progress,null);
+        builder.setView(v);
+
+        AlertDialog d=builder.create();
+        d.setCancelable(false);
+        d.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<MyPicture> imported=new ArrayList<>();
+                for(Uri u:uris){
+                    MyPicture p=new MyPicture();
+
+                    InputStream is=null;
+
+                    try{
+                        is=MainActivity.this.getContentResolver().openInputStream(u);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    Bitmap b=null;
+                    if(is!=null){
+
+                        b=BitmapFactory.decodeStream(is);
+                    }
+                    if(b==null){
+                        Log.e("THIS", "FAILED TO IMPORT in Main Activity" );
+                        d.dismiss();
+                        return;
+                    }
+
+                    String picName=currDocName+UtilityClass.lineSeparator+System.currentTimeMillis()%100000;
+                    Uri orig=UtilityClass.saveImage(MainActivity.this,b,picName,true);
+                    if(isNew){
+                        long time=System.currentTimeMillis();
+                        savedDoc=new MyDocument(currDocName,time,time,null);
+                    }
+                    p.setDid(savedDoc.getDid());
+                    p.setEditedName(picName);
+                    p.setOriginalUri(orig.toString());
+                    p.setCoordinates(null);
+                    picCount++;
+                    p.setPosition(picCount);
+                    imported.add(p);
+
+                    if(b!=null){
+                        b.recycle();
+                        b=null;
+                    }
+                }
+                // return imported;
+
+                String myPic=UtilityClass.getStringFromObject(imported);
+                String myDocument=UtilityClass.getStringFromObject(savedDoc);
+                Intent i=new Intent(MainActivity.this,BoxActivity.class);
+                i.putExtra("MyPicture",myPic);
+                i.putExtra("MyDocument",myDocument);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        d.dismiss();
+                        startActivity(i);
+                        finish();
+                    }
+                });
+
+
+            }
+        }).start();
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -330,21 +433,26 @@ return  f;
         {
             if (resultCode == Activity.RESULT_OK)
             {
+                ArrayList<Uri> uris=new ArrayList<>();
                 if (data.getClipData() != null)
                 {
                     int count = data.getClipData().getItemCount(); //evaluate the count before the for loop --- otherwise, the count is evaluated every loop.
                     for (int i = 0; i < count; i++) {
                         Uri imageUri = data.getClipData().getItemAt(i).getUri();
-                        Log.d("image_uri_all",imageUri+" ->");
+                        uris.add(imageUri);
                         //do something with the image (save it to some directory or whatever you need to do with it here)
                     }
                 }
                 else if (data.getData() != null) {
-                    String imagePath = data.getData().getPath();
+                    Uri imagePath = data.getData();
+                    uris.add(imagePath);
                     //do something with the image (save it to some directory or whatever you need to do with it here)
+                }else{
+                    Toast.makeText(this, "Cancel", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                Intent i=new Intent(MainActivity.this,BoxActivity.class);
-                 startActivity(i);
+                getPics(uris);
+
             }
         }
     }

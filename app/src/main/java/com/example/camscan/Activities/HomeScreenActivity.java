@@ -324,12 +324,13 @@ public class HomeScreenActivity extends AppCompatActivity {
     private void set_image_list()
     {
        List<MyDocument> myDocuments= MyDatabase.getInstance(this).myDocumentDao().getAllDocs();
+       MyDatabase db=MyDatabase.getInstance(HomeScreenActivity.this);
        for(MyDocument myDocument:myDocuments)
        {
             int did=myDocument.getDid();
             String name=myDocument.getdName();
             long date=myDocument.getTimeCreated();
-            int pcount=myDocument.getpCount();
+            int pcount=db.myPicDao().getCount(did);
             String fp_uri=myDocument.getfP_URI();
            Log.d("HomeScreen_Uri",fp_uri+"uri");
            long date_edited=myDocument.getTimeEdited();

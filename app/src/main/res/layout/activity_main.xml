@@ -26,7 +26,10 @@
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" >
+
+
+    </androidx.camera.view.PreviewView>
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -74,4 +77,5 @@
                 android:background="#ff00ff" />
         </androidx.cardview.widget.CardView>
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,16 +2,21 @@ package com.example.camscan.RenderScriptJava;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
+
+
+
 import android.util.Log;
+
+import androidx.renderscript.Allocation;
+import androidx.renderscript.Element;
+import androidx.renderscript.RenderScript;
+import androidx.renderscript.Script;
+import androidx.renderscript.ScriptIntrinsicBlur;
 
 import com.example.camscan.ScriptC_BCE;
 import com.example.camscan.ScriptC_FlatCorrection;
+import com.example.camscan.ScriptC_mean;
 
-import static androidx.camera.core.CameraXThreads.TAG;
 
 public class FlatCorrection {
 
@@ -23,134 +28,120 @@ public class FlatCorrection {
 
     }
 
-    public static float[] getAverageColorRGB(Bitmap bitmap) {
-        final int width = bitmap.getWidth();
-        final int height = bitmap.getHeight();
-        int size = width * height;
-        int pixelColor;
-        float r, g, b;
-        r = g = b = 0f;
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                pixelColor = bitmap.getPixel(x, y);
-                if (pixelColor == 0) {
-                    size--;
-                    continue;
-                }
-                r += Color.red(pixelColor);
-                g += Color.green(pixelColor);
-                b += Color.blue(pixelColor);
-            }
-        }
-        r /= size;
-        g /= size;
-        b /= size;
-        return new float[] {
-                r, g, b
-        };
-    }
-
     public Bitmap flatCorr(Bitmap image){
-        //Blurring
-  //      int width=image.getWidth();
-//        int height=image.getHeight();
-
-        Bitmap output=Bitmap.createScaledBitmap(image,(int)(image.getWidth()*0.3),(int)(image.getHeight()*0.3),false);
-        Bitmap input=Bitmap.createBitmap(output);
-        ScriptIntrinsicBlur script=ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-
-        Allocation tmpIn=Allocation.createFromBitmap(rs,input);
+        Log.e("FLAT", "flatCorr: in heere" );
+        Bitmap input=Bitmap.createBitmap(image);
+        Bitmap scaled=Bitmap.createScaledBitmap(image,(int)(image.getWidth()*0.3),(int)(image.getHeight()*0.3),false);
+        Bitmap output=Bitmap.createBitmap(scaled);
+        ScriptIntrinsicBlur scriptIntrinsicBlur=ScriptIntrinsicBlur.create(rs,Element.U8_4(rs));
+        Allocation tmpIn=Allocation.createFromBitmap(rs,scaled);
         Allocation tmpOut=Allocation.createFromBitmap(rs,output);
 
-        script.setRadius(BLUR_RADIUS);
-        script.setInput(tmpIn);
-        script.forEach(tmpOut);
-
+        scriptIntrinsicBlur.setRadius(BLUR_RADIUS);
+        scriptIntrinsicBlur.setInput(tmpIn);
+        scriptIntrinsicBlur.forEach(tmpOut);
         tmpOut.copyTo(output);
+        if(scaled!=null){
+            scaled.recycle();
+            scaled=null;
+        }
+        output=Bitmap.createScaledBitmap(output,image.getWidth(),image.getHeight(),true);
+        scriptIntrinsicBlur.destroy();
+        tmpIn=Allocation.createFromBitmap(rs,output);
 
-        Bitmap output2=Bitmap.createScaledBitmap(output,image.getWidth(),image.getHeight(),false);
+        Allocation sumAllocation = Allocation.createSized(rs, Element.F32(rs), 1);
+        Allocation sumAllocation2 = Allocation.createSized(rs, Element.F32(rs), 1);
+        Allocation sumAllocation3 = Allocation.createSized(rs, Element.F32(rs), 1);
 
 
-        float[] mean=getAverageColorRGB(output);
+        ScriptC_mean meanS=new ScriptC_mean(rs);
 
-      //  Log.e(TAG, "flatCorr: "+mean[0]+" "+mean[1]+" "+mean[2] );
-        //output is blurred mean is calculated
+        meanS.forEach_addChannel(tmpIn);
+        meanS.forEach_getTotalSum(sumAllocation);
+        float sumArray[] = new float[1];
+        sumAllocation.copyTo(sumArray);
+
+        meanS.forEach_getTotalSum2(sumAllocation2);
+        float sumArray2[] = new float[1];
+        sumAllocation2.copyTo(sumArray2);
+
+        meanS.forEach_getTotalSum3(sumAllocation3);
+        float sumArray3[] = new float[1];
+        sumAllocation3.copyTo(sumArray3);
+
+        meanS.destroy();
+        float [] mean={sumArray[0],sumArray2[0],sumArray3[0]};
+        String m="";
+        boolean isBlack=true;
+        int c=0;
+        for (int i=0;i<3;i++){
+            m+=mean[i]+" ";
+            if(mean[i]>127){
+                c++;
+            }else{
+                int dif=(int)(150-mean[i]);
+                mean[i]+=dif;
+            }
+        }
+        if(c>=2){
+            isBlack=false;
+        }
+        Log.e("THIS", "flatCorr: "+m+" "+c );
 
 
         ScriptC_FlatCorrection script2=new ScriptC_FlatCorrection(rs);
-        Bitmap corrected=Bitmap.createBitmap(image);
+       // Bitmap corrected=Bitmap.createBitmap(image);
 
-        tmpIn=Allocation.createFromBitmap(rs,output2);
-    //        Allocation tmp2In=Allocation.createFromBitmap(rs,output);
-        tmpOut=Allocation.createFromBitmap(rs,image);
+        tmpIn=Allocation.createFromBitmap(rs,output);
+        //        Allocation tmp2In=Allocation.createFromBitmap(rs,output);
+        tmpOut= Allocation.createFromBitmap(rs,input);
 
         script2.invoke_setMean(mean[0],mean[1],mean[2]);
         script2.forEach_applyFilter(tmpIn,tmpOut);
 
 
-        tmpOut.copyTo(corrected);
-        script.destroy();
+        tmpOut.copyTo(input);
         script2.destroy();
+        if(output!=null){
+            output.recycle();
+            output=null;
+        }
 
-
+        //flat corrected now post processing
         ScriptC_BCE script3=new ScriptC_BCE(rs);
 
-       // Bitmap res=Bitmap.createBitmap(image);
+        Bitmap res=Bitmap.createBitmap(image);
 
-        tmpIn=Allocation.createFromBitmap(rs,corrected);
+        tmpIn=Allocation.createFromBitmap(rs,input);
         tmpOut=Allocation.createTyped(rs,tmpIn.getType());
-
-//        int AvgMean=(int)((mean[0]+mean[1]+mean[2])/3);
-//        if(AvgMean<160){
-//            script3.invoke_setVals(getFactor(80),70,60);
+        script3.invoke_setVals(getFactor(150),185,-30);
+//        if(isBlack){
+//            script3.invoke_setVals(getFactor(120),100,50);
 //        }else{
-            script3.invoke_setVals(getFactor(70),60,-15);
-        //}
+//
+//            script3.invoke_setVals(getFactor(100),50,20);
+//        }
 
         script3.forEach_Evaluate(tmpIn,tmpOut);
 
-        tmpOut.copyTo(image);
+        tmpOut.copyTo(res);
 
-        tmpIn.destroy();
-        tmpOut.destroy();
-        script3.destroy();
-        return image;
-
-
-
-
-
-        //return corrected;
-
-        /*
-        ScriptC_contrast script3=new ScriptC_contrast(rs);
-        int width=image.getWidth();
-        int height=image.getHeight();
-
-        script3.set_size(width*height);
-        script3.forEach_root(tmpIn,tmpOut);
-        script3.invoke_createRemapArray();
-        script3.forEach_remaptoRGB(tmpOut,tmpIn);
-
-        tmpIn.copyTo(res);
         tmpIn.destroy();
         tmpOut.destroy();
         script3.destroy();
 
         return res;
-       // return output2;
-    */
 
     }
+
+
+
 
     public void clear(){
         rs.destroy();
-
-
     }
 
     private float getFactor(int c) {
-
         return (259*((float)c+255))/(255*(259-(float)c));
     }
 

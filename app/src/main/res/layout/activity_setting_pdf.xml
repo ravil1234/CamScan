@@ -1,7 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#fff"
     >
 
     <LinearLayout
@@ -17,7 +18,7 @@
             android:layout_height="24dp"
             android:layout_margin="16dp"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_crop_black_24dp"
+            android:src="@drawable/files_and_folders"
             />
         <LinearLayout
             android:layout_width="wrap_content"
@@ -43,8 +44,8 @@
     </LinearLayout>
     <Space
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#000"
+        android:layout_height="2dp"
+        android:background="#C0BFBF"
         />
     <LinearLayout
         android:id="@+id/pdf_setting_item2"
@@ -58,7 +59,7 @@
             android:layout_height="24dp"
             android:layout_margin="16dp"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_crop_black_24dp"
+            android:src="@drawable/password"
             />
         <LinearLayout
             android:layout_width="wrap_content"
@@ -84,8 +85,8 @@
     </LinearLayout>
     <Space
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#000"
+        android:layout_height="2dp"
+        android:background="#C0BFBF"
         />
     <LinearLayout
         android:id="@+id/pdf_setting_item3"
@@ -99,7 +100,7 @@
             android:layout_height="24dp"
             android:layout_margin="16dp"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_crop_black_24dp"
+            android:src="@drawable/page_orientation"
             />
         <LinearLayout
             android:layout_width="wrap_content"
@@ -125,8 +126,8 @@
     </LinearLayout>
     <Space
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#000"
+        android:layout_height="2dp"
+        android:background="#C0BFBF"
         />
     <LinearLayout
 
@@ -139,7 +140,7 @@
             android:layout_height="24dp"
             android:layout_margin="16dp"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_crop_black_24dp"
+            android:src="@drawable/page_border"
             />
 
         <TextView
@@ -175,8 +176,8 @@
     </LinearLayout>
     <Space
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#000"
+        android:layout_height="2dp"
+        android:background="#C0BFBF"
         />
     <LinearLayout
         android:id="@+id/pdf_setting_item5"
@@ -190,7 +191,7 @@
             android:layout_height="24dp"
             android:layout_margin="16dp"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_crop_black_24dp"
+            android:src="@drawable/stamp_icon"
             />
         <LinearLayout
             android:layout_width="wrap_content"

@@ -1,5 +1,6 @@
 package com.example.camscan.Activities;
 
+import androidx.appcompat.app.ActionBar;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -56,11 +57,16 @@ public class PdfSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting_pdf);
 
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle("Pdf Setting");
+
         borderSwitch=findViewById(R.id.pdf_setting_item4);
         light=findViewById(R.id.pdf_setting_item4_light);
         pass=findViewById(R.id.pdf_setting_text2);
         pageSize=findViewById(R.id.pdf_setting_text1);
         orientation=findViewById(R.id.pdf_setting_text3);
+
 
         fillDefaultSettings();
 
@@ -395,7 +401,7 @@ public class PdfSettingsActivity extends AppCompatActivity {
                     stamp = BitmapFactory.decodeStream(PdfSettingsActivity.this.getContentResolver()
                             .openInputStream(uri));
                     stamp=UtilityClass.resizeImage(stamp,200,50);
-                    stamp=makeTransparent(stamp,70);
+                    //stamp=makeTransparent(stamp,70);
                     savedStamp=saveStamp(stamp);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();

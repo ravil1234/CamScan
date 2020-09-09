@@ -74,7 +74,7 @@ public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.
         MyPicture current=images.get(position);
         MyBoxLayout mbl=holder.boxLayout;
         ImageView img=holder.imgView;
-        Uri imgUri=Uri.parse(current.getOriginalUri());
+       // Uri imgUri=Uri.parse(current.getOriginalUri());
         mbl.setMyPicObject(current);
         mbl.setViewPager(myvp);
         //mbl.setDimensions(screenHeight,screenWidth);
@@ -100,27 +100,11 @@ public class BoxRecyclerAdapter extends RecyclerView.Adapter<BoxRecyclerAdapter.
 //        });
 
 
-        if(current.getImg()==null){
-            //Bitmap imageBitmap= BitmapFactory.decodeFile(imgUri.getPath());
-            Bitmap imageBitmap=UtilityClass.populateImage(context,Uri.parse(current.getOriginalUri()),false,screenWidth,screenHeight);
-            //current.setImg(imageBitmap);
-            mbl.setBitmap(imageBitmap);
-            img.setImageBitmap(imageBitmap);
-           // current.setImg(imageBitmap);
-                //            if(img.getHeight()!=0){
-                //               // Log.e(TAG, "onBindViewHolder: "+imageBitmap.getWidth()+" "+img.getWidth()+" "+imageBitmap.getHeight()+" "+img.getHeight() );
-                //                FrameLayout.LayoutParams param2=(FrameLayout.LayoutParams)holder.imgView.getLayoutParams();
-                //       //         FrameLayout.LayoutParams params=(FrameLayout.LayoutParams)holder.boxLayout.getLayoutParams();
-                //                holder.boxLayout.setLayoutParams(param2);
-                //
-                //            }
-//            Log.e(TAG, "onBindViewHolder: "+imageBitmap.getWidth()+" "+imageBitmap.getHeight()+" "+screenWidth+" "+screenHeight );
-//            mbl.updateViewPos(current.getCoordinates());
-        }else{
-            img.setImageBitmap(current.getImg());
-            mbl.setBitmap(current.getImg());
+        Bitmap imageBitmap=UtilityClass.populateImage(context,Uri.parse(current.getOriginalUri()),false,screenWidth,screenHeight);
+        //current.setImg(imageBitmap);
+        mbl.setBitmap(imageBitmap);
+        img.setImageBitmap(imageBitmap);
 
-        }
 
        // Log.e(TAG, "onBindViewHolder: "+screenHeight+" "+screenWidth );
         if(current.getCoordinates().get(3).x==0 && current.getCoordinates().get(3).y==0){

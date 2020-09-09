@@ -46,7 +46,7 @@
         android:id="@+id/my_box_dot1"
         android:layout_width="24sp"
         android:layout_height="24sp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:layout_marginRight="-250dp"
         android:layout_marginBottom="-250dp"
         />
@@ -55,7 +55,7 @@
         android:id="@+id/my_box_dot2"
         android:layout_width="24sp"
         android:layout_height="24sp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:layout_marginRight="-250dp"
         android:layout_marginBottom="-250dp"
         />
@@ -63,7 +63,7 @@
         android:id="@+id/my_box_dot3"
         android:layout_width="24sp"
         android:layout_height="24sp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:layout_marginRight="-250dp"
         android:layout_marginBottom="-250dp"
         />
@@ -71,7 +71,7 @@
         android:id="@+id/my_box_dot4"
         android:layout_width="24sp"
         android:layout_height="24sp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:layout_marginRight="-250dp"
         android:layout_marginBottom="-250dp"
         />
@@ -79,7 +79,7 @@
         android:id="@+id/my_box_dot12"
         android:layout_width="24sp"
         android:layout_height="24sp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:layout_marginRight="-250dp"
         android:layout_marginBottom="-250dp"
         />
@@ -87,7 +87,7 @@
         android:id="@+id/my_box_dot23"
         android:layout_width="24sp"
         android:layout_height="24sp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:layout_marginBottom="-250dp"
         android:layout_marginRight="-250dp"
         />
@@ -95,7 +95,7 @@
         android:id="@+id/my_box_dot34"
         android:layout_width="24sp"
         android:layout_height="24sp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:layout_marginRight="-250dp"
         android:layout_marginBottom="-250dp"
         />
@@ -103,7 +103,7 @@
         android:id="@+id/my_box_dot14"
         android:layout_width="24sp"
         android:layout_height="24sp"
-        android:src="@drawable/dot2"
+        android:src="@drawable/dot3"
         android:layout_marginRight="-250dp"
         android:layout_marginBottom="-250dp"
 

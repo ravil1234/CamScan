@@ -14,11 +14,14 @@ import java.util.List;
 @Dao
 public interface MyDocumentDao {
 
-@Query("SELECT * FROM mydocument")
+@Query("SELECT * FROM mydocument ORDER BY timeCreated DESC")
     List<MyDocument> getAllDocs();
 
 @Query("SELECT * fROM mydocument where did=:did")
     MyDocument getDocumentWithId(int did);
+
+@Query("SELECT * FROM mydocument where dname=:name")
+    List<MyDocument> getDocsWithSameName(String name);
 
 @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertNewDoc(MyDocument doc);

@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
+<!--    <color name="colorPrimary">#008577</color>-->
     <color name="colorAppBar">#142f4d</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+<!--    <color name="colorPrimaryDark">#00574B</color>-->
+<!--    <color name="colorAccent">#D81B60</color>-->
     <color name="text_color1">#3696ff</color>
     <color name="bottom_navigation_text_color">#ffffff</color>
     <color name="colorPopup">#B0008577</color>
     <color name="text_color2">#3a9589</color>
     <color name="white">#ffffff</color>
     <color name="filter_selected">#273696FF</color>
+<!--    <color name="colorPrimary">#008577</color>-->
+<!--    <color name="colorPrimaryDark">#00574B</color>-->
+<!--    <color name="colorAccent">#D81B60</color>-->
+    <color name="colorPrimary">#5dbcd2</color>
+    <color name="colorPrimaryDark">#1e8ca1</color>
+    <color name="colorPrimaryLight">#92efff</color>
+    <color name="colorAccent">#d2725d</color>
 </resources>
+

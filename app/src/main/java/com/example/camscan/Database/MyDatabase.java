@@ -5,7 +5,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
-@Database(entities = {MyPicture.class, MyDocument.class},version = 1)
+@Database(entities = {MyPicture.class, MyDocument.class},version = 1,exportSchema = false)
 public abstract class MyDatabase extends RoomDatabase {
 
     private static volatile MyDatabase INSTANCE;
