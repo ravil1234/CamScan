@@ -1,7 +1,6 @@
 package com.example.camscan.Activities;
 
 import android.animation.LayoutTransition;
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,8 +47,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.CompositePageTransformer;
-import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.camscan.Adapters.InDocMiniAdapter;
@@ -71,7 +68,6 @@ import com.example.camscan.RenderScriptJava.rotator;
 import com.example.camscan.UtilityClass;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
-import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -202,7 +198,7 @@ public class MyDocumentActivity extends AppCompatActivity {
                                         true, 0, 0);
                                 tNails.add(b);
                                 if(p.getPosition()==1){
-                                    currDoc.setfP_URI(p.getEditedUri());
+                                    currDoc.setFp_uri(p.getEditedUri());
                                     updateDoc(currDoc);
                                 }
                                 runOnUiThread(new Runnable() {
@@ -232,8 +228,8 @@ public class MyDocumentActivity extends AppCompatActivity {
                                     p.setEditedUri(edited.toString());
                                     if(p.getPosition()==1){
 
-                                        if(currDoc.getfP_URI()==null || !currDoc.getfP_URI().equals(p.getEditedUri())){
-                                            currDoc.setfP_URI(p.getEditedUri());
+                                        if(currDoc.getFp_uri()==null || !currDoc.getFp_uri().equals(p.getEditedUri())){
+                                            currDoc.setFp_uri(p.getEditedUri());
                                             updateDoc(currDoc);
                                         }
 
@@ -291,7 +287,7 @@ public class MyDocumentActivity extends AppCompatActivity {
 
                     if(currPic!=null){
                         final MyPicture p=new MyPicture();
-                        Uri original=UtilityClass.saveImage(MyDocumentActivity.this,currPic,currDoc.getdName()+UtilityClass.lineSeparator+System.currentTimeMillis()%10000,true);
+                        Uri original=UtilityClass.saveImage(MyDocumentActivity.this,currPic,currDoc.getDname()+UtilityClass.lineSeparator+System.currentTimeMillis()%10000,true);
                         p.setDid(currDoc.getDid());
                         p.setOriginalUri(original.toString());
                         p.setCoordinates(null);
@@ -318,8 +314,8 @@ public class MyDocumentActivity extends AppCompatActivity {
                                     isLoading=false;
                                 }
                                 if(p.getPosition()==1){
-                                    if(currDoc.getfP_URI()==null || !currDoc.getfP_URI().equals(p.getEditedUri())){
-                                        currDoc.setfP_URI(p.getEditedUri());
+                                    if(currDoc.getFp_uri()==null || !currDoc.getFp_uri().equals(p.getEditedUri())){
+                                        currDoc.setFp_uri(p.getEditedUri());
                                         updateDoc(currDoc);
                                     }
 
@@ -358,7 +354,7 @@ public class MyDocumentActivity extends AppCompatActivity {
             ArrayList<MyPicture> oldPics=getImagesFromDatabase(currDoc.getDid());
             for(MyPicture p:oldPics){
                 if(p.getPosition()==1){
-                    currDoc.setfP_URI(p.getEditedUri());
+                    currDoc.setFp_uri(p.getEditedUri());
                     updateDoc(currDoc);
                     updateHeader();
                 }
@@ -410,8 +406,8 @@ public class MyDocumentActivity extends AppCompatActivity {
                             index++;
 
                             if(p.getPosition()==1){
-                                if(currDoc.getfP_URI()==null || !currDoc.getfP_URI().equals(p.getEditedUri())){
-                                    currDoc.setfP_URI(p.getEditedUri());
+                                if(currDoc.getFp_uri()==null || !currDoc.getFp_uri().equals(p.getEditedUri())){
+                                    currDoc.setFp_uri(p.getEditedUri());
                                     updateDoc(currDoc);
                                 }
 
@@ -452,7 +448,7 @@ public class MyDocumentActivity extends AppCompatActivity {
             //add doc
             if(currDoc.getDid()==0){
                 //new doc
-                currDoc.setfP_URI(newPics.get(0).getEditedUri());
+                currDoc.setFp_uri(newPics.get(0).getEditedUri());
                 long i=saveDocInDatabase(currDoc);
                 currDoc.setDid((int)i);
                 newPics.get(0).setDid((int)i);
@@ -885,7 +881,10 @@ public class MyDocumentActivity extends AppCompatActivity {
             }
             case R.id.In_doc_menu_pdf:{
                 if(!isLoading) {
-                    convertToPDF();
+ //                   convertToPDF();
+                    Intent intent=new Intent(MyDocumentActivity.this,PdfPreviewActivity.class);
+                    intent.putExtra("DocDID",currDoc.getDid());
+                    startActivity(intent);
                 }else{
                     Toast.makeText(this, "Task In Progress", Toast.LENGTH_SHORT).show();
                 }
@@ -974,7 +973,7 @@ public class MyDocumentActivity extends AppCompatActivity {
     //NAV
     private void populateMenuListItems() {
         menuList.add(new NavMenuObject(false,"Import Image From Gallery",R.drawable.import1,true));
-        menuList.add(new NavMenuObject(false,"Secure PDf",R.drawable.pdf_lock,true));
+        menuList.add(new NavMenuObject(false,"Save as Secured PDf",R.drawable.pdf_lock,true));
         menuList.add(new NavMenuObject(false,"Pdf Setting",R.drawable.pdf_setting,true));
         //pdf etting
 //        menuList.add(new NavMenuObject(false,"Password",0,false));
@@ -1018,14 +1017,14 @@ public class MyDocumentActivity extends AppCompatActivity {
     //mini VIew
     private void updateHeader(){
         currDoc=getDocFromDatabase(currDoc.getDid());
-        doc_name.setText(currDoc.getdName());
-        if(currDoc.getfP_URI()!=null){
-            Bitmap b=UtilityClass.populateImage(this,Uri.parse(currDoc.getfP_URI()),true,0,0);
+        doc_name.setText(currDoc.getDname());
+        if(currDoc.getFp_uri()!=null){
+            Bitmap b=UtilityClass.populateImage(this,Uri.parse(currDoc.getFp_uri()),true,0,0);
             b=UtilityClass.getRoundedCroppedBitmap(b);
             docIcon.setImageBitmap(b);
         }else{
             if(list!=null && list.size()>0 && list.get(0).getEditedUri()!=null){
-                currDoc.setfP_URI(list.get(0).getEditedUri());
+                currDoc.setFp_uri(list.get(0).getEditedUri());
             }
         }
 
@@ -1041,7 +1040,7 @@ public class MyDocumentActivity extends AppCompatActivity {
         newNameView.setSelectAllOnFocus(true);
         //newNameView.setText(currentDoc1.getDocName());
 
-        newNameView.setText(currDoc.getdName());
+        newNameView.setText(currDoc.getDname());
 
         newNameView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -1064,7 +1063,7 @@ public class MyDocumentActivity extends AppCompatActivity {
                 String newName=newNameView.getText().toString();
                 if(!newName.equals("")){
                     if(noDocLikeThis(newName)){
-                        currDoc.setdName(newName);
+                        currDoc.setDname(newName);
                         updateDoc(currDoc);
                         updateHeader();
                     }else{
@@ -1089,7 +1088,7 @@ public class MyDocumentActivity extends AppCompatActivity {
         timeCreated=v.findViewById(R.id.frag_about_doc_created_at);
         lastModified=v.findViewById(R.id.frag_about_doc_lastModified);
 
-        name.setText(currDoc.getdName());
+        name.setText(currDoc.getDname());
         int count=MyDatabase.getInstance(MyDocumentActivity.this).myPicDao().getCount(currDoc.getDid());
         pc.setText(String.valueOf(count));
         timeCreated.setText(getDate(currDoc.getTimeCreated()));
@@ -1213,7 +1212,7 @@ public class MyDocumentActivity extends AppCompatActivity {
     private void updateDoc(MyDocument doc){
 
         if(list.size()>0 && list.get(0).getEditedUri()!=null){
-            doc.setfP_URI(list.get(0).getEditedUri());
+            doc.setFp_uri(list.get(0).getEditedUri());
         }
         MyDatabase db=MyDatabase.getInstance(this);
         MyDocument d=getDocFromDatabase(currDoc.getDid());
@@ -1544,7 +1543,7 @@ public class MyDocumentActivity extends AppCompatActivity {
                     for (MyPicture p : list) {
                         uris.add(Uri.parse(p.getEditedUri()));
                     }
-                    Uri savedLongImage = UtilityClass.saveLongImage(MyDocumentActivity.this, uris, currDoc.getdName());
+                    Uri savedLongImage = UtilityClass.saveLongImage(MyDocumentActivity.this, uris, currDoc.getDname());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -1568,6 +1567,101 @@ public class MyDocumentActivity extends AppCompatActivity {
             Toast.makeText(this, "Documents are more than 10", Toast.LENGTH_SHORT).show();
         }
     }
+    public void shareAsSecuredPdf(View view){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MyDocumentActivity.this);
+        builder.setTitle("Set Password");
+        View dialog = LayoutInflater.from(MyDocumentActivity.this).inflate(R.layout.fragment_rename, null);
+        builder.setCancelable(false);
+        builder.setView(dialog);
+
+        EditText newNameView = dialog.findViewById(R.id.rename_fragment_eview);
+        newNameView.setSelectAllOnFocus(true);
+        //newNameView.setText(currentDoc1.getDocName());
+        String pass = getPdfPassword();
+        newNameView.setText(pass);
+
+
+        newNameView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    if (motionEvent.getRawX() >= (newNameView.getRight() - newNameView.getCompoundDrawables()[2].getBounds().width())) {
+                        // your action here
+                        newNameView.setText("");
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+        builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String newPass = newNameView.getText().toString();
+                if (!newPass.equals("")) {
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MyDocumentActivity.this);
+                    ProgressBar pbar=new ProgressBar(MyDocumentActivity.this,null,android.R.attr.progressBarStyleHorizontal);
+                    pbar.setIndeterminate(false);
+                    pbar.setMax(100);
+
+                    builder.setView(pbar);
+                    builder.setTitle("Loading");
+                    AlertDialog d = builder.create();
+                    d.setCancelable(false);
+                    d.show();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Uri pdfUri = savePdf(newPass, true, pbar);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    d.dismiss();
+                                    if(pdfUri!=null){
+                                        Intent intentShareFile=new Intent(Intent.ACTION_SEND);
+                                        intentShareFile.setType("application/pdf");
+                                        intentShareFile.putExtra(Intent.EXTRA_STREAM, pdfUri);
+
+                                        intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
+                                                "Document from CamScan...");
+                                        intentShareFile.putExtra(Intent.EXTRA_TEXT, "Document made from CamScan");
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                d.dismiss();
+                                                startActivity(Intent.createChooser(intentShareFile, "Share as secured Pdf"));
+                                            }
+                                        });
+                                    }else{
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                d.dismiss();
+                                                Toast.makeText(MyDocumentActivity.this, "Time Out", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+
+                                }
+                            });
+
+
+                        }
+                    }).start();
+                } else {
+                    Toast.makeText(MyDocumentActivity.this, "Password can't be null", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).setNegativeButton("Cancel", null);
+        builder.create().show();
+
+
+        shareClose();
+    }
 
     //PDF
     public Uri savePdf(String pass, boolean isPassSet, ProgressBar pBar){
@@ -1579,7 +1673,7 @@ public class MyDocumentActivity extends AppCompatActivity {
             }
 
             MyCustomPdf pdf = new MyCustomPdf(this, pdfList, isPassSet);
-            Uri savedPdf=pdf.savePdf2(currDoc.getdName(), pass, new pdfProgress() {
+            Uri savedPdf=pdf.savePdf2(currDoc.getDname(), pass, new pdfProgress() {
                 @Override
                 public void onUpdate(int perc) {
                     //Log.e("THIS", "onUpdate: "+perc );
@@ -1702,7 +1796,7 @@ public class MyDocumentActivity extends AppCompatActivity {
         MyPicture p=new MyPicture();
         p.setDid(currDoc.getDid());
         p.setCoordinates(null);
-        String picName=currDoc.dName+UtilityClass.lineSeparator+System.currentTimeMillis()%100000;
+        String picName=currDoc.getDname()+UtilityClass.lineSeparator+System.currentTimeMillis()%100000;
         Uri original=UtilityClass.saveImage(MyDocumentActivity.this,img,picName,true);
         p.setOriginalUri(original.toString());
         p.setPosition(list.size()+1);

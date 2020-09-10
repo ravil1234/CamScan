@@ -293,10 +293,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-
     }
     private File  saveimagefile(){
       File dir;

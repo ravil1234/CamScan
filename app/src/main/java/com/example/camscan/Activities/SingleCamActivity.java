@@ -71,11 +71,11 @@ public class SingleCamActivity extends AppCompatActivity {
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
     private int flashMode;
     PreviewView mPreviewView;
-    ImageView captureImage;
+    View captureImage;
     TextView tick_img;
     View view;
     MotionEvent motionEvent;
-    //CardView flashmode_btn;
+   // CardView flashmode_btn;
     ImageView gallery,single_mode_img,batch_mode_img,last_img;
     //   ArrayList<MyPicture > myPictureList;
     String uri="";
@@ -85,10 +85,10 @@ public class SingleCamActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camerax);
         getSupportActionBar().hide();
-
         mPreviewView = findViewById(R.id.previewView);
-        captureImage = findViewById(R.id.captureImg);
-        //flashmode_btn = findViewById(R.id.flash_mode);
+        captureImage = findViewById(R.id.captureImage);
+
+      //  flashmode_btn = findViewById(R.id.flash_mode);
         gallery = findViewById(R.id.gallery);
         single_mode_img=findViewById(R.id.single_mode);
         batch_mode_img=findViewById(R.id.batch_mode);
@@ -103,7 +103,13 @@ public class SingleCamActivity extends AppCompatActivity {
         uri=getIntent().getStringExtra("PICTURE_URI");
 
 
-
+//        flashmode_btn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view)
+//            {
+//                //Dialog box;
+//            }
+//        });
         if (allPermissionsGranted()) {
             startCamera(); //start camera if permission has been granted by user
         } else {
@@ -164,7 +170,8 @@ public class SingleCamActivity extends AppCompatActivity {
         preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageAnalysis, imageCapture);
         captureImage.setOnClickListener(v -> {
-            File my_file=new File(uri);
+
+            File my_file=new File(Uri.parse(uri).getPath());
             ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(my_file).build();
             imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
                 @Override
@@ -182,6 +189,9 @@ public class SingleCamActivity extends AppCompatActivity {
                 @Override
                 public void onError(@NonNull ImageCaptureException error) {
                     error.printStackTrace();
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_CANCELED,returnIntent);
+                    finish();
                 }
             });
         });
@@ -200,6 +210,7 @@ public class SingleCamActivity extends AppCompatActivity {
         Intent returnIntent = new Intent();
         //    returnIntent.putExtra("PICTURE_URI",uri);
         setResult(Activity.RESULT_OK,returnIntent);
+        Log.e("this", "call_save_list: "+uri );
         finish();
     }
     private boolean allPermissionsGranted() {

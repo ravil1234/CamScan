@@ -3,67 +3,44 @@ package com.example.camscan.Activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.camscan.Adapters.Filter_Items_RecyclerAdapter;
-import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import com.example.camscan.RenderScriptJava.rotator;
 import com.example.camscan.UtilityClass;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.example.camscan.RenderScriptJava.BCE;
 import com.example.camscan.RenderScriptJava.BlackAndWhite;
-import com.example.camscan.RenderScriptJava.Brightness;
-import com.example.camscan.RenderScriptJava.Contrast;
 import com.example.camscan.RenderScriptJava.Filter1;
 import com.example.camscan.RenderScriptJava.FlatCorrection;
 import com.example.camscan.RenderScriptJava.GrayScale;
 import com.example.camscan.RenderScriptJava.Inversion;
-
-import org.spongycastle.pqc.math.ntru.util.Util;
 
 public class FilterActivity extends AppCompatActivity {
 
@@ -487,7 +464,7 @@ public class FilterActivity extends AppCompatActivity {
                 list.get(0).setEditedUri(ediUri.toString());
                 if(currDoc.getDid()==0){
                     //new doc
-                    currDoc.setfP_URI(ediUri.toString());
+                    currDoc.setFp_uri(ediUri.toString());
                 }
                 //convertinto json and send
                 String myPicJson=UtilityClass.getStringFromObject(list);

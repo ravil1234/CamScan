@@ -10,24 +10,26 @@ public class MyDocument {
     @PrimaryKey(autoGenerate = true)
     private int did;
     @ColumnInfo(name="dname")
-    public String dName;
+    private String dname;
     @ColumnInfo(name="timeCreated")
     private long timeCreated;
     @ColumnInfo(name="timeEdited")
     private long timeEdited;
     @ColumnInfo(name="fp_uri")
-    public String fP_URI;
+    private String fp_uri;
 
     @Ignore
     public MyDocument(String dName, long timeCreated, long timeEdited,String fP_URI) {
-        this.dName = dName;
+        this.dname = dName;
         this.timeCreated = timeCreated;
         this.timeEdited = timeEdited;
-        this.fP_URI = fP_URI;
+        this.fp_uri = fP_URI;
     }
 
     public MyDocument() {
     }
+
+
 
     public int getDid() {
         return did;
@@ -38,13 +40,14 @@ public class MyDocument {
     }
 
 
-    public String getdName() {
-        return dName;
+    public String getDname() {
+        return dname;
     }
 
-    public void setdName(String dName) {
-        this.dName = dName;
+    public void setDname(String dName) {
+        this.dname = dName;
     }
+
 
     public long getTimeCreated() {
         return timeCreated;
@@ -63,11 +66,11 @@ public class MyDocument {
     }
 
 
-    public String getfP_URI() {
-        return fP_URI;
+    public String getFp_uri() {
+        return fp_uri;
     }
 
-    public void setfP_URI(String fP_URI) {
-        this.fP_URI = fP_URI;
+    public void setFp_uri(String fP_URI) {
+        this.fp_uri = fP_URI;
     }
 }

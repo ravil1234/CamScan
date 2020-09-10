@@ -12,6 +12,8 @@ import android.icu.util.TimeUnit;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+
+import com.example.camscan.Database.MyDatabase;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
@@ -102,9 +104,13 @@ public class CameraXActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camerax);
         getSupportActionBar().hide();
+
+
         preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
+
         long time=System.currentTimeMillis()%1000000;
         currDocName=UtilityClass.appName+UtilityClass.lineSeparator+time;
+
         mPreviewView = findViewById(R.id.previewView);
         captureImage = findViewById(R.id.captureImage);
         flashmode_btn = findViewById(R.id.flash_mode);
@@ -195,11 +201,13 @@ public class CameraXActivity extends AppCompatActivity {
         String from=getIntent().getStringExtra("from");
         if(from!=null)
         {
-            if(from.equals("InDocRecyclerActivity")){
+            if(from.equals("MyDocumentActivity")){
                 //came from recycelr activity from more pages
                 isNew=false;
                 String doc=getIntent().getStringExtra("MyDocument");
                 savedDoc=UtilityClass.getDocFromJson(doc);
+                picCount= MyDatabase.getInstance(CameraXActivity.this).myPicDao().getCount(savedDoc.getDid());
+
             }
         }
     }
