@@ -11,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -283,6 +284,7 @@ public class FilterActivity extends AppCompatActivity {
             list=pic;
         }
         currDoc=UtilityClass.getDocFromJson(myDoc);
+       // Log.e(TAG, "getPicAndDocFromIntent: "+currDoc.getDid() );
     }
 
 //

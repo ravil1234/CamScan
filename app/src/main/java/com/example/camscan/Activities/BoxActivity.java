@@ -132,6 +132,7 @@ public class BoxActivity extends AppCompatActivity {
             list.addAll(listTmp);
         }
         currDoc= UtilityClass.getDocFromJson(myDocString);
+       // Log.e(TAG, "populateList: "+"currDoc"+currDoc.getDid() );
        // adapter.notifyDataSetChanged();
 
         vp2.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {

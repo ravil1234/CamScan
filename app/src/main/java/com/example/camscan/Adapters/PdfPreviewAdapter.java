@@ -136,6 +136,11 @@ public class PdfPreviewAdapter extends RecyclerView.Adapter<PdfPreviewAdapter.My
             img=itemView.findViewById(R.id.pdf_preview_img);
             stampImg=itemView.findViewById(R.id.pdf_preview_stamp);
             count=itemView.findViewById(R.id.pdf_preview_count);
+            if(isBorder){
+                float scale = context.getResources().getDisplayMetrics().density;
+                int dpAsPixels = (int) (1*scale + 0.5f);
+                img.setPadding(dpAsPixels,dpAsPixels,dpAsPixels,dpAsPixels);
+            }
         }
     }
 
@@ -151,6 +156,7 @@ public class PdfPreviewAdapter extends RecyclerView.Adapter<PdfPreviewAdapter.My
                 int h=(int)(ratio*w);
                 RecyclerView.LayoutParams params=(RecyclerView.LayoutParams)v.getLayoutParams();
                 params.height=h;
+
                // Log.e("Params", "onGlobalLayout: "+h+" "+ratio+" "+w );
                 v.setLayoutParams(params);
             }

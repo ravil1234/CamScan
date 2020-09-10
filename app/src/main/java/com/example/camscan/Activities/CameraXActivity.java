@@ -98,6 +98,7 @@ public class CameraXActivity extends AppCompatActivity {
     SharedPreferences preferences;
     String currDocName;
     int picCount=0;
+    MyDocument currDoc;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -210,6 +211,18 @@ public class CameraXActivity extends AppCompatActivity {
 
             }
         }
+
+        long t=System.currentTimeMillis();
+        if(isNew){
+          //  Log.e("THIS", "onCreate: "+"Here" );
+            currDoc=new MyDocument(currDocName,
+                    t,t,null);
+        }else{
+            currDoc=savedDoc;
+            currDoc.setTimeEdited(System.currentTimeMillis());
+
+        }
+       // Log.e("THIS", "onCreate: "+currDoc.getDid() );
     }
     private void showPopupMenu(View anchor, boolean isWithIcons, int style) {
         //init the wrapper with style
@@ -382,25 +395,21 @@ public class CameraXActivity extends AppCompatActivity {
                 picCount,null,0,0);
         myPictureList.add(p);
 
-        MyDocument document=null;
-        long time=System.currentTimeMillis();
-        if(isNew){
-            document=new MyDocument(currDocName,
-                    time,time,null);
-        }else{
-            document=savedDoc;
-            document.setTimeEdited(System.currentTimeMillis());
-            p.setDid(savedDoc.getDid());
+        if(!isNew){
+            p.setDid(currDoc.getDid());
         }
+
+
 
         //String mydoc=UtilityClass.getStringFromObject(document);
         if(single_mode)
         {
             String mypic= UtilityClass.getStringFromObject(myPictureList);
-            String mydoc=UtilityClass.getStringFromObject(document);
+            String mydoc=UtilityClass.getStringFromObject(currDoc);
             Intent intent = new Intent(CameraXActivity.this, BoxActivity.class);
             intent.putExtra("MyPicture",mypic);
             intent.putExtra("MyDocument",mydoc);
+           // Log.e("THIS", "call_save_list: "+mydoc );
             startActivity(intent);
             isNew=true;
             finish();
@@ -412,14 +421,13 @@ public class CameraXActivity extends AppCompatActivity {
         Picasso.with(CameraXActivity.this).load(uri).into(last_img);
         batch_mode_img.setVisibility(View.GONE);
         single_mode_img.setVisibility(View.GONE);
-        MyDocument finalDocument = document;
+       // MyDocument finalDocument = currDoc;
         tick_img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-
                 String mypic= UtilityClass.getStringFromObject(myPictureList);
-                String mydoc=UtilityClass.getStringFromObject(finalDocument);
+                String mydoc=UtilityClass.getStringFromObject(currDoc);
                 Intent i=new Intent(CameraXActivity.this,BoxActivity.class);
                 i.putExtra("MyPicture",mypic);
                 i.putExtra("MyDocument",mydoc);

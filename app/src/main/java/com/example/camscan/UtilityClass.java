@@ -237,12 +237,12 @@ public class UtilityClass {
         try {
             JSONObject obj = new JSONObject(docJson);
             int did = obj.getInt("did");
-            String dName = obj.getString("dName");
+            String dName = obj.getString("dname");
             long timeCreated = obj.getLong("timeCreated");
             long timeEdited = obj.getLong("timeEdited");
             String fP_URI=null;
-            if(obj.has("fp_URI")){
-                fP_URI = obj.getString("fP_URI");
+            if(obj.has("fp_uri")){
+                fP_URI = obj.getString("fp_uri");
             }
 
 
@@ -315,11 +315,7 @@ public class UtilityClass {
         return new Gson().toJson(object);
     }
 
-    public static String getUniqueDocName(){
-        String name="CamScan";
-        name+=System.currentTimeMillis()%1000000;
-        return name;
-    }
+
 
 
     public static Bitmap getRoundedCroppedBitmap(Bitmap bitmap) {

@@ -12,7 +12,7 @@
         android:src="@drawable/low_op_back"
         android:adjustViewBounds="true"
         android:layout_gravity="center_vertical"
-        android:padding="1dp"
+        android:background="#000"
         />
     <ImageView
         android:id="@+id/pdf_preview_stamp"
