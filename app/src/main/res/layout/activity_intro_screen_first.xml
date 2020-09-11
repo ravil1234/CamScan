@@ -1,9 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ffffff"
     tools:context=".Activities.IntroScreenFirstActivity">
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageView
+        android:id="@+id/image"
+        android:padding="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-10dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ocr_screen_logo">
+    </ImageView>
+    <TextView
+        android:id="@+id/text"
+        android:layout_marginTop="-70dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/image"
+        android:layout_centerHorizontal="true"
+        android:text="OCR"
+        android:textColor="#000000"
+        android:textSize="@dimen/_26sdp"
+        android:fontFamily="@font/font_bold">
+    </TextView>
+    <TextView
+        android:id="@+id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:textStyle="bold"
+        android:text="Instant conversion to text with OCR,"
+        android:textColor="#707070"
+        android:textSize="@dimen/_12sdp"
+        android:gravity="center_horizontal"
+        android:fontFamily="@font/font_regular">
+    </TextView>
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text1"
+        android:layout_marginLeft="28dp"
+        android:layout_marginRight="28dp"
+        android:textStyle="bold"
+        android:text="don't worry about typing"
+        android:textColor="#707070"
+        android:textSize="@dimen/_12sdp"
+        android:gravity="center_horizontal"
+        android:fontFamily="@font/font_regular">
+    </TextView>
+<TextView
+    android:id="@+id/skip"
+    android:layout_marginTop="20dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:foreground="@drawable/foreground_app_theme"
+    android:text="Skip"
+    android:padding="10dp"
+    android:textColor="#2F4693"
+    android:layout_alignParentRight="true"
+    android:layout_marginRight="28dp"
+    android:fontFamily="@font/font_medium"
+    android:textSize="@dimen/_14sdp">
+</TextView>
+    <Button
+        android:id="@+id/next_btn"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginLeft="28dp"
+        android:layout_marginRight="28dp"
+        android:background="#2F4693"
+        android:text="Next"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/_14sdp"
+        android:fontFamily="@font/font_medium"
+        android:layout_alignParentBottom="true">
+    </Button>
+    <LinearLayout
+        android:layout_marginBottom="21dp"
+        android:layout_above="@id/next_btn"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <View
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:background="@drawable/circular_grey">
+        </View>
+        <View
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_marginLeft="6dp"
+            android:background="@drawable/circular_blue">
+        </View>
+        <View
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_marginLeft="6dp"
+            android:background="@drawable/circular_grey">
+        </View>
+    </LinearLayout>
+</RelativeLayout>

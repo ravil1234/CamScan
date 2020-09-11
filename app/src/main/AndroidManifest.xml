@@ -28,7 +28,12 @@
             android:noHistory="true" />
         <activity android:name=".Activities.CamActivity" />
         <activity android:name=".Activities.MainActivity" />
-        <activity android:name=".Activities.HomeScreenActivity" />
+        <activity android:name=".Activities.HomeScreenActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+        </activity>
         <activity android:name=".Activities.CameraXActivity" />
         <activity android:name=".Activities.CapturedImageActivity" />
         <activity android:name=".Activities.SplashScreenActivity">
@@ -39,6 +44,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".Activities.PdfSettingsActivity" />
+        <activity android:name=".Activities.SingleCamActivity" />
     </application>
 
 </manifest>

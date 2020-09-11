@@ -2,12 +2,15 @@ package com.example.camscan.Activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.SearchView;
 import androidx.camera.core.ImageCapture;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +44,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,12 +55,14 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     RecyclerView recyclerViewlayout;
     List<GridViewImagesList> gridViewImagesListList;
+    List<GridViewImagesList> list_sort_by_name;
     ImageView list_grid_view;
     boolean grid_view=true;
     GridViewImages myAdapter1;
     ListViewImages myAdapter;
     boolean long_click_enabled;
-    RelativeLayout relativeLayoutTop,sort_by_layout,no_result_layout,search_bar_layout;
+    RelativeLayout sort_by_layout,no_result_layout,search_bar_layout;
+    CoordinatorLayout relativeLayoutTop;
     FloatingActionButton floatingActionButton;
     ArrayList<Integer> selected_position;
     BottomNavigationView bottomNavigationView;
@@ -63,6 +70,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     EditText search_bar;
     TextView sort_by_text;
     SharedPreferences mypreference;
+    private SearchView searchSV;
+    boolean sort_by_date;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -70,67 +79,32 @@ public class HomeScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
         getSupportActionBar().hide();
         gridViewImagesListList=new ArrayList<>();
+        list_sort_by_name=new ArrayList<>();
         selected_position=new ArrayList<>();
         mypreference=getSharedPreferences("SharedPreference",MODE_PRIVATE);
         recyclerViewlayout=findViewById(R.id.recycler_view_layout);
         list_grid_view=findViewById(R.id.list_grid_view);
-        relativeLayoutTop=findViewById(R.id.relative_layout_top);
+        relativeLayoutTop=findViewById(R.id.app_bar);
         floatingActionButton=findViewById(R.id.floating_button);
         bottomNavigationView=findViewById(R.id.bottom_navigation);
-        settings=findViewById(R.id.settings);
         more_option=findViewById(R.id.more_option);
-        search_bar=findViewById(R.id.edit_text_search);
-        cross_button=findViewById(R.id.cross_button);
-        sort_by_layout=findViewById(R.id.relative_layout2);
-        sort_by_text=findViewById(R.id.sort_by);
         no_result_layout=findViewById(R.id.no_result_layout);
-        search_bar_layout=findViewById(R.id.relative_layout);
+        searchSV = findViewById(R.id.searchSV);
         long_click_enabled=false;
+        sort_by_date=true;
         if(mypreference.getInt("myview",0)==1)
            grid_view=false;
           else
             grid_view=true;
          set_default_adapter();
          set_image_list();
-         settings.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                 Intent i=new Intent(HomeScreenActivity.this,SettingsActivity.class);
-                  startActivity(i);
-             }
-         });
          more_option.setOnClickListener(new View.OnClickListener()
          {
              @Override
              public void onClick(View view) {
-                 showPopupMenu(view,true,R.style.MyPopupStyle);
+                 showPopupMenu(view,false,R.style.MyPopupStyle);
              }
          });
-        search_bar.addTextChangedListener(SearchTextWatcher);
-        cross_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                cross_button.setVisibility(View.GONE);
-                search_bar.setText("");
-              //  search_bar.setFocusable(false);
-                set_file_list("");
-            }
-        });
-        search_bar_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                search_bar.setFocusable(true);
-                search_bar.setFocusableInTouchMode(true);
-            }
-        });
-        sort_by_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-              showPopupMenuSortBy(view,false,R.style.MyPopupStyle);
-            }
-        });
          list_grid_view.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view)
@@ -139,45 +113,66 @@ public class HomeScreenActivity extends AppCompatActivity {
                  {
                   list_grid_view.setImageResource(R.drawable.grid_view);
                   grid_view=false;
-                     list_view();
+                  if(sort_by_date)
+                     list_view(gridViewImagesListList);
+                   else
+                       list_view(list_sort_by_name);
                  }
                  else
                  {
                      list_grid_view.setImageResource(R.drawable.list_view);
                      grid_view=true;
-                     grid_view();
+                     if(sort_by_date)
+                         grid_view(gridViewImagesListList);
+                     else
+                         grid_view(list_sort_by_name);
                  }
              }
          });
          onTouch_Listener();
          BottomNavigationBar();
+         search_view();
     }
-    private TextWatcher SearchTextWatcher = new TextWatcher()
+    public void search_view()
     {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after)
-        {
-
-        }
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count)
-        {
-            String text=search_bar.getText().toString().trim();
-            if(text.length()>0)
-            {
-                set_file_list(text);
-             cross_button.setVisibility(View.VISIBLE);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        assert searchManager != null;
+        searchSV.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchSV.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (view.hasFocus() || searchSV.getQuery().length() > 0)
+                {
+                    //appNameTV.setVisibility(View.GONE);
+                    set_file_list(searchSV.getQuery().toString());
+                    more_option.setVisibility(View.GONE);
+                    list_grid_view.setVisibility(View.GONE);
+                }
+                else
+                {
+                    ///appNameTV.setVisibility(View.VISIBLE);
+                    set_file_list("");
+                    more_option.setVisibility(View.VISIBLE);
+                    list_grid_view.setVisibility(View.VISIBLE);
+                }
             }
-            else
+        });
+        searchSV.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s)
             {
-                set_file_list(text);
-                cross_button.setVisibility(View.GONE);
+                return true;
             }
-        }
-        @Override
-        public void afterTextChanged(Editable s) {
-        }
-    };
+            @Override
+            public boolean onQueryTextChange(String s)
+            {
+               // findViewById(R.id.appNameTV).setVisibility(View.GONE);
+                more_option.setVisibility(View.GONE);
+                list_grid_view.setVisibility(View.GONE);
+                return  true;
+            }
+        });
+    }
     public  void set_default_adapter()
     {
         GridLayoutManager mGridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 3);
@@ -232,6 +227,21 @@ public class HomeScreenActivity extends AppCompatActivity {
                 }
             }
         }));
+    }
+    @Override
+    public void onBackPressed()
+    {
+      //  super.onBackPressed();
+        if(long_click_enabled)
+        {
+            long_click_enabled=false;
+            hide_action_bar();
+        }
+        else
+            {
+            finish();
+            finishAffinity();
+        }
     }
     public void show_action_bar()
     {
@@ -306,25 +316,53 @@ public class HomeScreenActivity extends AppCompatActivity {
         }
         return(super.onOptionsItemSelected(item));
     }
-    public void grid_view()
+    public void grid_view(List<GridViewImagesList> gridViewImagesList)
     {
         GridLayoutManager mGridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 3);
         recyclerViewlayout.setLayoutManager(mGridLayoutManager);
-         myAdapter1 = new  GridViewImages(HomeScreenActivity.this, gridViewImagesListList,new MyClickListener());
+         myAdapter1 = new  GridViewImages(HomeScreenActivity.this, gridViewImagesList,new MyClickListener());
         recyclerViewlayout.setAdapter(myAdapter1);
     }
-    public void list_view()
+    public void list_view(List<GridViewImagesList> gridViewImagesList)
     {
         recyclerViewlayout.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
         recyclerViewlayout.setLayoutManager(linearLayoutManager);
-        myAdapter = new  ListViewImages(HomeScreenActivity.this, gridViewImagesListList,new MyClickListener());
+        myAdapter = new  ListViewImages(HomeScreenActivity.this, gridViewImagesList,new MyClickListener());
         recyclerViewlayout.setAdapter(myAdapter);
+    }
+    public static class  Pair
+    {
+        private String name;
+        private GridViewImagesList gridViewImagesList;
+        Pair(String name,GridViewImagesList gridViewImagesList)
+        {
+            this.name=name;
+            this.gridViewImagesList=gridViewImagesList;
+        }
+        public String getname()
+        {
+            return name;
+        }
+
+        public GridViewImagesList getGridViewImagesList() {
+            return gridViewImagesList;
+        }
+
+        public static Comparator<Pair> NameComparator = new Comparator<Pair>() {
+
+            public int compare(Pair s1, Pair s2)
+            {
+                String StudentName1 = s1.getname().toUpperCase();
+                String StudentName2 = s2.getname().toUpperCase();
+                return StudentName2.compareTo(StudentName1);
+            }};
     }
     private void set_image_list()
     {
        List<MyDocument> myDocuments= MyDatabase.getInstance(this).myDocumentDao().getAllDocs();
        MyDatabase db=MyDatabase.getInstance(HomeScreenActivity.this);
+       ArrayList<Pair> name_list=new ArrayList<>();
        for(MyDocument myDocument:myDocuments)
        {
             int did=myDocument.getDid();
@@ -334,11 +372,20 @@ public class HomeScreenActivity extends AppCompatActivity {
             String fp_uri=myDocument.getfP_URI();
            Log.d("HomeScreen_Uri",fp_uri+"uri");
            long date_edited=myDocument.getTimeEdited();
-           gridViewImagesListList.add(new GridViewImagesList(name,did,fp_uri+"",dateformatter(date),
-                   pcount,dateformatter(date_edited),false,false));
+           GridViewImagesList list=new GridViewImagesList(name,did,fp_uri+"",dateformatter(date),
+                   pcount,dateformatter(date_edited),false,false);
+           name_list.add(new Pair(name,list));
+           gridViewImagesListList.add(list);
        }
-       grid_view();
-       list_view();
+        if(grid_view)
+            grid_view(gridViewImagesListList);
+        else
+            list_view(gridViewImagesListList);
+        Collections.sort(name_list,Pair.NameComparator);
+        for(Pair i:name_list)
+        {
+            list_sort_by_name.add(i.getGridViewImagesList());
+        }
     }
     public  void set_file_list(String name)
     {
@@ -398,6 +445,9 @@ public class HomeScreenActivity extends AppCompatActivity {
                 selected_position.add(position);
                 cur.setIschecked(true);
             }
+            gridViewImagesListList.set(position,cur);
+            myAdapter.notifyDataSetChanged();
+            myAdapter1.notifyDataSetChanged();
             Objects.requireNonNull(getSupportActionBar()).setTitle(selected_position.size()+" Selected");
         }
     }
@@ -491,59 +541,44 @@ public class HomeScreenActivity extends AppCompatActivity {
                         break;
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
             }
         }
         popup.getMenuInflater().inflate(R.menu.more_option_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
+            public boolean onMenuItemClick(MenuItem menuItem)
+            {
+                switch (menuItem.getItemId())
+                {
+                    case R.id.sort_name:
+                        sort_by_date=false;
+                        if(grid_view)
+                        grid_view(list_sort_by_name);
+                        else
+                            list_view(list_sort_by_name);
+                        break;
+                    case R.id.sort_date:
+                        sort_by_date=true;
+
+                        if(grid_view)
+                        grid_view(gridViewImagesListList);
+                        else
+                            list_view(gridViewImagesListList);
+                       // set_image_list();
+                        break;
+                    case R.id.settings_name:
+                        Intent i=new Intent(HomeScreenActivity.this,SettingsActivity.class);
+                         startActivity(i);
+                        break;
                     case R.id.contact_us:
                         break;
                     case R.id.terms_condition:
                         break;
                     case R.id.about_us:
-                        break;
-                }
-                return true;
-            }
-        });
-        popup.show();
-    }
-    private void showPopupMenuSortBy(View anchor, boolean isWithIcons, int style) {
-        //init the wrapper with style
-        Context wrapper = new ContextThemeWrapper(this, style);
-        PopupMenu popup = new PopupMenu(wrapper, anchor);
-        if (isWithIcons) {
-            try {
-                Field[] fields = popup.getClass().getDeclaredFields();
-                for (Field field : fields) {
-                    if ("mPopup".equals(field.getName())) {
-                        field.setAccessible(true);
-                        Object menuPopupHelper = field.get(popup);
-                        assert menuPopupHelper != null;
-                        Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-                        Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
-                        setForceIcons.invoke(menuPopupHelper, true);
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        popup.getMenuInflater().inflate(R.menu.sort_by_popup_menu, popup.getMenu());
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.sort_name:
-                        sort_by_text.setText("Sort By Name");
-                        break;
-                    case R.id.sort_date:
-                        sort_by_text.setText("Sort By Date");
                         break;
                 }
                 return true;

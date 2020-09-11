@@ -2,6 +2,8 @@ package com.example.camscan.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +14,11 @@ import android.icu.util.TimeUnit;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+
+import com.budiyev.android.codescanner.CodeScanner;
+import com.budiyev.android.codescanner.CodeScannerView;
+import com.budiyev.android.codescanner.DecodeCallback;
+import com.budiyev.android.codescanner.ScanMode;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
@@ -44,20 +51,26 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.URLUtil;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 //import com.example.camscan.UtilityClass;
 import com.example.camscan.UtilityClass;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.zxing.Result;
 import com.squareup.picasso.Picasso;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,6 +79,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -87,14 +102,17 @@ public class CameraXActivity extends AppCompatActivity {
     MotionEvent motionEvent;
     MyDocument savedDoc;
     ImageView flashmode_btn;
-    ImageView gallery,single_mode_img,batch_mode_img,last_img,focus_camera;
+    ImageView gallery,single_mode_img,batch_mode_img,last_img,focus_camera,scan_qr_code;
     boolean single_mode;
     boolean isNew=true;
-    RelativeLayout show_grid_view;
+    RelativeLayout show_grid_view,relativeLayoutCameraX,relativeLayoutScanQr;
     LinearLayout line_horizontal,line_vertical;
     ArrayList<MyPicture > myPictureList;
     SharedPreferences preferences;
     String currDocName;
+    CodeScanner mCodeScanner;
+    CodeScannerView scannerView;
+
     int picCount=0;
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -105,6 +123,8 @@ public class CameraXActivity extends AppCompatActivity {
         preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
         long time=System.currentTimeMillis()%1000000;
         currDocName=UtilityClass.appName+UtilityClass.lineSeparator+time;
+        relativeLayoutCameraX=findViewById(R.id.relative_layout_camerax);
+        relativeLayoutScanQr=findViewById(R.id.relative_layout_scanqrcode);
         mPreviewView = findViewById(R.id.previewView);
         captureImage = findViewById(R.id.captureImage);
         flashmode_btn = findViewById(R.id.flash_mode);
@@ -117,6 +137,7 @@ public class CameraXActivity extends AppCompatActivity {
         line_horizontal=findViewById(R.id.line_horizontal);
         line_vertical=findViewById(R.id.line_vertical);
         focus_camera=findViewById(R.id.focus_camera);
+        scan_qr_code=findViewById(R.id.scan_qr_code);
         flashMode = ImageCapture.FLASH_MODE_AUTO;
         myPictureList=new ArrayList<>();
         single_mode=true;
@@ -161,6 +182,16 @@ public class CameraXActivity extends AppCompatActivity {
                 }
             }
         });
+        scan_qr_code.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                //
+                relativeLayoutCameraX.setVisibility(View.GONE);
+                relativeLayoutScanQr.setVisibility(View.VISIBLE);
+
+            }
+        });
         gallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -192,6 +223,7 @@ public class CameraXActivity extends AppCompatActivity {
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
+        scan_qr_code();
         String from=getIntent().getStringExtra("from");
         if(from!=null)
         {
@@ -329,43 +361,6 @@ public class CameraXActivity extends AppCompatActivity {
             });
         });
     }
-    //    private  void call_save_list(String uri)
-//    {
-//        ArrayList<Point> pointArrayList=new ArrayList<>();
-//        Point p=new Point(0,0);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        myPictureList.add(new MyPicture(myPictureList.size()+1,uri,"","",
-//                myPictureList.size()+1,pointArrayList));
-//        String mypic= UtilityClass.getStringFromObject(myPictureList);
-//        MyDocument document=new MyDocument("NewFolder"+System.currentTimeMillis(),
-//                System.currentTimeMillis(),(long)0,myPictureList.size(),"");
-//        String mydoc=UtilityClass.getStringFromObject(document);
-//        if(single_mode)
-//        {
-//            Intent intent = new Intent(CameraXActivity.this, BoxActivity.class);
-//            intent.putExtra("MyPicture",mypic);
-//            intent.putExtra("MyDocument",mydoc);
-//            startActivity(intent);
-//        }
-//        if(myPictureList.size()>0)
-//            tick_img.setVisibility(View.VISIBLE);
-//        gallery.setVisibility(View.GONE);
-//        last_img.setVisibility(View.VISIBLE);
-//        Picasso.with(CameraXActivity.this).load(uri).into(last_img);
-//        tick_img.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view)
-//            {
-//                Intent i=new Intent(CameraXActivity.this,BoxActivity.class);
-//                i.putExtra("MyPicture",mypic);
-//                i.putExtra("MyDocument",mydoc);
-//                startActivity(i);
-//            }
-//        });
-//    }
     private  void call_save_list(String uri)
     {
 
@@ -580,5 +575,119 @@ public class CameraXActivity extends AppCompatActivity {
 
             }
         }
+    }
+    public void scan_qr_code()
+    {
+        scannerView = findViewById(R.id.scanner_view);
+        mCodeScanner = new CodeScanner(this, scannerView);
+        mCodeScanner.setCamera(CodeScanner.CAMERA_BACK );// or CAMERA_FRONT or specific camera id
+        mCodeScanner.setFormats(CodeScanner.ALL_FORMATS);  // list of type BarcodeFormat,
+        mCodeScanner.setAutoFocusEnabled(true);
+        mCodeScanner.setScanMode(ScanMode.SINGLE );
+        mCodeScanner.setTouchFocusEnabled(true);
+        mCodeScanner.setFlashEnabled(true);
+        mCodeScanner.setDecodeCallback(new DecodeCallback() {
+            @Override
+            public void onDecoded(@NonNull final Result result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String message = "result :\n" + result.getText();
+                        Log.d("message",message);
+                        String url=result.getText();
+
+                        if(isValid(url))
+                        {
+                           show_hyperlink(url);
+                        }
+                        else
+                        {
+                            show_text(url);
+                        }
+//                        try
+//                        {
+//                            Intent i=new Intent("android.intent.action.MAIN");
+//                            i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
+//                            i.addCategory("android.intent.category.LAUNCHER");
+//                            i.setData(Uri.parse(url));
+//                            startActivity(i);
+//                        }
+//                        catch(ActivityNotFoundException e)
+//                        {
+//                            Intent i=new Intent(Intent.ACTION_VIEW,Uri.parse(url));
+//                            startActivity(i);
+//                        }
+                    }
+                });
+            }
+        });
+
+        if (allPermissionsGranted())
+        {
+            mCodeScanner.startPreview();
+        }
+        else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        }
+    }
+    public void show_hyperlink(String result)
+    {
+        androidx.appcompat.app.AlertDialog.Builder builder=new
+                androidx.appcompat.app.AlertDialog.Builder(CameraXActivity.this);
+        View dialog= LayoutInflater.from(CameraXActivity.this).inflate(R.layout.dialog_box_hyperlink,null);
+        builder.setView(dialog);
+        TextView hyperlink=dialog.findViewById(R.id.hyperlink);
+        ProgressBar progressBar=dialog.findViewById(R.id.progress_bar);
+        hyperlink.setVisibility(View.VISIBLE);
+        hyperlink.setMovementMethod(LinkMovementMethod.getInstance());
+        hyperlink.setText(result);
+        androidx.appcompat.app.AlertDialog d=builder.create();
+        d.show();
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run()
+            {
+                progressBar.setVisibility(View.GONE);
+            }
+        },1000);
+        mCodeScanner.startPreview();
+    }
+    public void show_text(String result)
+    {
+        androidx.appcompat.app.AlertDialog.Builder builder=new
+                androidx.appcompat.app.AlertDialog.Builder(CameraXActivity.this);
+        View dialog= LayoutInflater.from(CameraXActivity.this).inflate(R.layout.dialog_box_hyperlink,null);
+        builder.setView(dialog);
+        TextView text_result=dialog.findViewById(R.id.text_result);
+        ProgressBar progressBar=dialog.findViewById(R.id.progress_bar);
+        text_result.setVisibility(View.VISIBLE);
+        text_result.setText(result);
+        androidx.appcompat.app.AlertDialog d=builder.create();
+        d.show();
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run()
+            {
+                progressBar.setVisibility(View.GONE);
+            }
+        },1000);
+        mCodeScanner.startPreview();
+    }
+    public void gotoCamera(View view)
+    {
+        relativeLayoutScanQr.setVisibility(View.GONE);
+        relativeLayoutCameraX.setVisibility(View.VISIBLE);
+    }
+    private boolean isValid(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            return URLUtil.isValidUrl(String.valueOf(url))&&Patterns.WEB_URL.matcher(String.valueOf(url)).matches();
+        } catch (MalformedURLException e)
+        {
+
+        }
+        return false;
     }
 }

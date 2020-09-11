@@ -123,8 +123,6 @@ public class SingleCamActivity extends AppCompatActivity {
                     ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                     bindPreview(cameraProvider);
                 } catch (ExecutionException | InterruptedException e) {
-                    // No errors need to be handled for this Future.
-                    // This should never be reached.
                 }
             }
         }, ContextCompat.getMainExecutor(this));
@@ -157,8 +155,6 @@ public class SingleCamActivity extends AppCompatActivity {
                 .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 .setFlashMode(flashMode)
-//                .setTargetAspectRatio(screenAspectRatio)
-//                .setTargetResolution(screenSize)
                 .build();
 
         preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
@@ -173,7 +169,6 @@ public class SingleCamActivity extends AppCompatActivity {
                         @Override
                         public void run()
                         {
-                            // Todo savelist
                             call_save_list(my_file.getPath());
                             Toast.makeText(SingleCamActivity.this, "Image Saved successfully", Toast.LENGTH_SHORT).show();
                         }
@@ -188,15 +183,6 @@ public class SingleCamActivity extends AppCompatActivity {
     }
     private  void call_save_list(String uri)
     {
-//        ArrayList<Point> pointArrayList=new ArrayList<>();
-//        Point p=new Point(0,0);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        myPictureList.add(new MyPicture(0,uri,null,String.valueOf(myPictureList.size()+1),
-        //              myPictureList.size()+1,pointArrayList));
-        //      String mypic= UtilityClass.getStringFromObject(myPictureList);
         Intent returnIntent = new Intent();
         //    returnIntent.putExtra("PICTURE_URI",uri);
         setResult(Activity.RESULT_OK,returnIntent);
