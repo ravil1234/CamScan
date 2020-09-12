@@ -96,13 +96,15 @@ public class HomeScreenActivity extends AppCompatActivity {
             grid_view=true;
          set_default_adapter();
          set_image_list();
-         settings.setOnClickListener(new View.OnClickListener() {
+         settings.setOnClickListener(new View.OnClickListener()
+         {
              @Override
              public void onClick(View view) {
                  Intent i=new Intent(HomeScreenActivity.this,SettingsActivity.class);
                   startActivity(i);
              }
          });
+
          more_option.setOnClickListener(new View.OnClickListener()
          {
              @Override
@@ -134,8 +136,8 @@ public class HomeScreenActivity extends AppCompatActivity {
             {
               showPopupMenuSortBy(view,false,R.style.MyPopupStyle);
             }
-        });
-         list_grid_view.setOnClickListener(new View.OnClickListener() {
+         });
+        list_grid_view.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view)
              {
@@ -152,7 +154,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                      grid_view();
                  }
              }
-         });
+        });
          onTouch_Listener();
          BottomNavigationBar();
     }
@@ -556,6 +558,4 @@ public class HomeScreenActivity extends AppCompatActivity {
         });
         popup.show();
     }
-
-
 }
