@@ -15,12 +15,6 @@
         android:title="Lock"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_tag"
-        android:enabled="true"
-        android:icon="@drawable/tag"
-        android:title="Tag"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/action_delete"
         android:enabled="true"
         android:icon="@drawable/trash"
@@ -30,6 +24,6 @@
         android:id="@+id/action_more"
         android:enabled="true"
         android:icon="@drawable/more"
-        android:title="More"
+        android:title="Merge"
         app:showAsAction="ifRoom" />
 </menu>

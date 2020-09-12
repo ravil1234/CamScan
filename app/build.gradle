@@ -56,12 +56,11 @@ dependencies {
     implementation 'com.itextpdf:itextg:5.5.9'
     implementation 'com.madgag.spongycastle:prov:1.54.0.0'
     implementation 'com.itextpdf:kernel:7.1.12'
-
     //for Database
     def room_version = "2.2.5"
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.intuit.sdp:sdp-android:1.0.6'
-
+    implementation 'com.budiyev.android:code-scanner:2.1.0'
 }

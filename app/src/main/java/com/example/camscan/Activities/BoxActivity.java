@@ -459,7 +459,8 @@ public class BoxActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    public void retakePic(){
+    public void retakePic()
+    {
         int index=vp2.getCurrentItem();
         MyPicture p=list.get(index);
         //String picString=UtilityClass.getStringFromObject(p);
@@ -536,6 +537,4 @@ public class BoxActivity extends AppCompatActivity {
             return true;
         }
     }
-
-
 }

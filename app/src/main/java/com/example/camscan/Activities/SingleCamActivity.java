@@ -1,7 +1,9 @@
 package com.example.camscan.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -15,6 +17,7 @@ import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
@@ -42,10 +45,14 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Gallery;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.camscan.UtilityClass;
@@ -55,6 +62,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -75,46 +84,88 @@ public class SingleCamActivity extends AppCompatActivity {
     TextView tick_img;
     View view;
     MotionEvent motionEvent;
-   // CardView flashmode_btn;
-    ImageView gallery,single_mode_img,batch_mode_img,last_img;
+    ImageView flashmode_btn;
+    ImageView gallery,single_mode_img,batch_mode_img,last_img,focus_camera,scan_qr_code;;
     //   ArrayList<MyPicture > myPictureList;
+    RelativeLayout show_grid_view,relativeLayoutCameraX,relativeLayoutScanQr;
+    LinearLayout line_horizontal,line_vertical;
     String uri="";
+    SharedPreferences preferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camerax);
         getSupportActionBar().hide();
+        preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
         mPreviewView = findViewById(R.id.previewView);
         captureImage = findViewById(R.id.captureImage);
-
-      //  flashmode_btn = findViewById(R.id.flash_mode);
+        flashmode_btn = findViewById(R.id.flash_mode);
         gallery = findViewById(R.id.gallery);
         single_mode_img=findViewById(R.id.single_mode);
         batch_mode_img=findViewById(R.id.batch_mode);
         tick_img=findViewById(R.id.tick_img);
         last_img=findViewById(R.id.last_img);
+        show_grid_view=findViewById(R.id.show_hide_grid);
+        line_horizontal=findViewById(R.id.line_horizontal);
+        line_vertical=findViewById(R.id.line_vertical);
+        focus_camera=findViewById(R.id.focus_camera);
+        scan_qr_code=findViewById(R.id.scan_qr_code);
         flashMode = ImageCapture.FLASH_MODE_AUTO;
+        if(preferences.contains("flash_mode"))
+        {
+            flashMode=preferences.getInt("flash_mode",0);
+        }
         tick_img.setVisibility(View.GONE);
         batch_mode_img.setVisibility(View.GONE);
         single_mode_img.setVisibility(View.GONE);
         gallery.setVisibility(View.GONE);
         last_img.setVisibility(View.INVISIBLE);
+        scan_qr_code.setVisibility(View.GONE);
+
         uri=getIntent().getStringExtra("PICTURE_URI");
-
-
-//        flashmode_btn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view)
-//            {
-//                //Dialog box;
-//            }
-//        });
+        if(preferences.contains("grid"))
+        {
+            if(preferences.getInt("grid",0)==1)
+            {
+                line_vertical.setVisibility(View.VISIBLE);
+                line_horizontal.setVisibility(View.VISIBLE);
+                focus_camera.setVisibility(View.VISIBLE);
+            }
+        }
+        flashmode_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Dialog box;
+                showPopupMenu(view,true,R.style.MyPopupOtherStyle);
+            }
+        });
         if (allPermissionsGranted()) {
             startCamera(); //start camera if permission has been granted by user
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
+        show_grid_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                if(line_horizontal.getVisibility()==View.GONE)
+                {
+                    line_horizontal.setVisibility(View.VISIBLE);
+                    line_vertical.setVisibility(View.VISIBLE);
+                    focus_camera.setVisibility(View.VISIBLE);
+                    preferences.edit().putInt("grid",1).apply();
+                }
+                else
+                {
+                    line_horizontal.setVisibility(View.GONE);
+                    line_vertical.setVisibility(View.GONE);
+                    focus_camera.setVisibility(View.GONE);
+                    preferences.edit().putInt("grid",-1).apply();
+                }
+            }
+        });
     }
 
     private void startCamera() {
@@ -129,8 +180,6 @@ public class SingleCamActivity extends AppCompatActivity {
                     ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                     bindPreview(cameraProvider);
                 } catch (ExecutionException | InterruptedException e) {
-                    // No errors need to be handled for this Future.
-                    // This should never be reached.
                 }
             }
         }, ContextCompat.getMainExecutor(this));
@@ -163,15 +212,12 @@ public class SingleCamActivity extends AppCompatActivity {
                 .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 .setFlashMode(flashMode)
-//                .setTargetAspectRatio(screenAspectRatio)
-//                .setTargetResolution(screenSize)
                 .build();
 
         preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageAnalysis, imageCapture);
         captureImage.setOnClickListener(v -> {
-
-            File my_file=new File(Uri.parse(uri).getPath());
+            File my_file=new File(uri);
             ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(my_file).build();
             imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
                 @Override
@@ -180,7 +226,6 @@ public class SingleCamActivity extends AppCompatActivity {
                         @Override
                         public void run()
                         {
-                            // Todo savelist
                             call_save_list(my_file.getPath());
                             Toast.makeText(SingleCamActivity.this, "Image Saved successfully", Toast.LENGTH_SHORT).show();
                         }
@@ -189,28 +234,66 @@ public class SingleCamActivity extends AppCompatActivity {
                 @Override
                 public void onError(@NonNull ImageCaptureException error) {
                     error.printStackTrace();
-                    Intent returnIntent = new Intent();
-                    setResult(Activity.RESULT_CANCELED,returnIntent);
-                    finish();
                 }
             });
         });
     }
+    private void showPopupMenu(View anchor, boolean isWithIcons, int style) {
+        //init the wrapper with style
+        Context wrapper = new ContextThemeWrapper(this, style);
+        PopupMenu popup = new PopupMenu(wrapper, anchor);
+        if (isWithIcons) {
+            try {
+                Field[] fields = popup.getClass().getDeclaredFields();
+                for (Field field : fields) {
+                    if ("mPopup".equals(field.getName())) {
+                        field.setAccessible(true);
+                        Object menuPopupHelper = field.get(popup);
+                        assert menuPopupHelper != null;
+                        Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                        Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+                        setForceIcons.invoke(menuPopupHelper, true);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        popup.getMenuInflater().inflate(R.menu.flash_popup_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.flash_auto:
+                        flashMode=ImageCapture.FLASH_MODE_AUTO;
+                        flashmode_btn.setImageResource(R.drawable.automatic_flash);
+                        preferences.edit().putInt("flash_mode",flashMode).apply();
+                        Toast.makeText(SingleCamActivity.this, "Flash Auto !", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.flash_on:
+                        flashMode=ImageCapture.FLASH_MODE_ON;
+                        flashmode_btn.setImageResource(R.drawable.flash);
+                        preferences.edit().putInt("flash_mode",flashMode).apply();
+                        Toast.makeText(SingleCamActivity.this, "Flash On !", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.flash_off:
+                        flashMode=ImageCapture.FLASH_MODE_OFF;
+                        flashmode_btn.setImageResource(R.drawable.flash_off);
+                        preferences.edit().putInt("flash_mode",flashMode).apply();
+                        Toast.makeText(SingleCamActivity.this, "Flash Off !", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                return true;
+            }
+        });
+        popup.show();
+    }
     private  void call_save_list(String uri)
     {
-//        ArrayList<Point> pointArrayList=new ArrayList<>();
-//        Point p=new Point(0,0);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        pointArrayList.add(p);
-//        myPictureList.add(new MyPicture(0,uri,null,String.valueOf(myPictureList.size()+1),
-        //              myPictureList.size()+1,pointArrayList));
-        //      String mypic= UtilityClass.getStringFromObject(myPictureList);
         Intent returnIntent = new Intent();
         //    returnIntent.putExtra("PICTURE_URI",uri);
         setResult(Activity.RESULT_OK,returnIntent);
-        Log.e("this", "call_save_list: "+uri );
         finish();
     }
     private boolean allPermissionsGranted() {

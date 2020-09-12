@@ -38,7 +38,7 @@ public class GridViewImages extends RecyclerView.Adapter<GridViewImages.ServiceV
         if(list.checkbox_visibility())
             holder.checkBox.setVisibility(View.VISIBLE);
         else
-            holder.checkBox.setVisibility(View.INVISIBLE);
+            holder.checkBox.setVisibility(View.GONE);
         if(list.Ischecked())
             holder.checkBox.setChecked(true);
         else

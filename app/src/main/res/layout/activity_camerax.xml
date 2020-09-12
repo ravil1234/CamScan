@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <RelativeLayout
+        android:visibility="visible"
+        android:id="@+id/relative_layout_camerax"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <androidx.cardview.widget.CardView
         android:id="@+id/top_card_view"
         android:layout_width="match_parent"
-        app:cardBackgroundColor="#142f4d"
+        app:cardBackgroundColor="@color/colorAppBar"
         android:layout_height="@dimen/_45sdp">
         <RelativeLayout
             android:layout_width="match_parent"
@@ -75,6 +80,7 @@
                 </View>
             </RelativeLayout>
             <ImageView
+                android:id="@+id/scan_qr_code"
                 android:foreground="@drawable/foreground_app_theme"
                 android:layout_width="@dimen/_35sdp"
                 android:layout_height="@dimen/_35sdp"
@@ -182,19 +188,18 @@
         android:id="@+id/bottom_card_view"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        app:cardBackgroundColor="#142f4d"
+        app:cardBackgroundColor="@color/colorAppBar"
         android:layout_height="120dp">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="120dp">
-            <androidx.cardview.widget.CardView
+            <View
                 android:layout_width="60dp"
-                app:cardBackgroundColor="#ffffff"
+                android:layout_height="60dp"
                 android:layout_centerInParent="true"
-                app:cardCornerRadius="60dp"
-                app:cardElevation="5dp"
-                android:layout_height="60dp">
-            </androidx.cardview.widget.CardView>
+                android:background="@drawable/circular_white"
+               >
+            </View>
             <View
                 android:foreground="@drawable/foreground_app_theme"
                 android:id="@+id/captureImage"
@@ -262,4 +267,58 @@
             </ImageView>
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
+</RelativeLayout>
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/relative_layout_scanqrcode"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <com.budiyev.android.codescanner.CodeScannerView
+                android:id="@+id/scanner_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:autoFocusButtonColor="@android:color/white"
+                app:autoFocusButtonVisible="true"
+                app:flashButtonColor="@android:color/white"
+                app:flashButtonVisible="true"
+                app:frameColor="#F6A129"
+                app:frameCornersSize="35dp"
+                app:frameCornersRadius="10dp"
+                app:frameAspectRatioWidth="1"
+                app:frameAspectRatioHeight="1"
+                app:frameSize=".75"
+                app:frameThickness="3dp"
+                app:maskColor="#79000000"/>
+        </RelativeLayout>
+    <TextView
+        android:layout_marginTop="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan QR Code"
+        android:textStyle="bold"
+        android:textSize="18dp"
+        android:textColor="#ffffff"
+        >
+    </TextView>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="28dp">
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/floating_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorAppBar"
+                android:src="@drawable/ic_camera_alt_black_24dp"
+                android:onClick="gotoCamera"
+                android:layout_marginBottom="36dp"
+                />
+        </RelativeLayout>
+    </RelativeLayout>
 </RelativeLayout>

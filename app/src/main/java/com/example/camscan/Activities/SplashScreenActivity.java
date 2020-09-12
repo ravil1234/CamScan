@@ -25,10 +25,10 @@ public class SplashScreenActivity extends Activity
             @Override
             public void run()
             {
-                 Intent i=new Intent(SplashScreenActivity.this,HomeScreenActivity.class);
+                 Intent i=new Intent(SplashScreenActivity.this,IntroScreenFirstActivity.class);
                  startActivity(i);
                  finish();
             }
-        },2000);
+        },1500);
     }
 }
