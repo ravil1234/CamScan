@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitCenter"
-            android:src="@drawable/pbar_back"
+            android:src="@drawable/low_op_back"
             />
         <ProgressBar
             android:id="@+id/filter_prog_bar"

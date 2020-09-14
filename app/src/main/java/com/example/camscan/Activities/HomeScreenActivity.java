@@ -682,7 +682,9 @@ public class HomeScreenActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        d.dismiss();
                         startActivity(intent);
+
                     }
                 });
             }
@@ -749,6 +751,9 @@ public class HomeScreenActivity extends AppCompatActivity {
                         v.setProgress(100);
                         d.dismiss();
                         Toast.makeText(HomeScreenActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+                        for(Integer i:dids){
+                            //REMOVE ITEM FROM LIST WHERE did is equal to given did
+                        }
                         myAdapter.notifyDataSetChanged();
                         myAdapter1.notifyDataSetChanged();
                     }
@@ -785,6 +790,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                             pos+=1;
                             p.setEditedName(p.getEditedName().replace(currDoc.getDname(),target.getDname()));
                             p.setDid(targetDid);
+                            db.myPicDao().updatePic(p);
                         }
                         //all pics of curr is moved to target
                         db.myDocumentDao().deleteDoc(currDoc);
@@ -808,6 +814,12 @@ public class HomeScreenActivity extends AppCompatActivity {
                         v.setProgress(100);
                         d.dismiss();
                         Toast.makeText(HomeScreenActivity.this, "Documents Merged", Toast.LENGTH_SHORT).show();
+                        for(Integer i:dids){
+                            if(i!=targetDid){
+                                //REMOVE THIS FROM THE LIST WHERE Ddid IS i
+
+                            }
+                        }
                         myAdapter1.notifyDataSetChanged();
                         myAdapter.notifyDataSetChanged();
 

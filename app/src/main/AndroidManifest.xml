@@ -19,8 +19,7 @@
         <activity android:name=".Activities.FilterActivity" />
         <activity
             android:name=".Activities.BoxActivity"
-            android:hardwareAccelerated="false"
-            android:noHistory="true"></activity>
+            android:hardwareAccelerated="false"></activity>
         <activity android:name=".Activities.CamActivity" />
         <activity android:name=".Activities.MainActivity"></activity>
         <activity android:name=".Activities.HomeScreenActivity" />
@@ -35,5 +34,7 @@
         <activity android:name=".Activities.PdfSettingsActivity" />
         <activity android:name=".Activities.IntroScreenFirstActivity" />
         <activity android:name=".Activities.IntroScreenSecondActivity" />
+        <activity android:name=".Activities.SingleCamActivity"/>
+        <activity android:name=".Activities.PdfPreviewActivity"/>
     </application>
 </manifest>

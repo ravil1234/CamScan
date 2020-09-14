@@ -493,9 +493,9 @@ public class MyDocumentActivity extends AppCompatActivity {
         doc_name=view.findViewById(R.id.nav_header_name);
 
         //others
-        shareApp=findViewById(R.id.in_doc_shareApp);
-        exitDoc=findViewById(R.id.in_doc_nav_list_exit);
-        aboutUs=findViewById(R.id.in_doc_aboutUs);
+//        shareApp=findViewById(R.id.in_doc_shareApp);
+//        exitDoc=findViewById(R.id.in_doc_nav_list_exit);
+//        aboutUs=findViewById(R.id.in_doc_aboutUs);
 
     }
 
@@ -523,38 +523,7 @@ public class MyDocumentActivity extends AppCompatActivity {
             }
         });
 
-        TextView tv1=shareApp.findViewById(R.id.item_nav_title);
-        tv1.setText("Share App");
-        TextView tv2=aboutUs.findViewById(R.id.item_nav_title);
-        tv2.setText("About Us");
-        TextView tv3=exitDoc.findViewById(R.id.item_nav_title);
-        tv3.setText("Close Document");
 
-        ImageView icon_share=shareApp.findViewById(R.id.item_nav_icon);
-        icon_share.setImageDrawable(getResources().getDrawable(R.drawable.move_to));
-        ImageView icon_about_us=aboutUs.findViewById(R.id.item_nav_icon);
-        icon_about_us.setImageDrawable(getResources().getDrawable(R.drawable.about_us));
-        ImageView icon_close=exitDoc.findViewById(R.id.item_nav_icon);
-        icon_close.setImageDrawable(getResources().getDrawable(R.drawable.cross));
-
-        shareApp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onShareAppClicked();
-                }
-        });
-        aboutUs.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onAboutUsClicked();
-            }
-        });
-        exitDoc.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onExitDocClicked();
-            }
-        });
 
         doc_name.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -835,8 +804,22 @@ public class MyDocumentActivity extends AppCompatActivity {
                         builder.create().show();
                         break;
                     }
+                    case 8:{//Share App
+                        onShareAppClicked();
+                        break;
+                    }
+                    case 9:{//About us
+                        onAboutUsClicked();
+                        break;
+                    }
+                    case 10:{//Exit Doc
+                        onExitDocClicked();
+                        break;
+                    }
+
 
                 }
+
             }else{
                 Toast.makeText(MyDocumentActivity.this, "Task In Progress", Toast.LENGTH_SHORT).show();
             }
@@ -990,7 +973,16 @@ public class MyDocumentActivity extends AppCompatActivity {
         //
         menuList.add(new NavMenuObject(false,"Reverse Order",R.drawable.reverse,true));
         menuList.add(new NavMenuObject(false,"Add more Pages",R.drawable.add_more,true));
-        menuList.add(new NavMenuObject(false,"Delete Document",R.drawable.trash,true));
+        menuList.add(new NavMenuObject(false,"Delete Document",R.drawable.trash_black,true));
+
+        menuList.add(new NavMenuObject(false,"Share App",R.drawable.move_to,true));
+        menuList.add(new NavMenuObject(false,"About Us",R.drawable.about_us,true));
+        menuList.add(new NavMenuObject(false,"Close Document",R.drawable.cross,true));
+
+
+
+
+
 
     }
     private boolean noDocLikeThis(String name){
