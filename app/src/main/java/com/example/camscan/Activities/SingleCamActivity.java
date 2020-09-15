@@ -311,7 +311,8 @@ public class SingleCamActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
                 startCamera();
-            } else {
+            } else
+                {
                 Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
             }
         }

@@ -52,7 +52,7 @@
                 android:textStyle="bold"
                 android:focusable="true"
                 app:iconifiedByDefault="false"
-                app:searchIcon="@null"
+                app:searchIcon="@drawable/search_img"
                 app:queryHint="Search File . . ." />
         </RelativeLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -98,7 +98,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginEnd="28dp">
+            android:layout_marginEnd="16dp">
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/floating_button"
                 android:layout_width="wrap_content"

@@ -31,7 +31,7 @@ public class SettingsActivity extends AppCompatActivity
     BottomSheetDialog bottom_dialog,filter_dialog;
     View bottom_view,filter_view;
     ImageView imageViewOne,imageViewTwo;
-    TextView settings_name,textViewOne,textViewTwo;
+    TextView settings_name,textViewOne,textViewTwo,theme_name,activity_name,view_name;
     RadioButton radioButtonOne,radioButtonTwo;
     RelativeLayout relativeLayoutOne,relativeLayoutTwo;
     SharedPreferences preferences;
@@ -73,12 +73,12 @@ public class SettingsActivity extends AppCompatActivity
             }
         });
        List<FilterObject> filter_list=new ArrayList<>();
-       filter_list.add(new FilterObject(R.drawable.circular_shape,"Original"));
-        filter_list.add(new FilterObject(R.drawable.circular_shape,"Luminous"));
-        filter_list.add(new FilterObject(R.drawable.circular_shape,"Corrected"));
-        filter_list.add(new FilterObject(R.drawable.circular_shape,"GrayScale"));
-        filter_list.add(new FilterObject(R.drawable.circular_shape,"B/W"));
-        filter_list.add(new FilterObject(R.drawable.circular_shape,"Inverted"));
+       filter_list.add(new FilterObject(R.drawable.original,"Original"));
+        filter_list.add(new FilterObject(R.drawable.luminous,"Luminous"));
+        filter_list.add(new FilterObject(R.drawable.correction,"Corrected"));
+        filter_list.add(new FilterObject(R.drawable.grayscale,"GrayScale"));
+        filter_list.add(new FilterObject(R.drawable.b_w,"B/W"));
+        filter_list.add(new FilterObject(R.drawable.invert,"Inverted"));
         GridLayoutManager mGridLayoutManager = new GridLayoutManager(SettingsActivity.this, 3);
         filter_recycler_view.setLayoutManager(mGridLayoutManager);
         FilterGridAdapter myAdapter=new FilterGridAdapter(SettingsActivity.this,filter_list,

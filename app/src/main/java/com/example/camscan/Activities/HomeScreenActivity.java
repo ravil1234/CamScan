@@ -153,7 +153,8 @@ public class HomeScreenActivity extends AppCompatActivity {
         searchSV.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchSV.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onFocusChange(View view, boolean b) {
+            public void onFocusChange(View view, boolean b)
+            {
                 if (view.hasFocus() || searchSV.getQuery().length() > 0)
                 {
                     //appNameTV.setVisibility(View.GONE);
@@ -776,7 +777,8 @@ public class HomeScreenActivity extends AppCompatActivity {
                 int pos=targetSize+1;
                 final int[] a = {0};
                 int each=dids.size()/100;
-                for(Integer did:dids){
+                for(Integer did:dids)
+                {
                     MyDocument currDoc=db.myDocumentDao().getDocumentWithId(did);
                     List<MyPicture> pics=db.myPicDao().getDocPics(did);
                     if(pics!=null && currDoc.getDid()!=targetDid){
@@ -815,5 +817,6 @@ public class HomeScreenActivity extends AppCompatActivity {
                 });
             }
         }).start();
+
     }
 }
