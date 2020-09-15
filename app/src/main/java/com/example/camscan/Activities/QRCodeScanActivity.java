@@ -46,10 +46,10 @@ public class QRCodeScanActivity  extends AppCompatActivity
         mCodeScanner = new CodeScanner(this, scannerView);
         mCodeScanner.setCamera(CodeScanner.CAMERA_BACK );// or CAMERA_FRONT or specific camera id
         mCodeScanner.setFormats(CodeScanner.ALL_FORMATS);  // list of type BarcodeFormat,
-        mCodeScanner.setAutoFocusEnabled(true);
+        mCodeScanner.setAutoFocusEnabled(false);
         mCodeScanner.setScanMode(ScanMode.SINGLE );
         mCodeScanner.setTouchFocusEnabled(true);
-        mCodeScanner.setFlashEnabled(true);
+        mCodeScanner.setFlashEnabled(false);
         mCodeScanner.setDecodeCallback(new DecodeCallback() {
             @Override
             public void onDecoded(@NonNull final Result result) {
@@ -141,14 +141,16 @@ public class QRCodeScanActivity  extends AppCompatActivity
     }
     public void gotoCamera(View view)
     {
+        mCodeScanner.stopPreview();
+        mCodeScanner.releaseResources();
        Intent intent=new Intent(QRCodeScanActivity.this,CameraXActivity.class);
        startActivity(intent);
        finish();
-
     }
     @Override
     public void onBackPressed()
     {
+        mCodeScanner.stopPreview();
         Intent intent=new Intent(QRCodeScanActivity.this,CameraXActivity.class);
         startActivity(intent);
         finish();

@@ -24,7 +24,9 @@
         <activity android:name=".Activities.CamActivity" />
         <activity android:name=".Activities.MainActivity"></activity>
         <activity android:name=".Activities.HomeScreenActivity" />
-        <activity android:name=".Activities.CameraXActivity" />
+        <activity android:name=".Activities.CameraXActivity"
+            android:hardwareAccelerated="true">
+        </activity>
         <activity android:name=".Activities.CapturedImageActivity" />
         <activity android:name=".Activities.SplashScreenActivity">
             <intent-filter>
@@ -37,6 +39,8 @@
         <activity android:name=".Activities.IntroScreenSecondActivity" />
         <activity android:name=".Activities.PdfPreviewActivity" />
         <activity android:name=".Activities.SingleCamActivity" />
-        <activity android:name=".Activities.QRCodeScanActivity" />
+        <activity android:name=".Activities.QRCodeScanActivity"
+            android:hardwareAccelerated="true">
+        </activity>
     </application>
 </manifest>
