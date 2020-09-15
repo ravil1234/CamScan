@@ -287,35 +287,7 @@ public class FilterActivity extends AppCompatActivity {
        // Log.e(TAG, "getPicAndDocFromIntent: "+currDoc.getDid() );
     }
 
-//
-//    private void addAllTnails() {
-//        tnails.add(Bitmap.createScaledBitmap(cropped,200,200,true));
-//
-//        Filter1 f1=new Filter1(this);
-//        Bitmap t1=f1.filter(100,Bitmap.createScaledBitmap(cropped,200,200,true));
-//        tnails.add(t1);
-//        f1.cleanUp();
-//
-//
-//        FlatCorrection fc=new FlatCorrection(this);
-//        t1=fc.flatCorr(Bitmap.createScaledBitmap(cropped,200,200,true));
-//        tnails.add(t1);
-//        fc.clear();
-//
-//        GrayScale gs=new GrayScale();
-//        t1=gs.toGrayscale(Bitmap.createScaledBitmap(cropped,200,200,true));
-//        tnails.add(t1);
-//
-//        BlackAndWhite bnw=new BlackAndWhite(this);
-//        t1=bnw.getBlackAndWhite(Bitmap.createScaledBitmap(cropped,200,200,true));
-//        tnails.add(t1);
-//        bnw.clear();
-//
-//        Inversion inv=new Inversion(this);
-//        t1=inv.setInversion(Bitmap.createScaledBitmap(cropped,200,200,true));
-//        tnails.add(t1);
-//        inv.clear();
-//    }
+
 
 
 
@@ -415,9 +387,6 @@ public class FilterActivity extends AppCompatActivity {
             return null;
         }
     }
-
-
-
 
 
     public void rotate(View view){

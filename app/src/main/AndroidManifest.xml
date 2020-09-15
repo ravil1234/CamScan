@@ -37,5 +37,6 @@
         <activity android:name=".Activities.IntroScreenSecondActivity" />
         <activity android:name=".Activities.PdfPreviewActivity" />
         <activity android:name=".Activities.SingleCamActivity" />
+        <activity android:name=".Activities.QRCodeScanActivity" />
     </application>
 </manifest>

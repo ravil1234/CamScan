@@ -71,6 +71,7 @@ public class GridViewImages extends RecyclerView.Adapter<GridViewImages.ServiceV
             mImage = itemView.findViewById(R.id.pdf_image);
             mTitle = itemView.findViewById(R.id.date);
             checkBox=itemView.findViewById(R.id.checkbox);
+            checkBox.setClickable(false);
         }
     }
 }

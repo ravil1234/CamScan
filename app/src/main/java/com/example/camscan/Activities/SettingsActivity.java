@@ -5,18 +5,23 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.camscan.AdapterClass.FilterGridAdapter;
 import com.example.camscan.AdapterClass.GridViewImages;
 import com.example.camscan.ObjectClass.FilterObject;
@@ -32,6 +37,7 @@ public class SettingsActivity extends AppCompatActivity
     View bottom_view,filter_view;
     ImageView imageViewOne,imageViewTwo;
     TextView settings_name,textViewOne,textViewTwo,theme_name,activity_name,view_name;
+    public static TextView filter_name;
     RadioButton radioButtonOne,radioButtonTwo;
     RelativeLayout relativeLayoutOne,relativeLayoutTwo;
     SharedPreferences preferences;
@@ -50,9 +56,42 @@ public class SettingsActivity extends AppCompatActivity
         relativeLayoutView=findViewById(R.id.relative_view_activity);
         relativeLayoutFilter=findViewById(R.id.relative_filter);
         relativeLayoutName=findViewById(R.id.relative_doc_name);
+        theme_name=findViewById(R.id.theme_name);
+        view_name=findViewById(R.id.view_name);
+        activity_name=findViewById(R.id.activity_name);
+        filter_name=findViewById(R.id.filter_name);
+        set_filter();
+        if(preferences.getInt("myview",0)==1)
+            view_name.setText("Grid View");
+          else
+            view_name.setText("List View");
+        if(preferences.getInt("myactivity",0)==1)
+            activity_name.setText("Home Screen");
+        else
+            activity_name.setText("Camera Screen");
+
+        if(preferences.getInt("mytheme",0)==1)
+            theme_name.setText("Dark Mode");
+        else
+            theme_name.setText("Light Mode");
         show_bottom_sheet();
         set_filter_bottom_sheet();
         relative_ClickListener();
+    }
+    public void  set_filter()
+    {
+     if(preferences.getInt("myfilter",0)==0)
+         filter_name.setText("Original");
+     else if(preferences.getInt("myfilter",0)==1)
+            filter_name.setText("Luminous");
+     else if(preferences.getInt("myfilter",0)==2)
+            filter_name.setText("Corrected");
+     else if(preferences.getInt("myfilter",0)==3)
+         filter_name.setText("GrayScale");
+     else if(preferences.getInt("myfilter",0)==4)
+         filter_name.setText("B/W");
+     else if(preferences.getInt("myfilter",0)==5)
+         filter_name.setText("Inverted");
     }
     private  void set_filter_bottom_sheet()
     {
@@ -72,13 +111,14 @@ public class SettingsActivity extends AppCompatActivity
                filter_dialog.dismiss();
             }
         });
-       List<FilterObject> filter_list=new ArrayList<>();
-       filter_list.add(new FilterObject(R.drawable.original,"Original"));
+        List<FilterObject> filter_list=new ArrayList<>();
+        filter_list.add(new FilterObject(R.drawable.original,"Original"));
         filter_list.add(new FilterObject(R.drawable.luminous,"Luminous"));
         filter_list.add(new FilterObject(R.drawable.correction,"Corrected"));
         filter_list.add(new FilterObject(R.drawable.grayscale,"GrayScale"));
         filter_list.add(new FilterObject(R.drawable.b_w,"B/W"));
         filter_list.add(new FilterObject(R.drawable.invert,"Inverted"));
+
         GridLayoutManager mGridLayoutManager = new GridLayoutManager(SettingsActivity.this, 3);
         filter_recycler_view.setLayoutManager(mGridLayoutManager);
         FilterGridAdapter myAdapter=new FilterGridAdapter(SettingsActivity.this,filter_list,
@@ -157,122 +197,13 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void onClick(View view)
             {
-             show_bottom_name();
-            }
-        });
-    }
-    public  void show_bottom_theme()
-    {
-      settings_name.setText("App Theme");
-      textViewOne.setText("Dark Theme");
-      textViewTwo.setText("Light Theme");
-      imageViewOne.setImageResource(R.drawable.dark_theme);
-      imageViewTwo.setImageResource(R.drawable.light_theme);
-      radioButtonOne.setChecked(false);
-      radioButtonTwo.setChecked(false);
-      if(preferences.getInt("mytheme",0)==1)
-          radioButtonOne.setChecked(true);
-      else
-          radioButtonTwo.setChecked(true);
-      bottom_dialog.show();
-        relativeLayoutOne.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                radioButtonOne.setChecked(true);
-                radioButtonTwo.setChecked(false);
-                preferences.edit().putInt("mytheme",1).apply();
-            }
-        });
-        relativeLayoutTwo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                radioButtonOne.setChecked(false);
-                radioButtonTwo.setChecked(true);
-                preferences.edit().putInt("mytheme",2).apply();
-            }
-        });
-    }
-    public  void show_bottom_activity()
-    {
-        settings_name.setText("Default Activity");
-        textViewOne.setText("Home Activity");
-        textViewTwo.setText("Camera Activity");
-        imageViewOne.setImageResource(R.drawable.dark_theme);
-        imageViewTwo.setImageResource(R.drawable.light_theme);
-        radioButtonOne.setChecked(false);
-        radioButtonTwo.setChecked(false);
-        if(preferences.getInt("myactivity",0)==1)
-            radioButtonOne.setChecked(true);
-        else
-            radioButtonTwo.setChecked(true);
-        bottom_dialog.show();
-
-        relativeLayoutOne.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                radioButtonOne.setChecked(true);
-                radioButtonTwo.setChecked(false);
-                preferences.edit().putInt("myactivity",1).apply();
-            }
-        });
-        relativeLayoutTwo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                radioButtonOne.setChecked(false);
-                radioButtonTwo.setChecked(true);
-                preferences.edit().putInt("myactivity",2).apply();
-            }
-        });
-    }
-    public  void show_bottom_view()
-    {
-        settings_name.setText("View Document As");
-        textViewOne.setText("List View");
-        textViewTwo.setText("Grid View");
-        imageViewOne.setImageResource(R.drawable.dark_theme);
-        imageViewTwo.setImageResource(R.drawable.light_theme);
-        radioButtonOne.setChecked(false);
-        radioButtonTwo.setChecked(false);
-        if(preferences.getInt("myview",0)==1)
-            radioButtonOne.setChecked(true);
-        else
-            radioButtonTwo.setChecked(true);
-        bottom_dialog.show();
-        bottom_dialog.show();
-        relativeLayoutOne.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                radioButtonOne.setChecked(true);
-                radioButtonTwo.setChecked(false);
-                preferences.edit().putInt("myview",1).apply();
-            }
-        });
-        relativeLayoutTwo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                radioButtonOne.setChecked(false);
-                radioButtonTwo.setChecked(true);
-                preferences.edit().putInt("myview",2).apply();
+             set_doc_name();
             }
         });
     }
     public  void show_bottom_filter()
     {
        filter_dialog.show();
-    }
-    public  void show_bottom_pdf()
-    {
-
-    }
-    public  void show_bottom_name()
-    {
-
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -317,10 +248,12 @@ public class SettingsActivity extends AppCompatActivity
                 if(portBtn.isChecked())
                 {
                     radio=1;
+                    activity_name.setText("Home Screen");
 
                 }else
                     {
                     radio=2;
+                        activity_name.setText("Camera Screen");
                 }
                 preferences.edit().putInt("myactivity",radio).apply();
                 d.dismiss();
@@ -356,9 +289,11 @@ public class SettingsActivity extends AppCompatActivity
                 if(portBtn.isChecked())
                 {
                     radio=1;
+                    view_name.setText("Grid View");
 
                 }else
                 {
+                    view_name.setText("List View");
                     radio=2;
                 }
                 preferences.edit().putInt("myview",radio).apply();
@@ -389,20 +324,66 @@ public class SettingsActivity extends AppCompatActivity
         AlertDialog d=builder.create();
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 int radio;
                 if(portBtn.isChecked())
                 {
                     radio=1;
+                    theme_name.setText("Dark Mode");
 
-                }else
+                }
+                else
                 {
                     radio=2;
+                    theme_name.setText("Light Mode");
                 }
                 preferences.edit().putInt("mytheme",radio).apply();
                 d.dismiss();
             }
         });
         d.show();
+    }
+    public void set_doc_name()
+    {
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("Set New Document Name");
+        View v= LayoutInflater.from(this).inflate(R.layout.fragment_rename,null);
+        builder.setView(v);
+        EditText newNameView=v.findViewById(R.id.rename_fragment_eview);
+        newNameView.setSelectAllOnFocus(true);
+        //newNameView.setText(currentDoc1.getDocName());
+        newNameView.setText(preferences.getString("mydocname",""));
+        newNameView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    if(motionEvent.getRawX() >= (newNameView.getRight() - newNameView.getCompoundDrawables()[2].getBounds().width())) {
+                        // your action here
+                        newNameView.setText("");
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String newPass=newNameView.getText().toString();
+                if(!newPass.equals(""))
+                {
+                    preferences.edit().putString("mydocname",newPass).apply();
+                    Toast.makeText(SettingsActivity.this,"Document Name is set", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(SettingsActivity.this, "Document Name can't be null", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).setNegativeButton("Cancel",null);
+
+        builder.create().show();
     }
 }

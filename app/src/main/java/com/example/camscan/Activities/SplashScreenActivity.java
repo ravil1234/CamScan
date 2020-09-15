@@ -15,19 +15,30 @@ public class SplashScreenActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spalsh_screen);
         preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
+        if(!preferences.contains("mydocname"))
+            preferences.edit().putString("mydocname","NewDocument").apply();
         if(!preferences.contains("mytheme"))
         {
             preferences.edit().putInt("mytheme",1).putInt("myactivity",1).putInt("myview",1).
                     putInt("myfilter",0).apply();
+            preferences.edit().putString("mydocname","NewDocument").apply();
         }
         handler=new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run()
             {
-                 Intent i=new Intent(SplashScreenActivity.this,IntroScreenFirstActivity.class);
-                 startActivity(i);
-                 finish();
+                if(!preferences.contains("myintro"))
+                {
+                    Intent i = new Intent(SplashScreenActivity.this, IntroScreenFirstActivity.class);
+                    startActivity(i);
+                    finish();
+                }
+                else
+                {
+                    Intent i = new Intent(SplashScreenActivity.this, HomeScreenActivity.class);
+                    startActivity(i);
+                }
             }
         },1500);
     }

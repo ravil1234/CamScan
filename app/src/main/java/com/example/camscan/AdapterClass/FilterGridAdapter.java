@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.camscan.Activities.SettingsActivity;
 import com.example.camscan.ObjectClass.FilterObject;
 import com.example.camscan.R;
 import java.util.List;
@@ -56,6 +58,7 @@ public class FilterGridAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
                 prev_holder.mcardView.setCardBackgroundColor(Color.parseColor("#ffffff"));
                 holder.mcardView.setCardBackgroundColor(Color.parseColor("#273696FF"));
                 preferences.edit().putInt("myfilter",position).apply();
+                SettingsActivity.filter_name.setText(serviceObject.getFilter_name());
                 selected_position=position;
                 prev_holder=holder;
             }

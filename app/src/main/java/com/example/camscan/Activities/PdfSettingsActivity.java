@@ -173,7 +173,8 @@ public class PdfSettingsActivity extends AppCompatActivity {
         pref.apply();
     }
 
-    public void onPassClick(View view){
+    public void onPassClick(View view)
+    {
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("Set New Password");
         View v= LayoutInflater.from(this).inflate(R.layout.fragment_rename,null);

@@ -97,7 +97,7 @@ public class CameraXActivity extends AppCompatActivity {
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
     private int flashMode;
     PreviewView mPreviewView;
-    View captureImage,view;
+    View captureImage,view,batch_mode_true,single_mode_true;
     TextView tick_img;
     MotionEvent motionEvent;
     MyDocument savedDoc;
@@ -110,9 +110,6 @@ public class CameraXActivity extends AppCompatActivity {
     ArrayList<MyPicture > myPictureList;
     SharedPreferences preferences;
     String currDocName;
-    CodeScanner mCodeScanner;
-    CodeScannerView scannerView;
-
     int picCount=0;
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -131,6 +128,8 @@ public class CameraXActivity extends AppCompatActivity {
         gallery = findViewById(R.id.gallery);
         single_mode_img=findViewById(R.id.single_mode);
         batch_mode_img=findViewById(R.id.batch_mode);
+        batch_mode_true=findViewById(R.id.batch_mode_true);
+        single_mode_true=findViewById(R.id.single_mode_true);
         tick_img=findViewById(R.id.tick_img);
         last_img=findViewById(R.id.last_img);
         show_grid_view=findViewById(R.id.show_hide_grid);
@@ -141,6 +140,7 @@ public class CameraXActivity extends AppCompatActivity {
         flashMode = ImageCapture.FLASH_MODE_AUTO;
         myPictureList=new ArrayList<>();
         single_mode=true;
+        single_mode_true.setVisibility(View.VISIBLE);
         last_img.setVisibility(View.INVISIBLE);
         if(preferences.contains("flash_mode"))
         {
@@ -186,10 +186,8 @@ public class CameraXActivity extends AppCompatActivity {
             @Override
             public void onClick(View view)
             {
-                //
-                relativeLayoutCameraX.setVisibility(View.GONE);
-                relativeLayoutScanQr.setVisibility(View.VISIBLE);
-
+                Intent i=new Intent(CameraXActivity.this,QRCodeScanActivity.class);
+                startActivity(i);
             }
         });
         gallery.setOnClickListener(new View.OnClickListener() {
@@ -205,8 +203,11 @@ public class CameraXActivity extends AppCompatActivity {
         tick_img.setVisibility(View.INVISIBLE);
         batch_mode_img.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 single_mode=false;
+                single_mode_true.setVisibility(View.GONE);
+                batch_mode_true.setVisibility(View.VISIBLE);
                 Toast.makeText(CameraXActivity.this,"Batch Mode On",Toast.LENGTH_LONG).show();
             }
         });
@@ -215,6 +216,8 @@ public class CameraXActivity extends AppCompatActivity {
             public void onClick(View view)
             {
                 single_mode=true;
+                single_mode_true.setVisibility(View.VISIBLE);
+                batch_mode_true.setVisibility(View.GONE);
                 Toast.makeText(CameraXActivity.this,"Single Mode On",Toast.LENGTH_LONG).show();
             }
         });
@@ -223,7 +226,6 @@ public class CameraXActivity extends AppCompatActivity {
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
-        scan_qr_code();
         String from=getIntent().getStringExtra("from");
         if(from!=null)
         {
@@ -235,6 +237,7 @@ public class CameraXActivity extends AppCompatActivity {
             }
         }
     }
+
     private void showPopupMenu(View anchor, boolean isWithIcons, int style) {
         //init the wrapper with style
         Context wrapper = new ContextThemeWrapper(this, style);
@@ -286,6 +289,12 @@ public class CameraXActivity extends AppCompatActivity {
         });
         popup.show();
     }
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        startCamera();
+    }
     private void startCamera() {
 
         final ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -298,8 +307,6 @@ public class CameraXActivity extends AppCompatActivity {
                     ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                     bindPreview(cameraProvider);
                 } catch (ExecutionException | InterruptedException e) {
-                    // No errors need to be handled for this Future.
-                    // This should never be reached.
                 }
             }
         }, ContextCompat.getMainExecutor(this));
@@ -575,119 +582,5 @@ public class CameraXActivity extends AppCompatActivity {
 
             }
         }
-    }
-    public void scan_qr_code()
-    {
-        scannerView = findViewById(R.id.scanner_view);
-        mCodeScanner = new CodeScanner(this, scannerView);
-        mCodeScanner.setCamera(CodeScanner.CAMERA_BACK );// or CAMERA_FRONT or specific camera id
-        mCodeScanner.setFormats(CodeScanner.ALL_FORMATS);  // list of type BarcodeFormat,
-        mCodeScanner.setAutoFocusEnabled(true);
-        mCodeScanner.setScanMode(ScanMode.SINGLE );
-        mCodeScanner.setTouchFocusEnabled(true);
-        mCodeScanner.setFlashEnabled(true);
-        mCodeScanner.setDecodeCallback(new DecodeCallback() {
-            @Override
-            public void onDecoded(@NonNull final Result result) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String message = "result :\n" + result.getText();
-                        Log.d("message",message);
-                        String url=result.getText();
-
-                        if(isValid(url))
-                        {
-                           show_hyperlink(url);
-                        }
-                        else
-                        {
-                            show_text(url);
-                        }
-//                        try
-//                        {
-//                            Intent i=new Intent("android.intent.action.MAIN");
-//                            i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
-//                            i.addCategory("android.intent.category.LAUNCHER");
-//                            i.setData(Uri.parse(url));
-//                            startActivity(i);
-//                        }
-//                        catch(ActivityNotFoundException e)
-//                        {
-//                            Intent i=new Intent(Intent.ACTION_VIEW,Uri.parse(url));
-//                            startActivity(i);
-//                        }
-                    }
-                });
-            }
-        });
-
-        if (allPermissionsGranted())
-        {
-            mCodeScanner.startPreview();
-        }
-        else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
-        }
-    }
-    public void show_hyperlink(String result)
-    {
-        androidx.appcompat.app.AlertDialog.Builder builder=new
-                androidx.appcompat.app.AlertDialog.Builder(CameraXActivity.this);
-        View dialog= LayoutInflater.from(CameraXActivity.this).inflate(R.layout.dialog_box_hyperlink,null);
-        builder.setView(dialog);
-        TextView hyperlink=dialog.findViewById(R.id.hyperlink);
-        ProgressBar progressBar=dialog.findViewById(R.id.progress_bar);
-        hyperlink.setVisibility(View.VISIBLE);
-        hyperlink.setMovementMethod(LinkMovementMethod.getInstance());
-        hyperlink.setText(result);
-        androidx.appcompat.app.AlertDialog d=builder.create();
-        d.show();
-        Handler handler=new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run()
-            {
-                progressBar.setVisibility(View.GONE);
-            }
-        },1000);
-        mCodeScanner.startPreview();
-    }
-    public void show_text(String result)
-    {
-        androidx.appcompat.app.AlertDialog.Builder builder=new
-                androidx.appcompat.app.AlertDialog.Builder(CameraXActivity.this);
-        View dialog= LayoutInflater.from(CameraXActivity.this).inflate(R.layout.dialog_box_hyperlink,null);
-        builder.setView(dialog);
-        TextView text_result=dialog.findViewById(R.id.text_result);
-        ProgressBar progressBar=dialog.findViewById(R.id.progress_bar);
-        text_result.setVisibility(View.VISIBLE);
-        text_result.setText(result);
-        androidx.appcompat.app.AlertDialog d=builder.create();
-        d.show();
-        Handler handler=new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run()
-            {
-                progressBar.setVisibility(View.GONE);
-            }
-        },1000);
-        mCodeScanner.startPreview();
-    }
-    public void gotoCamera(View view)
-    {
-        relativeLayoutScanQr.setVisibility(View.GONE);
-        relativeLayoutCameraX.setVisibility(View.VISIBLE);
-    }
-    private boolean isValid(String urlString) {
-        try {
-            URL url = new URL(urlString);
-            return URLUtil.isValidUrl(String.valueOf(url))&&Patterns.WEB_URL.matcher(String.valueOf(url)).matches();
-        } catch (MalformedURLException e)
-        {
-
-        }
-        return false;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.camscan.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -18,9 +19,13 @@ public class IntroScreenSecondActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         next=findViewById(R.id.next_btn);
         skip=findViewById(R.id.skip);
-        next.setOnClickListener(new View.OnClickListener() {
+        SharedPreferences preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
+        next.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
+                preferences.edit().putString("myintro","true").apply();
                 Intent i=new Intent(IntroScreenSecondActivity.this,HomeScreenActivity.class);
                 startActivity(i);
                 finish();
@@ -28,7 +33,9 @@ public class IntroScreenSecondActivity extends AppCompatActivity {
         });
         skip.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
+                preferences.edit().putString("myintro","true").apply();
                 Intent i=new Intent(IntroScreenSecondActivity.this,HomeScreenActivity.class);
                 startActivity(i);
                 finish();

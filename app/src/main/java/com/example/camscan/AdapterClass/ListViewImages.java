@@ -41,7 +41,9 @@ public class ListViewImages extends RecyclerView.Adapter<ListViewHolder> {
             holder.checkBox.setChecked(true);
         else
             holder.checkBox.setChecked(false);
-        holder.mTitle.setText(list.getImage_date());
+//        holder.mTitle.setText(list.getImage_date());
+        holder.mTitle.setText(list.getDid()+" ");
+
       //  Picasso.with(mContext).load(list.getImage_url()).into(holder.mImage);
         holder.itemView.setOnClickListener(mListener);
 //        holder.checkBox.setOnClickListener(new View.OnClickListener() {
@@ -71,5 +73,6 @@ class ListViewHolder extends RecyclerView.ViewHolder {
         mImage = itemView.findViewById(R.id.pdf_image);
         mTitle = itemView.findViewById(R.id.date_pdf);
         checkBox=itemView.findViewById(R.id.checkbox);
+        checkBox.setClickable(false);
     }
 }

@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 public class HomeScreenActivity extends AppCompatActivity {
@@ -683,7 +684,9 @@ public class HomeScreenActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        d.dismiss();
                         startActivity(intent);
+
                     }
                 });
             }
@@ -750,6 +753,20 @@ public class HomeScreenActivity extends AppCompatActivity {
                         v.setProgress(100);
                         d.dismiss();
                         Toast.makeText(HomeScreenActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+                        for(Integer i:dids)
+                        {
+                            for(GridViewImagesList j:gridViewImagesListList)
+                            {
+                                int did=j.getDid();
+                                if(i==did)
+                                {
+                                    gridViewImagesListList.remove(j);
+                                    list_sort_by_name.remove(j);
+                                    break;
+                                }
+                            }
+                            //REMOVE ITEM FROM LIST WHERE did is equal to given did
+                        }
                         myAdapter.notifyDataSetChanged();
                         myAdapter1.notifyDataSetChanged();
                     }
@@ -787,6 +804,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                             pos+=1;
                             p.setEditedName(p.getEditedName().replace(currDoc.getDname(),target.getDname()));
                             p.setDid(targetDid);
+                            db.myPicDao().updatePic(p);
                         }
                         //all pics of curr is moved to target
                         db.myDocumentDao().deleteDoc(currDoc);
@@ -810,6 +828,21 @@ public class HomeScreenActivity extends AppCompatActivity {
                         v.setProgress(100);
                         d.dismiss();
                         Toast.makeText(HomeScreenActivity.this, "Documents Merged", Toast.LENGTH_SHORT).show();
+                        for(Integer i:dids){
+                            if(i!=targetDid)
+                            {
+                                    for(GridViewImagesList j:gridViewImagesListList)
+                                    {
+                                        int did=j.getDid();
+                                        if(i==did)
+                                        {
+                                            gridViewImagesListList.remove(j);
+                                            list_sort_by_name.remove(j);
+                                            break;
+                                        }
+                                    }
+                            }
+                        }
                         myAdapter1.notifyDataSetChanged();
                         myAdapter.notifyDataSetChanged();
 
@@ -817,6 +850,5 @@ public class HomeScreenActivity extends AppCompatActivity {
                 });
             }
         }).start();
-
     }
 }
