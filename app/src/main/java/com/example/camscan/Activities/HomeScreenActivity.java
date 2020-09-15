@@ -230,9 +230,11 @@ public class HomeScreenActivity extends AppCompatActivity {
 //                            Toast.LENGTH_LONG).show();
                     GridViewImagesList list = gridViewImagesListList.get(position);
                     ///  list.setCheckbox_visibility(true);
+                    selected_position.add(list.getDid());
                     list.setIschecked(true);
                     gridViewImagesListList.set(position, list);
-                    for (int i = 0; i < gridViewImagesListList.size(); i++) {
+                    for (int i = 0; i < gridViewImagesListList.size(); i++)
+                    {
                         list = gridViewImagesListList.get(i);
                         list.setCheckbox_visibility(true);
                         gridViewImagesListList.set(i, list);
@@ -767,8 +769,10 @@ public class HomeScreenActivity extends AppCompatActivity {
                             }
                             //REMOVE ITEM FROM LIST WHERE did is equal to given did
                         }
+
                         myAdapter.notifyDataSetChanged();
                         myAdapter1.notifyDataSetChanged();
+                        hide_action_bar();
                     }
                 });
 
@@ -828,7 +832,8 @@ public class HomeScreenActivity extends AppCompatActivity {
                         v.setProgress(100);
                         d.dismiss();
                         Toast.makeText(HomeScreenActivity.this, "Documents Merged", Toast.LENGTH_SHORT).show();
-                        for(Integer i:dids){
+                        for(Integer i:dids)
+                        {
                             if(i!=targetDid)
                             {
                                     for(GridViewImagesList j:gridViewImagesListList)
@@ -845,7 +850,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                         }
                         myAdapter1.notifyDataSetChanged();
                         myAdapter.notifyDataSetChanged();
-
+                        hide_action_bar();
                     }
                 });
             }

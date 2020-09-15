@@ -12,7 +12,7 @@ import android.webkit.URLUtil;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.content.Intent;
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
@@ -141,6 +141,16 @@ public class QRCodeScanActivity  extends AppCompatActivity
     }
     public void gotoCamera(View view)
     {
+       Intent intent=new Intent(QRCodeScanActivity.this,CameraXActivity.class);
+       startActivity(intent);
+       finish();
+
+    }
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent=new Intent(QRCodeScanActivity.this,CameraXActivity.class);
+        startActivity(intent);
         finish();
     }
     private boolean isValid(String urlString) {

@@ -188,6 +188,7 @@ public class CameraXActivity extends AppCompatActivity {
             {
                 Intent i=new Intent(CameraXActivity.this,QRCodeScanActivity.class);
                 startActivity(i);
+                finish();
             }
         });
         gallery.setOnClickListener(new View.OnClickListener() {
@@ -221,11 +222,7 @@ public class CameraXActivity extends AppCompatActivity {
                 Toast.makeText(CameraXActivity.this,"Single Mode On",Toast.LENGTH_LONG).show();
             }
         });
-        if (allPermissionsGranted()) {
-            startCamera(); //start camera if permission has been granted by user
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
-        }
+
         String from=getIntent().getStringExtra("from");
         if(from!=null)
         {
@@ -235,6 +232,14 @@ public class CameraXActivity extends AppCompatActivity {
                 String doc=getIntent().getStringExtra("MyDocument");
                 savedDoc=UtilityClass.getDocFromJson(doc);
             }
+        }
+        if (allPermissionsGranted())
+        {
+            startCamera(); //start camera if permission has been granted by user
+        }
+        else
+            {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
     }
 
@@ -293,7 +298,6 @@ public class CameraXActivity extends AppCompatActivity {
     protected void onResume()
     {
         super.onResume();
-        startCamera();
     }
     private void startCamera() {
 
@@ -342,7 +346,6 @@ public class CameraXActivity extends AppCompatActivity {
 //                .setTargetAspectRatio(screenAspectRatio)
 //                .setTargetResolution(screenSize)
                 .build();
-
         preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageAnalysis, imageCapture);
         captureImage.setOnClickListener(v -> {
