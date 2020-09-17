@@ -97,7 +97,7 @@
         app:headerLayout="@layout/nav_header"
         android:id="@+id/in_doc_nav"
         android:fitsSystemWindows="true"
-        android:background="#DADADA"
+        android:background="#EEEDED"
         android:layout_gravity="start"
         >
 
