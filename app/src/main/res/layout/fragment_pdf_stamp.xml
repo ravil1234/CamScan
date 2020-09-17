@@ -10,7 +10,7 @@
 
         android:layout_margin="50dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/stamp"
+        android:src="@drawable/stamp_default"
         />
     <RadioGroup
         android:layout_width="match_parent"

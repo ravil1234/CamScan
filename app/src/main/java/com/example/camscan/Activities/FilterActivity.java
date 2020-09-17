@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -99,7 +100,8 @@ public class FilterActivity extends AppCompatActivity {
             image.setImageBitmap(cropped);
             selected=cropped;
             //default Filter
-            applyFlatCorrection();
+            //applyFlatCorrection();
+            setDefaultFilter();
         }
 
 
@@ -287,6 +289,40 @@ public class FilterActivity extends AppCompatActivity {
        // Log.e(TAG, "getPicAndDocFromIntent: "+currDoc.getDid() );
     }
 
+    private int getDefaultFilter(){
+        SharedPreferences pref=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
+        return pref.getInt("myfilter",0);
+    }
+    private void setDefaultFilter(){
+        switch(getDefaultFilter()){
+            case 0:{
+                pbar.setVisibility(View.INVISIBLE);
+                image.setImageBitmap(cropped);
+                selected=cropped;
+                break;
+            }
+            case 1:{
+                applyExposure();
+                break;
+            }
+            case 2:{
+                applyFlatCorrection();
+                break;
+            }
+            case 3:{
+                applyGrayScale();
+                break;
+            }
+            case 4:{
+                applyBnW();
+                break;
+            }
+            case 5:{
+                applyInvert();
+                break;
+            }
+        }
+    }
 
 
 

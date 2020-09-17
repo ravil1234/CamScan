@@ -71,7 +71,15 @@ public class FlatCorrection {
 
         meanS.destroy();
         float [] mean={sumArray[0],sumArray2[0],sumArray3[0]};
-        String m="";
+        float avg=(sumArray[0]+sumArray2[0]+sumArray3[0])/3;
+        if(Math.abs(sumArray[0]-sumArray2[0])>5) {
+            sumArray[0]=sumArray2[0]-5;
+        }
+        if(Math.abs(sumArray2[0]-sumArray3[0])>5){
+            sumArray3[0]=sumArray2[0]+5;
+        }
+
+            String m="";
         boolean isBlack=true;
         int c=0;
         for (int i=0;i<3;i++){

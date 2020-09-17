@@ -15,6 +15,7 @@
         android:layout_height="24dp"
         android:src="@drawable/dot3"
         android:visibility="invisible"
+
         />
 
     <androidx.viewpager2.widget.ViewPager2
@@ -23,7 +24,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginBottom="24dp"
-
         />
 
 

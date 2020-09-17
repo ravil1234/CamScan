@@ -19,6 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.camscan.Activities.PdfPreviewActivity;
 import com.example.camscan.Activities.PdfSettingsActivity;
 import com.example.camscan.Callbacks.ItemMoveCallback;
 import com.example.camscan.Objects.MyPicture;
@@ -40,6 +41,8 @@ public class PdfPreviewAdapter extends RecyclerView.Adapter<PdfPreviewAdapter.My
     boolean orientation=true;       //PORTRAIT
     float ratio=0;
     int pageSize=-1;
+    int width=0;
+    int height=0;
  //   ArrayList<MyPicture> pics;
 
     public PdfPreviewAdapter(Context context,ArrayList<Uri> uris){
@@ -53,7 +56,7 @@ public class PdfPreviewAdapter extends RecyclerView.Adapter<PdfPreviewAdapter.My
 
     public void getDefaultSettings(){
         SharedPreferences pref=context.getSharedPreferences(UtilityClass.PDF_SETTING, Context.MODE_PRIVATE);
-        String uriString=pref.getString("PDF_STAMP_URI","android.resource://"+context.getPackageName()+"/drawable/"+R.drawable.stamp);
+        String uriString=pref.getString("PDF_STAMP_URI","android.resource://"+context.getPackageName()+"/drawable/"+R.drawable.stamp_default);
         pageSize =pref.getInt("PDF_PAGE_SIZE",1);
        // Log.e("Page", "getDefaultSettings: "+pageSize );
         switch (pageSize){
@@ -167,10 +170,29 @@ public class PdfPreviewAdapter extends RecyclerView.Adapter<PdfPreviewAdapter.My
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Uri currUri=imgUris.get(position);
-        Bitmap img=BitmapFactory.decodeFile(currUri.getPath());
-        if(img!=null){
-            holder.img.setImageBitmap(img);
-        }
+        holder.img.setImageDrawable(context.getDrawable(R.drawable.low_op_back));
+        new Thread(new Runnable() {
+            @Override
+            public synchronized void run() {
+                Bitmap[] img=new Bitmap[1];
+                if(width!=0 && height!=0){
+                    img[0]=UtilityClass.populateImage(context,currUri,false,width,height);
+                }else{
+                    img[0]=BitmapFactory.decodeFile(currUri.getPath());
+                }
+
+                if(img[0]!=null){
+                    ((PdfPreviewActivity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            holder.img.setImageBitmap(img[0]);
+                        }
+                    });
+
+                }
+            }
+        }).start();
+
         if(stamp!=null){
             holder.stampImg.setImageBitmap(stamp);
         }else{
@@ -184,5 +206,8 @@ public class PdfPreviewAdapter extends RecyclerView.Adapter<PdfPreviewAdapter.My
         return imgUris.size();
     }
 
-
+    public void setDimens(int w,int h){
+        width=w;
+        height=h;
+    }
 }

@@ -187,6 +187,17 @@ public class MyDocumentActivity extends AppCompatActivity {
                 if(lst!=null){
                     list.addAll(lst);
                 }
+                int flag=0;
+                for(MyPicture p:lst){
+                    if(p.getEditedUri()==null){
+                        flag=1;
+                        break;
+                    }
+                }
+                if(flag==0){
+                    //no editing remaining
+                    isLoading=false;
+                }
                 new Thread(new Runnable() {
                     @Override
                     public  void run() {
@@ -1234,7 +1245,9 @@ public class MyDocumentActivity extends AppCompatActivity {
 
     //BITMAP OPS
     private int getDefaultBitmapFilter(){
-        return 2;
+        SharedPreferences pref=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
+        return pref.getInt("myfilter",0);
+
     }
     private Bitmap getFilteredBitmap(Bitmap bitmap){
         Bitmap result=null;
@@ -1434,17 +1447,26 @@ public class MyDocumentActivity extends AppCompatActivity {
     private void shareOpen(){
         if(!isShareOpen){
             isShareOpen=true;
+
+
+            Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.my_doc_anim_slide_up);
             shareWindow.setVisibility(View.VISIBLE);
+            shareWindow.startAnimation(slideUp);
 
         }
     }
     private void shareClose(){
         if(isShareOpen){
             isShareOpen=false;
+            Animation slideDown=AnimationUtils.loadAnimation(this,R.anim.my_doc_anim_slide_down);
+            shareWindow.startAnimation(slideDown);
             shareWindow.setVisibility(View.GONE);
             LinearLayout long_box=shareWindow.findViewById(R.id.in_doc_share_frag_long);
             long_box.setVisibility(View.VISIBLE);
         }
+    }
+    public void shareClose(View view){
+        shareClose();
     }
 
     public void shareAsPdf(View view){

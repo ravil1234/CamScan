@@ -85,7 +85,7 @@ public class MyCustomPdf {
         ORIENTATION=pref.getInt("PDF_PAGE_ORIENTATION",0);
         isBorderAdded=pref.getBoolean("PDF_PAGE_BORDER",false);
         PASSWORD=pref.getString("PDF_PAGE_PASSWORD","admin");
-        stampUri=pref.getString("PDF_STAMP_URI","android.resource://"+context.getPackageName()+"/"+R.drawable.stamp);
+        stampUri=pref.getString("PDF_STAMP_URI","android.resource://"+context.getPackageName()+"/"+R.drawable.stamp_default);
     }
 
     public Uri savePdf2(String name, String pass, MyDocumentActivity.pdfProgress mp){
@@ -185,7 +185,7 @@ public class MyCustomPdf {
             try {
                 Bitmap st=BitmapFactory.decodeStream(context.getContentResolver().openInputStream(Uri.parse(stampUri)));
                 //
-                if(st.getWidth()>200){
+                if(st.getWidth()>200 || st.getHeight()>50){
                     st=UtilityClass.resizeImage(st,200,50);
                 }
                 st.compress(Bitmap.CompressFormat.JPEG,100,bos);

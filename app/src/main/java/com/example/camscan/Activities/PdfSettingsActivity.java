@@ -94,7 +94,7 @@ public class PdfSettingsActivity extends AppCompatActivity {
         orientInt=pref.getInt("PDF_PAGE_ORIENTATION",0);
         isBorder=pref.getBoolean("PDF_PAGE_BORDER",false);
         passString=pref.getString("PDF_PAGE_PASSWORD","admin");
-        uriString=pref.getString("PDF_STAMP_URI","android.resource://"+getPackageName()+"/drawable/"+R.drawable.stamp);
+        uriString=pref.getString("PDF_STAMP_URI","android.resource://"+getPackageName()+"/drawable/"+R.drawable.stamp_default);
 
         if(isBorder){
             light.setImageDrawable(getResources().getDrawable(R.drawable.border_on));
@@ -338,7 +338,7 @@ public class PdfSettingsActivity extends AppCompatActivity {
             imgForStamp.setImageBitmap(stamp);
             //.recycle();
         }
-        if(uriString.equals("android.resource://"+getPackageName()+"/drawable/"+R.drawable.stamp)){
+        if(uriString.equals("android.resource://"+getPackageName()+"/drawable/"+R.drawable.stamp_default)){
             def.setChecked(true);
         }else{
             gall.setChecked(true);
@@ -355,7 +355,7 @@ public class PdfSettingsActivity extends AppCompatActivity {
                     Bitmap stamp= null;
                     try {
                         stamp = BitmapFactory.decodeStream(PdfSettingsActivity.this.getContentResolver()
-                                .openInputStream(Uri.parse("android.resource://"+getPackageName()+"/"+R.drawable.stamp)));
+                                .openInputStream(Uri.parse("android.resource://"+getPackageName()+"/"+R.drawable.stamp_default)));
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
@@ -364,7 +364,7 @@ public class PdfSettingsActivity extends AppCompatActivity {
                        // stamp.recycle();
                     }
 
-                    setPageStamp("android.resource://"+getPackageName()+"/"+R.drawable.stamp);
+                    setPageStamp("android.resource://"+getPackageName()+"/"+R.drawable.stamp_default);
                 }
             }
         });
@@ -420,7 +420,7 @@ public class PdfSettingsActivity extends AppCompatActivity {
 
             }else{
                 Toast.makeText(PdfSettingsActivity.this, "FAILED", Toast.LENGTH_SHORT).show();
-                setPageStamp("android.resource://"+getPackageName()+"/"+R.drawable.stamp);
+                setPageStamp("android.resource://"+getPackageName()+"/"+R.drawable.stamp_default);
             }
         }
     }

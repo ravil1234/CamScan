@@ -36,11 +36,12 @@ import java.util.ArrayList;
 
 public class UtilityClass {
 
-    public static final String PDF_SETTING="CAM_SCAN_PDF_SETTINGS";
+    public static final String PDF_SETTING="E_SCAN_PDF_SETTINGS";
+    public static final String APP_SETTINGS_PREF="E_SCAN_APP_SETTINGS";
     public static final int IMPORT_REQ_CODE=101;
     public static final int RETAKE_REQ_CODE=102;
     public static final String lineSeparator="__";
-    public static final String appName="CamScan";
+    public static final String appName="E_Scan";
 
     public static Uri saveImage(Context context, Bitmap img, String name, boolean isOriginal){
         File dir;

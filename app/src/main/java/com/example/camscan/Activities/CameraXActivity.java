@@ -117,9 +117,15 @@ public class CameraXActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camerax);
         getSupportActionBar().hide();
-        preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
+        preferences=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
         long time=System.currentTimeMillis()%1000000;
-        currDocName=UtilityClass.appName+UtilityClass.lineSeparator+time;
+        String savedName=preferences.getString("mydocname",null);
+        if(savedName==null){
+            currDocName=UtilityClass.appName+UtilityClass.lineSeparator+time;
+        }else{
+            currDocName=savedName+UtilityClass.lineSeparator+time;
+        }
+
         relativeLayoutCameraX=findViewById(R.id.relative_layout_camerax);
         relativeLayoutScanQr=findViewById(R.id.relative_layout_scanqrcode);
         mPreviewView = findViewById(R.id.previewView);

@@ -3,18 +3,37 @@
    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffffff">
-
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:src="@drawable/back_icon"
+        />
     <TextView
         android:id="@+id/text"
         android:layout_marginTop="15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="QUICK SCAN"
+        android:text="E-SCAN"
         android:layout_centerInParent="true"
         android:textColor="#000000"
         android:textSize="@dimen/_26sdp"
         android:textStyle="bold"
-        android:fontFamily="@font/font_medium">
+        android:fontFamily="@font/font_medium"
+        android:layout_below="@id/icon"
+        >
     </TextView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:text="orgainisation.co.org"
+        android:textStyle="bold"
+        android:textAllCaps="true"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/_50sdp"
+        />
 </RelativeLayout>

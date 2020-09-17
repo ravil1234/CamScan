@@ -26,6 +26,7 @@ import com.example.camscan.AdapterClass.FilterGridAdapter;
 import com.example.camscan.AdapterClass.GridViewImages;
 import com.example.camscan.ObjectClass.FilterObject;
 import com.example.camscan.R;
+import com.example.camscan.UtilityClass;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class SettingsActivity extends AppCompatActivity
         getSupportActionBar().show();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Settings");
-        preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
+        preferences=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
         relativeLayoutTheme=findViewById(R.id.relative_theme);
         relativeLayoutPdf=findViewById(R.id.relative_pdf);
         relativeLayoutActivity=findViewById(R.id.relative_default_activity);

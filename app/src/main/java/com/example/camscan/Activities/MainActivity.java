@@ -3,6 +3,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -96,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         long time=System.currentTimeMillis()%1000000;
+        SharedPreferences pref=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
+
         currDocName=UtilityClass.appName+UtilityClass.lineSeparator+time;
 //        Intent intent=new Intent(this,MyDocumentActivity.class);
 //        startActivity(intent);
