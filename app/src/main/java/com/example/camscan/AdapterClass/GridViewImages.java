@@ -8,8 +8,10 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.camscan.ObjectClass.GridViewImagesList;
+import com.example.camscan.ObjectClass.RoundedCornersTransformation;
 import com.example.camscan.R;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.util.List;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,10 +19,13 @@ public class GridViewImages extends RecyclerView.Adapter<GridViewImages.ServiceV
 
     private Context mContext;
     private List<GridViewImagesList> gridViewImagesLists;
+
     View.OnClickListener mClickListener;
+    Transformation transformation;
     public GridViewImages (Context mContext, List<GridViewImagesList> serviceObjects, View.OnClickListener listener) {
         this.mContext = mContext;
         this.gridViewImagesLists = serviceObjects;
+        transformation=new RoundedCornersTransformation(12,0);
         mClickListener=listener;
     }
 
@@ -43,19 +48,14 @@ public class GridViewImages extends RecyclerView.Adapter<GridViewImages.ServiceV
             holder.checkBox.setChecked(true);
         else
             holder.checkBox.setChecked(false);
-        holder.mTitle.setText(list.getImage_date());
-     //   Picasso.with(mContext).load(list.getImage_url()).into(holder.mImage);
+        holder.file_name.setText(list.getName());
+        holder.doc_date_created.setText(list.getImage_date());
+        if(list.getPcount()<9)
+            holder.no_pages.setText("0"+list.getPcount());
+        else
+            holder.no_pages.setText(list.getPcount()+"");
+       Picasso.with(mContext).load(list.getImage_url()).into(holder.mImage);
         holder.itemView.setOnClickListener(mClickListener);
-//        holder.checkBox.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view)
-//            {
-//                if(holder.checkBox.isChecked())
-//                    list.setIschecked(false);
-//                else
-//                    list.setIschecked(true);
-//            }
-//        });
     }
     @Override
     public int getItemCount() {
@@ -64,13 +64,15 @@ public class GridViewImages extends RecyclerView.Adapter<GridViewImages.ServiceV
     public class ServiceViewHolder extends RecyclerView.ViewHolder {
 
         ImageView mImage;
-        TextView mTitle;
+        TextView doc_date_created,file_name,no_pages;
         CheckBox checkBox;
         public ServiceViewHolder(View itemView) {
             super(itemView);
             mImage = itemView.findViewById(R.id.pdf_image);
-            mTitle = itemView.findViewById(R.id.date);
+            doc_date_created = itemView.findViewById(R.id.date);
+            file_name = itemView.findViewById(R.id.pdf_name);
             checkBox=itemView.findViewById(R.id.checkbox);
+            no_pages=itemView.findViewById(R.id.no_pages);
             checkBox.setClickable(false);
         }
     }

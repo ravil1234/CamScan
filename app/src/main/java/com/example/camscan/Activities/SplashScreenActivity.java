@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import com.example.camscan.R;
+import com.example.camscan.UtilityClass;
+
 public class SplashScreenActivity extends Activity
 {
     Handler handler;
@@ -14,9 +16,7 @@ public class SplashScreenActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spalsh_screen);
-        preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
-        if(!preferences.contains("mydocname"))
-            preferences.edit().putString("mydocname","NewDocument").apply();
+        preferences=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
         if(!preferences.contains("mytheme"))
         {
             preferences.edit().putInt("mytheme",1).putInt("myactivity",1).putInt("myview",1).

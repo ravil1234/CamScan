@@ -22,7 +22,8 @@
             android:layout_marginLeft="16dp"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:background="#efefef">
+            android:scaleType="fitXY"
+            android:adjustViewBounds="true">
         </ImageView>
         <TextView
             android:id="@+id/name_pdf"
@@ -30,24 +31,39 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="5dp"
             android:text="New Folder 11201021"
             android:textColor="#000000"
             android:fontFamily="@font/font_regular"
-            android:textSize="14sp">
+            android:textSize="@dimen/_12sdp">
         </TextView>
         <TextView
             android:id="@+id/date_pdf"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="3dp"
             android:layout_below="@id/name_pdf"
             android:layout_toRightOf="@id/image_pdf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:text=" 15-10-2020"
+            android:text="15-10-2020"
             android:textColor="#000000"
             android:fontFamily="@font/font_regular"
-            android:textSize="14sp">
+            android:textSize="@dimen/_12sdp">
+        </TextView>
+        <TextView
+            android:id="@+id/no_pages"
+            android:layout_marginTop="6dp"
+            android:layout_below="@id/date_pdf"
+            android:layout_toRightOf="@id/image_pdf"
+            android:background="@drawable/rectangular_background"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:text="05"
+            android:textColor="#ffffff"
+            android:fontFamily="@font/font_regular"
+            android:textSize="@dimen/_9sdp">
         </TextView>
         <View
             android:layout_marginRight="28dp"
@@ -55,8 +71,8 @@
             android:layout_marginTop="15dp"
             android:layout_below="@id/image_pdf"
             android:layout_width="match_parent"
-            android:layout_height="1.5dp"
-            android:background="#f8f8f8">
+            android:layout_height="1dp"
+            android:background="#E8E8E8">
 
         </View>
     </RelativeLayout>

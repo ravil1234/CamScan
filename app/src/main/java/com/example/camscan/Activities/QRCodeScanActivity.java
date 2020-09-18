@@ -151,6 +151,7 @@ public class QRCodeScanActivity  extends AppCompatActivity
     public void onBackPressed()
     {
         mCodeScanner.stopPreview();
+        mCodeScanner.releaseResources();
         Intent intent=new Intent(QRCodeScanActivity.this,CameraXActivity.class);
         startActivity(intent);
         finish();

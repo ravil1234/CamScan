@@ -19,6 +19,7 @@ import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
 import com.budiyev.android.codescanner.ScanMode;
+import com.example.camscan.ObjectClass.RoundedCornersTransformation;
 import com.example.camscan.Objects.MyDocument;
 import com.example.camscan.Objects.MyPicture;
 import com.example.camscan.R;
@@ -72,6 +73,8 @@ import com.example.camscan.UtilityClass;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.zxing.Result;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -98,7 +101,7 @@ public class CameraXActivity extends AppCompatActivity {
     private int flashMode;
     PreviewView mPreviewView;
     View captureImage,view,batch_mode_true,single_mode_true;
-    TextView tick_img;
+    TextView tick_img,no_pages;
     MotionEvent motionEvent;
     MyDocument savedDoc;
     ImageView flashmode_btn;
@@ -111,6 +114,7 @@ public class CameraXActivity extends AppCompatActivity {
     SharedPreferences preferences;
     String currDocName;
     int picCount=0;
+    Transformation transformation;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -120,6 +124,7 @@ public class CameraXActivity extends AppCompatActivity {
         preferences=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
         long time=System.currentTimeMillis()%1000000;
         String savedName=preferences.getString("mydocname",null);
+        transformation=new RoundedCornersTransformation(12,0);
         if(savedName==null){
             currDocName=UtilityClass.appName+UtilityClass.lineSeparator+time;
         }else{
@@ -138,6 +143,7 @@ public class CameraXActivity extends AppCompatActivity {
         single_mode_true=findViewById(R.id.single_mode_true);
         tick_img=findViewById(R.id.tick_img);
         last_img=findViewById(R.id.last_img);
+        no_pages=findViewById(R.id.no_pages);
         show_grid_view=findViewById(R.id.show_hide_grid);
         line_horizontal=findViewById(R.id.line_horizontal);
         line_vertical=findViewById(R.id.line_vertical);
@@ -365,7 +371,11 @@ public class CameraXActivity extends AppCompatActivity {
                         public void run()
                         {
                             // Todo savelist
+                            Picasso.with(CameraXActivity.this).load("file://"+my_file.getAbsolutePath()).transform(transformation)
+                                    .fit().centerCrop()
+                                    .into(last_img);
                             call_save_list(my_file.getPath());
+                            Log.d("my_uri","file://"+my_file.getAbsolutePath());
                             Toast.makeText(CameraXActivity.this, "Image Saved successfully", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -410,9 +420,14 @@ public class CameraXActivity extends AppCompatActivity {
         }
         if(myPictureList.size()>0)
             tick_img.setVisibility(View.VISIBLE);
+        if(myPictureList.size()<9)
+            no_pages.setText("0"+myPictureList.size());
+        else
+            no_pages.setText(myPictureList.size()+"");
         gallery.setVisibility(View.GONE);
         last_img.setVisibility(View.VISIBLE);
-        Picasso.with(CameraXActivity.this).load(uri).into(last_img);
+        no_pages.setVisibility(View.VISIBLE);
+       // Picasso.with(CameraXActivity.this).load(uri).into(last_img);
         batch_mode_img.setVisibility(View.GONE);
         single_mode_img.setVisibility(View.GONE);
         MyDocument finalDocument = document;
@@ -501,7 +516,8 @@ public class CameraXActivity extends AppCompatActivity {
             @Override
             public void run() {
                 ArrayList<MyPicture> imported=new ArrayList<>();
-                for(Uri u:uris){
+                for(Uri u:uris)
+                {
                     MyPicture p=new MyPicture();
 
                     InputStream is=null;

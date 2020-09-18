@@ -9,6 +9,8 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
@@ -87,7 +89,7 @@ public class HomeScreenActivity extends AppCompatActivity
         gridViewImagesListList=new ArrayList<>();
         list_sort_by_name=new ArrayList<>();
         selected_position=new ArrayList<>();
-        mypreference=getSharedPreferences("SharedPreference",MODE_PRIVATE);
+        mypreference=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
         recyclerViewlayout=findViewById(R.id.recycler_view_layout);
         list_grid_view=findViewById(R.id.list_grid_view);
         relativeLayoutTop=findViewById(R.id.app_bar);
@@ -96,6 +98,7 @@ public class HomeScreenActivity extends AppCompatActivity
         more_option=findViewById(R.id.more_option);
         no_result_layout=findViewById(R.id.no_result_layout);
         searchSV = findViewById(R.id.searchSV);
+        rotate_image();
         long_click_enabled=false;
         sort_by_date=true;
         if(mypreference.getInt("myview",0)==1)
@@ -103,7 +106,7 @@ public class HomeScreenActivity extends AppCompatActivity
           else
             grid_view=true;
          set_default_adapter();
-         set_image_list();
+         set_document_list();
          more_option.setOnClickListener(new View.OnClickListener()
          {
              @Override
@@ -139,6 +142,12 @@ public class HomeScreenActivity extends AppCompatActivity
          BottomNavigationBar();
          search_view();
     }
+    public void rotate_image()
+    {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(more_option, "rotation",0,  90);
+        anim.setDuration(0);
+        anim.start();
+    }
     @Override
     protected void onResume()
     {
@@ -146,7 +155,7 @@ public class HomeScreenActivity extends AppCompatActivity
         gridViewImagesListList=new ArrayList<>();
         list_sort_by_name=new ArrayList<>();
         selected_position=new ArrayList<>();
-        set_image_list();
+        set_document_list();
     }
     public void search_view()
     {
@@ -380,7 +389,8 @@ public class HomeScreenActivity extends AppCompatActivity
                 return StudentName2.compareTo(StudentName1);
             }};
     }
-    private void set_image_list()
+    private void set_document_list()
+
     {
        List<MyDocument> myDocuments= MyDatabase.getInstance(this).myDocumentDao().getAllDocs();
        MyDatabase db=MyDatabase.getInstance(HomeScreenActivity.this);
@@ -391,10 +401,12 @@ public class HomeScreenActivity extends AppCompatActivity
             String name=myDocument.getDname();
             long date=myDocument.getTimeCreated();
             int pcount=db.myPicDao().getCount(did);
-            String fp_uri=myDocument.getFp_uri();
-           Log.d("HomeScreen_Uri",fp_uri+"uri");
+            String fp_uri="no_image_found";
+            if(myDocument.getFp_uri()!=null)
+                fp_uri=myDocument.getFp_uri();
+           Log.d("HomeScreen_Uri",fp_uri);
            long date_edited=myDocument.getTimeEdited();
-           GridViewImagesList list=new GridViewImagesList(name,did,fp_uri+"",dateformatter(date),
+           GridViewImagesList list=new GridViewImagesList(name,did,fp_uri,dateformatter(date),
                    pcount,dateformatter(date_edited),false,false);
            name_list.add(new Pair(name,list));
            gridViewImagesListList.add(list);
@@ -427,15 +439,20 @@ public class HomeScreenActivity extends AppCompatActivity
             no_result_layout.setVisibility(View.GONE);
         else
             no_result_layout.setVisibility(View.VISIBLE);
-        GridLayoutManager mGridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 3);
-        recyclerViewlayout.setLayoutManager(mGridLayoutManager);
-        myAdapter1 = new  GridViewImages(HomeScreenActivity.this, lists,new MyClickListener());
-        recyclerViewlayout.setAdapter(myAdapter1);
-        recyclerViewlayout.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
-        recyclerViewlayout.setLayoutManager(linearLayoutManager);
-        myAdapter = new  ListViewImages(HomeScreenActivity.this,lists,new MyClickListener());
-        recyclerViewlayout.setAdapter(myAdapter);
+
+        if(grid_view)
+            grid_view(lists);
+        else
+            list_view(lists);
+//        GridLayoutManager mGridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 3);
+//        recyclerViewlayout.setLayoutManager(mGridLayoutManager);
+//        myAdapter1 = new  GridViewImages(HomeScreenActivity.this, lists,new MyClickListener());
+//        recyclerViewlayout.setAdapter(myAdapter1);
+//        recyclerViewlayout.setHasFixedSize(true);
+//        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
+//        recyclerViewlayout.setLayoutManager(linearLayoutManager);
+//        myAdapter = new  ListViewImages(HomeScreenActivity.this,lists,new MyClickListener());
+//        recyclerViewlayout.setAdapter(myAdapter);
     }
     public  String dateformatter(long timestamp)
     {
@@ -532,15 +549,30 @@ public class HomeScreenActivity extends AppCompatActivity
                 switch (item.getItemId())
                 {
                     case R.id.action_share:
+                        if(selected_position.size()>0)
                         shareSelected(selected_position);
+                        else
+                            Toast.makeText(HomeScreenActivity.this,"Please select file(s) to share",
+                                    Toast.LENGTH_SHORT).show();
+                        hide_action_bar();
                         break;
                     case R.id.action_lock:
                         break;
                     case R.id.action_delete:
+                        if(selected_position.size()>0)
                         deleteSelected(selected_position);
+                        else
+                            Toast.makeText(HomeScreenActivity.this,"Please select file(s) to delete",
+                                    Toast.LENGTH_SHORT).show();
+                        hide_action_bar();
                       break;
                     case R.id.action_more:
+                        if(selected_position.size()>0)
                         mergeSelected(selected_position,selected_position.get(selected_position.size()-1));
+                        else
+                            Toast.makeText(HomeScreenActivity.this,"Please select file(s) to merge",
+                                    Toast.LENGTH_SHORT).show();
+                        hide_action_bar();
                         break;
                 }
                 return true;

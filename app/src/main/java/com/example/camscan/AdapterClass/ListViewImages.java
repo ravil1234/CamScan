@@ -7,8 +7,10 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.camscan.ObjectClass.GridViewImagesList;
+import com.example.camscan.ObjectClass.RoundedCornersTransformation;
 import com.example.camscan.R;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.util.List;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,11 +18,12 @@ public class ListViewImages extends RecyclerView.Adapter<ListViewHolder> {
 
     private Context mContext;
     private List<GridViewImagesList> gridViewImagesLists;
-    View.OnClickListener mListener;
-
+    private View.OnClickListener mListener;
+    private Transformation transformation;
     public ListViewImages(Context mContext, List<GridViewImagesList> serviceObjects, View.OnClickListener listener) {
         this.mContext = mContext;
         this.gridViewImagesLists = serviceObjects;
+        transformation=new RoundedCornersTransformation(10,0);
         mListener=listener;
     }
     @Override
@@ -42,20 +45,14 @@ public class ListViewImages extends RecyclerView.Adapter<ListViewHolder> {
         else
             holder.checkBox.setChecked(false);
 //        holder.mTitle.setText(list.getImage_date());
-        holder.mTitle.setText(list.getDid()+" ");
-
-      //  Picasso.with(mContext).load(list.getImage_url()).into(holder.mImage);
+        holder.file_name.setText(list.getName());
+        holder.doc_date_created.setText(list.getImage_date());
+        if(list.getPcount()<9)
+        holder.no_pages.setText("0"+list.getPcount());
+        else
+            holder.no_pages.setText(list.getPcount()+"");
+        Picasso.with(mContext).load(list.getImage_url()).transform(transformation).fit().centerCrop().into(holder.mImage);
         holder.itemView.setOnClickListener(mListener);
-//        holder.checkBox.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view)
-//            {
-//                if(holder.checkBox.isChecked())
-//                    list.setIschecked(false);
-//                else
-//                    list.setIschecked(true);
-//            }
-//        });
     }
     @Override
     public int getItemCount() {
@@ -65,14 +62,16 @@ public class ListViewImages extends RecyclerView.Adapter<ListViewHolder> {
 class ListViewHolder extends RecyclerView.ViewHolder {
 
     ImageView mImage;
-    TextView mTitle;
+    TextView file_name,doc_date_created;
     CheckBox checkBox;
-
+    TextView no_pages;
     ListViewHolder(View itemView) {
         super(itemView);
-        mImage = itemView.findViewById(R.id.pdf_image);
-        mTitle = itemView.findViewById(R.id.date_pdf);
+        mImage = itemView.findViewById(R.id.image_pdf);
+        file_name = itemView.findViewById(R.id.name_pdf);
         checkBox=itemView.findViewById(R.id.checkbox);
+        no_pages=itemView.findViewById(R.id.no_pages);
+        doc_date_created=itemView.findViewById(R.id.date_pdf);
         checkBox.setClickable(false);
     }
 }

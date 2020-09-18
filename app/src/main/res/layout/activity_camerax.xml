@@ -217,14 +217,36 @@
                 android:layout_marginLeft="30dp"
                 android:src="@drawable/gallery">
             </ImageView>
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/last_img"
-                android:layout_width="50dp"
-                android:layout_height="70dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="30dp">
-            </ImageView>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_centerVertical="true">
+                <ImageView
+                    android:visibility="gone"
+                    android:id="@+id/last_img"
+                    android:layout_width="50dp"
+                    android:layout_height="70dp"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/test_img">
+                </ImageView>
+                <TextView
+                    android:visibility="gone"
+                    android:id="@+id/no_pages"
+                    android:background="@drawable/rectangular_white_background"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="40dp"
+                    android:paddingLeft="3dp"
+                    android:paddingRight="3dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:text="00"
+                    android:textColor="#28a8e9"
+                    android:fontFamily="@font/font_regular"
+                    android:textSize="@dimen/_9sdp">
+                </TextView>
+            </RelativeLayout>
             <TextView
                 android:id="@+id/tick_img"
                 android:visibility="gone"

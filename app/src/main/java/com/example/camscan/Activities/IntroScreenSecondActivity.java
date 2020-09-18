@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import com.example.camscan.R;
+import com.example.camscan.UtilityClass;
+
 public class IntroScreenSecondActivity extends AppCompatActivity {
 
     Button next;
@@ -19,7 +21,7 @@ public class IntroScreenSecondActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         next=findViewById(R.id.next_btn);
         skip=findViewById(R.id.skip);
-        SharedPreferences preferences=getSharedPreferences("SharedPreference",MODE_PRIVATE);
+        SharedPreferences preferences=getSharedPreferences(UtilityClass.APP_SETTINGS_PREF,MODE_PRIVATE);
         next.setOnClickListener(new View.OnClickListener()
         {
             @Override
